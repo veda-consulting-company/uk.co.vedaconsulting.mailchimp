@@ -28,6 +28,39 @@ function mailchimp_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function mailchimp_civicrm_install() {
+  $parentId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailings', 'id', 'name');
+  $weight   = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'From Email Addresses', 'weight', 'name');
+
+  if ($parentId) {
+    $mailchimpMenuTree = 
+      array(
+        array(
+          'label' => ts('Mailchimp Settings'),
+          'name'  => 'Mailchimp_Settings',
+          'url'   => 'civicrm/mailchimp/settings&reset=1',
+        ),
+        array(
+          'label' => ts('Mailchimp Sync'),
+          'name'  => 'Mailchimp_Sync',
+          'url'   => 'civicrm/mailchimp/sync&reset=1',
+        ),
+        array(
+          'label' => ts('Mailchimp Webhook'),
+          'name'  => 'Mailchimp_Webhook',
+          'url'   => 'civicrm/mailchimp/webhook&reset=1',
+        ),
+      );
+
+    foreach ($mailchimpMenuTree as $key => $menuItems) {
+      $menuItems['is_active'] = 1;
+      $menuItems['parent_id'] = $parentId;
+      $menuItems['weight']    = ++$weight;
+      $menuItems['permission'] = 'administer CiviCRM';
+      CRM_Core_BAO_Navigation::add($menuItems);
+    }
+    CRM_Core_BAO_Navigation::resetNavigation();
+  }
+
   return _mailchimp_civix_civicrm_install();
 }
 
@@ -37,6 +70,20 @@ function mailchimp_civicrm_install() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
 function mailchimp_civicrm_uninstall() {
+  $mailchimMenuItems = array(
+    'Mailchimp_Settings', 
+    'Mailchimp_Sync', 
+    'Mailchimp_Webhook',
+  );
+
+  foreach ($mailchimMenuItems as $name) {
+    $itemId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', $name, 'id', 'name');
+    if ($itemId) {
+      CRM_Core_BAO_Navigation::processDelete($itemId);
+    }
+  }
+  CRM_Core_BAO_Navigation::resetNavigation();
+
   return _mailchimp_civix_civicrm_uninstall();
 }
 

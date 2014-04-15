@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <extension key="uk.co.vedaconsulting.mailchimp" type="module">
   <file>mailchimp</file>
-  <name>FIXME</name>
-  <description>FIXME</description>
+  <name>Mailchimp</name>
+  <description>Integration with Mailchimp.</description>
   <license>AGPL-3.0</license>
   <maintainer>
     <author>Deepak Srivastava</author>
@@ -12,7 +12,7 @@
   <version>1.0</version>
   <develStage>alpha</develStage>
   <compatibility>
-    <ver>4.2</ver>
+    <ver>4.4</ver>
   </compatibility>
   <comments>This is a new, undeveloped module</comments>
   <civix>
