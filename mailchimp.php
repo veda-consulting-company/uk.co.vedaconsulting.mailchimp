@@ -70,14 +70,14 @@ function mailchimp_civicrm_install() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
 function mailchimp_civicrm_uninstall() {
-  $mailchimMenuItems = array(
+  $mailchimpMenuItems = array(
     'Mailchimp_Settings', 
     'Mailchimp_Sync', 
     'Mailchimp_Webhook',
   );
 
-  foreach ($mailchimMenuItems as $name) {
-    $itemId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', $name, 'id', 'name');
+  foreach ($mailchimpMenuItems as $name) {
+    $itemId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', $name, 'id', 'name', TRUE);
     if ($itemId) {
       CRM_Core_BAO_Navigation::processDelete($itemId);
     }
