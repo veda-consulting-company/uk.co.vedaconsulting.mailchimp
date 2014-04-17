@@ -2,9 +2,15 @@
 
 <menu>
   <item>
+    <path>civicrm/mailchimp/settings</path>
+    <page_callback>CRM_Mailchimp_Form_Setting</page_callback>
+    <title>Mailchimp Settings</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
     <path>civicrm/mailchimp/sync</path>
     <page_callback>CRM_Mailchimp_Form_Sync</page_callback>
-    <title>Mailchimp Sync: (DS Queue Test)</title>
+    <title>Mailchimp Sync: (DS Queue Skeleton Test)</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
 </menu>
