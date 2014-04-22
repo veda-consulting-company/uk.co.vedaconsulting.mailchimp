@@ -21,7 +21,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $buttons = array(
       array(
         'type' => 'submit',
-        'name' => ts('Save'),
+        'name' => ts('Save & Test'),
       ),
     );
 
@@ -30,11 +30,12 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
   }
 
   public function setDefaultValues() {
-    $defaults = array();
+    $defaults = $details = array();
 
-    $defaults['api_key'] = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
+    $apiKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
       'api_key', NULL, FALSE
     );
+    $defaults['api_key'] = $apiKey;
 
     return $defaults;
   }
@@ -56,6 +57,25 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         self::MC_SETTING_GROUP,
         'api_key'
       );
+      try {
+        $mcClient = new Mailchimp($params['api_key']);
+        $mcHelper = new Mailchimp_Helper($mcClient);
+        $details  = $mcHelper->accountDetails();
+      } catch (Mailchimp_Invalid_ApiKey $e) {
+        CRM_Core_Session::setStatus($e->getMessage());
+        return FALSE;
+      } catch (Mailchimp_HttpError $e) {
+        CRM_Core_Session::setStatus($e->getMessage());
+        return FALSE;
+      }
+
+      $message = "Following is the account information received from API callback:<br/>
+        <table>
+        <tr><td>Company:</td><td>{$details['contact']['company']}</td></tr>
+        <tr><td>First Name:</td><td>{$details['contact']['fname']}</td></tr>
+        <tr><td>Last Name:</td><td>{$details['contact']['lname']}</td></tr>
+        </table>";
+      CRM_Core_Session::setStatus($message);
     }
   }
 }
