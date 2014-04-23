@@ -21,23 +21,6 @@
   </CustomGroups>
   <CustomFields>
     <CustomField>
-      <name>Sync_with_mailchimp</name>
-      <label>Sync with mailchimp</label>
-      <data_type>Boolean</data_type>
-      <html_type>Radio</html_type>
-      <is_required>0</is_required>
-      <is_searchable>0</is_searchable>
-      <is_search_range>0</is_search_range>
-      <weight>1</weight>
-      <is_active>1</is_active>
-      <is_view>0</is_view>
-      <text_length>255</text_length>
-      <note_columns>60</note_columns>
-      <note_rows>4</note_rows>
-      <column_name>sync_with_mailchimp</column_name>
-      <custom_group_name>Mailchimp_Settings</custom_group_name>
-    </CustomField>
-    <CustomField>
       <name>Mailchimp_List_ID</name>
       <label>Mailchimp List ID</label>
       <data_type>String</data_type>
