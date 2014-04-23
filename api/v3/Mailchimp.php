@@ -41,8 +41,12 @@ function civicrm_api3_mailchimp_getlists($params) {
  */ 
 function civicrm_api3_mailchimp_getgroups($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-
-  $results = $mcLists->interestGroupings($params['id']);
+  try {
+    $results = $mcLists->interestGroupings($params['id']);
+  } 
+  catch (Exception $e) {
+    return array();
+  }
   $groups = array();
   foreach($results as $result) {
     foreach($result['groups'] as $group) {
@@ -51,4 +55,32 @@ function civicrm_api3_mailchimp_getgroups($params) {
   }
 
   return civicrm_api3_create_success($groups);
+}
+
+/**
+ * Mailchimp Get all Mailchimp Lists & Groups API
+ *
+ * @param array $params
+ * @return array API result descriptor
+ * @see civicrm_api3_create_success
+ * @see civicrm_api3_create_error
+ * @throws API_Exception
+ */ 
+function civicrm_api3_mailchimp_getlistsandgroups($params) {
+  $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+
+  $results = $mcLists->getList();
+  $lists = array();
+
+  foreach($results['data'] as $list) {
+    $lists[$list['id']]['name'] = $list['name'];
+    $lists[$list['id']]['id'] = $list['id'];
+
+    $params = array('id' => $list['id']);
+    $group_results = civicrm_api3_mailchimp_getgroups($params);
+
+    $lists[$list['id']]['groups'] = $group_results['values'];
+  }
+
+  return civicrm_api3_create_success($lists);
 }

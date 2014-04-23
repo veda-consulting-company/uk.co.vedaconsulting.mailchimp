@@ -177,16 +177,13 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
     // Prepopulate details if 'edit' action
     $groupId = $form->getVar('_id');
     if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
-      $query = "
-        SELECT mailchimp_list_id, mailchimp_group
-        FROM civicrm_value_mailchimp_settings
-        WHERE entity_id = %1";
-
-      $dao = CRM_Core_DAO::executeQuery($query, array('1' => array($groupId , 'Integer')));
-      if ($dao->fetch()) {
-        $defaults['mailchimp_list'] = $dao->mailchimp_list_id;
+      
+      $mcDetails  = CRM_Mailchimp_Utils::getGroupsToSync($groupId);
+      
+      if (!empty($mcDetails)) {
+        $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
         $form->setDefaults($defaults);  
-        $form->assign('mailchimp_group_id' , $dao->mailchimp_group);
+        $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
       }
     }
   }

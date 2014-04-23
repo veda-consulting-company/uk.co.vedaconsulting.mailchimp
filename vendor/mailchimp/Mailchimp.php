@@ -105,7 +105,7 @@ class Mailchimp {
      * CURLOPT_SSL_VERIFYPEER setting
      * @var  bool
      */
-    public $ssl_verifypeer = false;
+    public $ssl_verifypeer = true;
     /**
      * CURLOPT_SSL_VERIFYHOST setting
      * @var  bool
