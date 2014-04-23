@@ -23,6 +23,7 @@
     <type>int unsigned</type>
     <comment>FK to Email ID</comment>
     <title>Email ID</title>
+    <unique>true</unique>
   </field>
   <foreignKey>
     <name>email_id</name>
