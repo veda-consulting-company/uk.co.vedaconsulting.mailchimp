@@ -154,3 +154,40 @@ function mailchimp_civicrm_caseTypes(&$caseTypes) {
 function mailchimp_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
   _mailchimp_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
+
+/**
+ * Implementation of hook_civicrm_buildForm
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_buildForm
+ */
+function mailchimp_civicrm_buildForm($formName, &$form) {
+  if ($formName == 'CRM_Group_Form_Edit' AND ($form->getAction() == CRM_Core_Action::ADD OR $form->getAction() == CRM_Core_Action::UPDATE)) {
+    // Get all the Mailchimp lists
+    $lists = array();
+    $params = array(
+      'version' => 3,
+      'sequential' => 1,
+    );
+    $lists = civicrm_api('Mailchimp', 'getlists', $params);
+
+    // Add form elements
+    $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
+    $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
+
+    // Prepopulate details if 'edit' action
+    $groupId = $form->getVar('_id');
+    if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
+      $query = "
+        SELECT mailchimp_list_id, mailchimp_group
+        FROM civicrm_value_mailchimp_settings
+        WHERE entity_id = %1";
+
+      $dao = CRM_Core_DAO::executeQuery($query, array('1' => array($groupId , 'Integer')));
+      if ($dao->fetch()) {
+        $defaults['mailchimp_list'] = $dao->mailchimp_list_id;
+        $form->setDefaults($defaults);  
+        $form->assign('mailchimp_group_id' , $dao->mailchimp_group);
+      }
+    }
+  }
+}
