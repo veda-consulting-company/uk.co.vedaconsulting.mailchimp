@@ -86,7 +86,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * @return TRUE
    */
   public function runSync(CRM_Queue_TaskContext $ctx, $start) {
-    //sleep(1);
     $mcGroupIDs = CRM_Mailchimp_Utils::getGroupIDsToSync();
     if (!empty($mcGroupIDs)) {
       $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync();
