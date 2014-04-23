@@ -10,7 +10,7 @@
   <item>
     <path>civicrm/mailchimp/sync</path>
     <page_callback>CRM_Mailchimp_Form_Sync</page_callback>
-    <title>Mailchimp Sync: (DS Queue Skeleton Test)</title>
+    <title>Mailchimp Sync</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
 </menu>
