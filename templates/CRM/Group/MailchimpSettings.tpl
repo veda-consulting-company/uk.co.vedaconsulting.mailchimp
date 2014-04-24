@@ -22,11 +22,19 @@ cj( document ).ready(function() {
 
     cj("#mailchimp_list").change(function() {
         var list_id = cj("#mailchimp_list :selected").val();
+        if (list_id  == 0) {
+            list_id = '';
+        }
+        cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List_ID']").val(list_id);
         populateGroups(list_id);
     });
 
     cj("#mailchimp_group").change(function() {
-        cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").val(cj("#mailchimp_group :selected").val());
+        var group_id = cj("#mailchimp_group :selected").val();
+        if (group_id == 0) {
+            group_id = '';
+        }
+        cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").val(group_id);
     });
 
     {/literal}{if $action eq 2}{literal}
@@ -44,7 +52,6 @@ cj( document ).ready(function() {
 
 function populateGroups(list_id , mailing_group_id = null) {
     if (list_id) {
-        cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List_ID']").val(list_id);
         cj('#mailchimp_group').find('option').remove().end().append('<option value="0">- select -</option>');
         CRM.api('Mailchimp', 'getgroups', {'id': list_id},
         {success: function(data) {
