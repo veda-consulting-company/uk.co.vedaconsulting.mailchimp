@@ -84,3 +84,23 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
 
   return civicrm_api3_create_success($lists);
 }
+<<<<<<< HEAD
+
+/**
+  * Mailchimp Get CiviCRM Group Mailchimp settings (Mailchimp List Id and Group)
+ *
+ * @param array $params
+ * @return array API result descriptor
+ * @see civicrm_api3_create_success
+ * @see civicrm_api3_create_error
+ * @throws API_Exception
+ */ 
+function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
+  
+  $groupIds = explode(',', $params['ids']);    
+  $groups  = CRM_Mailchimp_Utils::getGroupsToSync($groupIds);
+  
+  return civicrm_api3_create_success($groups);
+}
+=======
+>>>>>>> master

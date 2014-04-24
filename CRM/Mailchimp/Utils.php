@@ -8,38 +8,27 @@ class CRM_Mailchimp_Utils {
     return $mcClient;
   }
 
-  static function getGroupsToSync($id = FALSE) {
+  static function getGroupsToSync($ids = array()) {
     $groups = array();
-    if ($id > 1) {
-      $query = "
-        SELECT entity_id, mailchimp_list_id, mailchimp_group
-        FROM civicrm_value_mailchimp_settings
-        WHERE entity_id = %1";
-
-      $dao = CRM_Core_DAO::executeQuery($query, array('1' => array($id , 'Integer')));
-      if ($dao->fetch()) {
-        $groups[$dao->entity_id] = 
-          array(
-            'list_id'  => $dao->mailchimp_list_id,
-            'group_id' => $dao->mailchimp_group
-          );
-      }
+    
+    if (!empty($ids)) {
+      $groupIDs = implode(',', $ids);
+      $whereClause = "entity_id IN ($groupIDs)";
+    } else {
+      $whereClause = "mailchimp_list_id IS NOT NULL AND mailchimp_list_id <> ''";
     }
     
-    if (!$id) {
-      $query  = "
+    $query  = "
         SELECT  entity_id, mailchimp_list_id, mailchimp_group    
         FROM    civicrm_value_mailchimp_settings mcs
-        WHERE   mailchimp_list_id IS NOT NULL AND mailchimp_list_id <> ''";
-
-      $dao = CRM_Core_DAO::executeQuery($query);
-      while ($dao->fetch()) {
-        $groups[$dao->entity_id] = 
-          array(
-            'list_id'  => $dao->mailchimp_list_id,
-            'group_id' => $dao->mailchimp_group
-          );
-      }
+        WHERE   $whereClause";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $groups[$dao->entity_id] = 
+        array(
+          'list_id'  => $dao->mailchimp_list_id,
+          'group_id' => $dao->mailchimp_group
+        );
     }
     return $groups;
   }
