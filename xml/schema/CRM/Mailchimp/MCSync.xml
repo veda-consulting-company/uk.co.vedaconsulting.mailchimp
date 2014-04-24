@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Mailchimp</base>
+  <class>MCSync</class>
+  <name>civicrm_mc_sync</name>
+  <comment>Mailchimp sync mapping.</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique Mailchimp ID</comment>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>email_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Email ID</comment>
+    <title>Email ID</title>
+    <unique>true</unique>
+  </field>
+  <foreignKey>
+    <name>email_id</name>
+    <table>civicrm_email</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>mc_list_id</name>
+    <type>varchar</type>
+    <length>64</length>
+    <comment>The mailchimp List ID email is sync'd to</comment>
+    <title>Mailchimp List ID</title>
+  </field>
+
+  <field>
+    <name>mc_group</name>
+    <type>varchar</type>
+    <length>128</length>
+    <comment>The mailchimp group email is sync'd to</comment>
+    <title>Mailchimp Group</title>
+  </field>
+
+  <field>
+    <name>mc_euid</name>
+    <type>varchar</type>
+    <length>64</length>
+    <comment>Email id in mailchimp</comment>
+    <title>Mailchimp EUID</title>
+  </field>
+
+  <field>
+    <name>mc_leid</name>
+    <type>varchar</type>
+    <length>64</length>
+    <comment>Email id for the list in mailchimp</comment>
+    <title>Mailchimp LEID</title>
+  </field>
+
+  <field>
+    <name>sync_time</name>
+    <type>timestamp</type>
+    <comment>Last date when sync happened</comment>
+    <title>Last Sync Date</title>
+  </field>
+
+  <field>
+    <name>sync_status</name>
+    <type>enum</type>
+    <values>Added, Updated, Removed, Error</values>
+    <comment>Sync action result</comment>
+    <title>Last Sync Status</title>
+  </field>
+</table>

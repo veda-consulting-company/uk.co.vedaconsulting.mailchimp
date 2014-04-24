@@ -50,7 +50,7 @@ function civicrm_api3_mailchimp_getgroups($params) {
   $groups = array();
   foreach($results as $result) {
     foreach($result['groups'] as $group) {
-      $groups[$group['id']] = $group['name'];
+      $groups[$result['name'] . CRM_Core_DAO::VALUE_SEPARATOR . $group['name']] = "{$result['name']}::{$group['name']}";
     }
   }
 
@@ -84,6 +84,7 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
 
   return civicrm_api3_create_success($lists);
 }
+<<<<<<< HEAD
 
 /**
   * Mailchimp Get CiviCRM Group Mailchimp settings (Mailchimp List Id and Group)
@@ -101,3 +102,5 @@ function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
   
   return civicrm_api3_create_success($groups);
 }
+=======
+>>>>>>> master

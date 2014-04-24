@@ -17,5 +17,6 @@ CREATE TABLE `civicrm_mc_sync` (
   `sync_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last date when sync happened',
   `sync_status` enum('Added', 'Updated', 'Removed', 'Error') COMMENT 'Sync action e.g: Added, Updated, Removed, Error'    ,
   PRIMARY KEY ( `id` ),
-  CONSTRAINT `FK_civicrm_mc_sync_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email`(`id`) ON DELETE CASCADE
+  CONSTRAINT `FK_civicrm_mc_sync_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `UI_email_id` UNIQUE KEY (`email_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
