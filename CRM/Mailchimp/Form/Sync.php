@@ -125,13 +125,34 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $email->find(TRUE);
 
         $listID = $mcGroups[$groupContact->group_id]['list_id'];
+        $groups = $mcGroups[$groupContact->group_id]['group_id'];
+        $groupings = array();
+        if (!empty($groups)) {
+          list($grouping, $group) = explode(CRM_Core_DAO::VALUE_SEPARATOR, trim($groups));
+          if ($grouping && $group) {
+            $groupings = 
+              array(
+                array(
+                  'name'   => $grouping,
+                  'groups' => array($group)
+                )
+              );
+          }
+        }
 
         if ($email->email && 
-          ($contact->is_opt_out == 0) && 
+          ($contact->is_opt_out   == 0) && 
           ($contact->do_not_email == 0) &&
-          ($email->on_hold == 0)) 
-        {
-          $mapper[$listID]['batch'][] = array('email' => array('email' => $email->email));
+          ($email->on_hold        == 0)
+        ) {
+          $mapper[$listID]['batch'][] = array(
+            'email'       => array('email' => $email->email),
+            'merge_vars'  => array(
+              'fname'     => $contact->first_name, 
+              'lname'     => $contact->last_name,
+              'groupings' => $groupings,
+            ),
+          );
         } 
         if ($email->id) {
           $emailToIDs["{$email->email}"] = $email->id;
