@@ -50,7 +50,7 @@ function civicrm_api3_mailchimp_getgroups($params) {
   $groups = array();
   foreach($results as $result) {
     foreach($result['groups'] as $group) {
-      $groups[$group['id']] = $group['name'];
+      $groups[$result['name'] . CRM_Core_DAO::VALUE_SEPARATOR . $group['name']] = "{$result['name']}::{$group['name']}";
     }
   }
 

@@ -34,7 +34,7 @@ cj( document ).ready(function() {
         var list_id = cj("#mailchimp_list :selected").val();
         var mailing_group_id
         {/literal}{if $mailchimp_group_id}{literal}
-            var mailing_group_id = {/literal}{$mailchimp_group_id}{literal};
+            var mailing_group_id = '{/literal}{$mailchimp_group_id}{literal}';
         {/literal}{/if}{literal}
         populateGroups(list_id , mailing_group_id);
         //cj("#mailchimp_group").val(mailing_group_id);
