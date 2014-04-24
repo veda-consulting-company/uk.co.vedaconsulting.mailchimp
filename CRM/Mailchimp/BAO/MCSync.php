@@ -18,6 +18,17 @@ class CRM_Mailchimp_BAO_MCSync extends CRM_Mailchimp_DAO_MCSync {
     while ($dao->fetch()) {
       $stats[$dao->status] = $dao->count;
     }
+
+    $total   = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync();
+    $blocked = $total - array_sum($stats);
+
+    $stats['Total']   = $total;
+    $stats['Blocked'] = $blocked;
+
     return $stats;
+  }
+
+  static function resetTable() {
+    return CRM_Core_DAO::singleValueQuery("TRUNCATE TABLE civicrm_mc_sync");
   }
 }
