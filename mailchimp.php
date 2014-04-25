@@ -178,7 +178,7 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
     $groupId = $form->getVar('_id');
     if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
       
-      $mcDetails  = CRM_Mailchimp_Utils::getGroupsToSync($groupId);
+      $mcDetails  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupId));
       
       if (!empty($mcDetails)) {
         $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
