@@ -155,7 +155,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           );
         } 
         if ($email->id) {
-          $emailToIDs["{$email->email}"] = $email->id;
+          $emailToIDs["{$email->email}"]['id'] = $email->id;
+          $emailToIDs["{$email->email}"]['group'] = $group ? $group : "null";
         }
       }
 
@@ -166,14 +167,15 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           $vals['batch'], 
           FALSE,
           TRUE, 
-          TRUE
+          FALSE
         );
         foreach (array('adds', 'updates', 'errors') as $key) {
           foreach ($results[$key] as $data) {
             $email  = $key == 'errors' ? $data['email']['email'] : $data['email'];
             $params = array(
-              'email_id'   => $emailToIDs[$email],
+              'email_id'   => $emailToIDs[$email]['id'],
               'mc_list_id' => $listID,
+              'mc_group'   => $emailToIDs[$email]['group'],
               'mc_euid'    => $data['euid'],
               'mc_leid'    => $data['leid'],
               'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
