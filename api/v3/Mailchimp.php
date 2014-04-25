@@ -48,9 +48,12 @@ function civicrm_api3_mailchimp_getgroups($params) {
     return array();
   }
   $groups = array();
+  
   foreach($results as $result) {
+    $groups[$result['id']]['id'] = $result['id'];
+    $groups[$result['id']]['name'] = $result['name'];
     foreach($result['groups'] as $group) {
-      $groups[$result['name'] . CRM_Core_DAO::VALUE_SEPARATOR . $group['name']] = "{$result['name']}::{$group['name']}";
+      $groups[$result['id']]['groups'][$group['id']] = "{$result['name']}::{$group['name']}";
     }
   }
 
@@ -79,8 +82,25 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
     $params = array('id' => $list['id']);
     $group_results = civicrm_api3_mailchimp_getgroups($params);
 
-    $lists[$list['id']]['groups'] = $group_results['values'];
+    $lists[$list['id']]['grouping'] = $group_results['values'];
   }
 
   return civicrm_api3_create_success($lists);
+}
+
+/**
+  * Mailchimp Get CiviCRM Group Mailchimp settings (Mailchimp List Id and Group)
+ *
+ * @param array $params
+ * @return array API result descriptor
+ * @see civicrm_api3_create_success
+ * @see civicrm_api3_create_error
+ * @throws API_Exception
+ */ 
+function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
+  
+  $groupIds = explode(',', $params['ids']);    
+  $groups  = CRM_Mailchimp_Utils::getGroupsToSync($groupIds);
+  
+  return civicrm_api3_create_success($groups);
 }
