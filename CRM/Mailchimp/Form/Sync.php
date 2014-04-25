@@ -54,29 +54,42 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       'type'  => 'Sql',
       'reset' => TRUE,
     ));
-
-    // get member count
-    $count  = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync();
-
-    // Set the Number of Rounds
-    $rounds = ceil($count/self::BATCH_COUNT);
-
-   // Setup a Task in the Queue
-    $i = 0;
-    while ($i < $rounds) {
-      $start = $i * self::BATCH_COUNT;
+    
+    $groups = CRM_Mailchimp_Utils::getGroupsToSync();
+    foreach ($groups as $groupID => $groupVals) {
       $task  = new CRM_Queue_Task(
-        array ('CRM_Mailchimp_Form_Sync', 'runSync'),
-        array($start),
-        'Mailchimp Sync - Contacts '. ($start+self::BATCH_COUNT) . ' of ' . $count
+        array ('CRM_Mailchimp_Form_Sync', 'syncGroups'),
+        array($groupID),
+        "Syncing group: $groupID"
       );
 
       // Add the Task to the Queu
       $queue->createItem($task);
-      $i++;
     }
 
-    if ($i > 0) {
+
+#    // get member count
+#    $count  = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync();
+#
+#    // Set the Number of Rounds
+#    $rounds = ceil($count/self::BATCH_COUNT);
+#
+#   // Setup a Task in the Queue
+#    $i = 0;
+#    while ($i < $rounds) {
+#      $start = $i * self::BATCH_COUNT;
+#      $task  = new CRM_Queue_Task(
+#        array ('CRM_Mailchimp_Form_Sync', 'syncContacts'),
+#        array($start),
+#        'Mailchimp Sync - Contacts '. ($start+self::BATCH_COUNT) . ' of ' . $count
+#      );
+#
+#      // Add the Task to the Queu
+#      $queue->createItem($task);
+#      $i++;
+#    }
+
+    if (!empty($groups)) {
       CRM_Mailchimp_BAO_MCSync::resetTable();
 
       // Setup the Runner
@@ -94,6 +107,34 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     }
   }
 
+  public function syncGroups(CRM_Queue_TaskContext $ctx, $groupID) {
+    CRM_Core_Error::debug_var('$groupID', $groupID);
+    // get member count
+    $count  = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync(array($groupID));
+    CRM_Core_Error::debug_var('$count', $count);
+
+    // Set the Number of Rounds
+    $rounds = ceil($count/self::BATCH_COUNT);
+    CRM_Core_Error::debug_var('$rounds', $rounds);
+
+   // Setup a Task in the Queue
+    $i = 0;
+    while ($i < $rounds) {
+      $start   = $i * self::BATCH_COUNT;
+      $counter = ($rounds > 1) ? ($start + self::BATCH_COUNT) : $count;
+      $task    = new CRM_Queue_Task(
+        array('CRM_Mailchimp_Form_Sync', 'syncContacts'),
+        array($groupID, $start),
+        "Syncing group: {$groupID} - Contacts ". $counter . ' of ' . $count
+      );
+
+      // Add the Task to the Queu
+      $ctx->queue->createItem($task);
+      $i++;
+    }
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+
   /**
    * Run the From
    *
@@ -101,13 +142,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    *
    * @return TRUE
    */
-  public function runSync(CRM_Queue_TaskContext $ctx, $start) {
-    $mcGroupIDs = CRM_Mailchimp_Utils::getGroupIDsToSync();
-    if (!empty($mcGroupIDs)) {
-      $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync();
+  public function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {
+    //$mcGroupIDs = CRM_Mailchimp_Utils::getGroupIDsToSync();
+    if (!empty($groupID)) {
+      $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync($groupID);
 
       $groupContact = new CRM_Contact_BAO_GroupContact();
-      $groupContact->whereAdd('group_id IN ('.implode(',', $mcGroupIDs).')');
+      $groupContact->group_id = $groupID;
       $groupContact->whereAdd("status = 'Added'");
       $groupContact->limit($start, self::BATCH_COUNT);
       $groupContact->find();

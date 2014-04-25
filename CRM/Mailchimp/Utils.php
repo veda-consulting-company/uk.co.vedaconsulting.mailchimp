@@ -49,9 +49,10 @@ class CRM_Mailchimp_Utils {
     return array_keys($groupIDs);
   }
 
-  static function getMemberCountForGroupsToSync() {
-    $groupIDs = self::getGroupIDsToSync();
-
+  static function getMemberCountForGroupsToSync($groupIDs = array()) {
+    if (empty($groupIDs)) {
+      $groupIDs = self::getGroupIDsToSync();
+    }
     if (!empty($groupIDs)) {
       $groupIDs = implode(',', $groupIDs);
       $query    = "
