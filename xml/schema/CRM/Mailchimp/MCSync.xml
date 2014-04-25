@@ -23,7 +23,7 @@
     <type>int unsigned</type>
     <comment>FK to Email ID</comment>
     <title>Email ID</title>
-    <unique>true</unique>
+    <required>true</required>
   </field>
   <foreignKey>
     <name>email_id</name>
@@ -38,6 +38,7 @@
     <length>64</length>
     <comment>The mailchimp List ID email is sync'd to</comment>
     <title>Mailchimp List ID</title>
+    <required>true</required>
   </field>
 
   <field>

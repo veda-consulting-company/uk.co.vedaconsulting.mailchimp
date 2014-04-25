@@ -4,9 +4,6 @@ class CRM_Mailchimp_BAO_MCSync extends CRM_Mailchimp_DAO_MCSync {
 
   public static function create($params) {
     $instance = new self();
-    $instance->email_id = $params['email_id'];
-    $instance->find(TRUE);
-
     $instance->copyValues($params);
     $instance->save();
   }
