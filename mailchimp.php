@@ -62,6 +62,18 @@ function mailchimp_civicrm_install() {
     CRM_Core_BAO_Navigation::resetNavigation();
   }
 
+  // create a sync job
+  $params = array(
+    'sequential' => 1,
+    'name'          => 'Mailchimp Sync',
+    'description'   => 'Sync contacts from civi to mailchimp.',
+    'run_frequency' => 'Daily',
+    'api_entity'    => 'Mailchimp',
+    'api_action'    => 'sync',
+    'is_active'     => 0,
+  );
+  $result = civicrm_api3('job', 'create', $params);
+
   return _mailchimp_civix_civicrm_install();
 }
 
