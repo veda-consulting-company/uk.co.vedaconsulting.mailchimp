@@ -48,6 +48,16 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * @return None
    */
   public function postProcess() {
+    $runner = self::getRunner();
+    if ($runner) {
+      // Run Everything in the Queue via the Web.
+      $runner->runAllViaWeb();
+    } else {
+      CRM_Core_Session::setStatus(ts('Nothing to sync. Make sure mailchimp settings are configured for the groups with enough members.'));
+    }
+  }
+
+  static function getRunner() {
     // Setup the Queue
     $queue = CRM_Queue_Service::singleton()->create(array(
       'name'  => self::QUEUE_NAME,
@@ -68,8 +78,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     }
 
     if (!empty($groups)) {
-      CRM_Mailchimp_BAO_MCSync::resetTable();
-
       // Setup the Runner
       $runner = new CRM_Queue_Runner(array(
         'title' => ts('Mailchimp Sync'),
@@ -77,15 +85,15 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
         'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS),
       ));
+      // reset sync table
+      CRM_Mailchimp_BAO_MCSync::resetTable();
 
-      // Run Everything in the Queue via the Web.
-      $runner->runAllViaWeb();
-    } else {
-      CRM_Core_Session::setStatus(ts('Nothing to sync. Make sure mailchimp settings are configured for the groups with enough members.'));
+      return $runner;
     }
+    return FALSE;
   }
 
-  public function syncGroups(CRM_Queue_TaskContext $ctx, $groupID) {
+  static function syncGroups(CRM_Queue_TaskContext $ctx, $groupID) {
     // get member count
     $count  = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync(array($groupID));
 
@@ -120,7 +128,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    *
    * @return TRUE
    */
-  public function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {
+  static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {
     if (!empty($groupID)) {
       $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
 
@@ -195,8 +203,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
                 'email_id'   => $emailToIDs[$email]['id'],
                 'mc_list_id' => $listID,
                 'mc_group'   => $emailToIDs[$email]['group'],
-                'mc_euid'    => $data['euid'],
-                'mc_leid'    => $data['leid'],
+                'mc_euid'    => CRM_Utils_Array::value('euid',$data),
+                'mc_leid'    => CRM_Utils_Array::value('leid',$data),
                 'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
               );
               CRM_Mailchimp_BAO_MCSync::create($params);

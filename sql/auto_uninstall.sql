@@ -6,3 +6,6 @@ DELETE FROM `civicrm_custom_group` WHERE table_name = 'civicrm_value_mailchimp_s
 
 -- drop sync table
 DROP TABLE IF EXISTS `civicrm_mc_sync`;
+
+-- delete job entry
+DELETE FROM `civicrm_job` WHERE name = 'Mailchimp Sync';
