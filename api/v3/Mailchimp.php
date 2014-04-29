@@ -81,8 +81,9 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
 
     $params = array('id' => $list['id']);
     $group_results = civicrm_api3_mailchimp_getgroups($params);
-
-    $lists[$list['id']]['grouping'] = $group_results['values'];
+    if (!empty($group_results)) {
+      $lists[$list['id']]['grouping'] = $group_results['values'];
+    }
   }
 
   return civicrm_api3_create_success($lists);

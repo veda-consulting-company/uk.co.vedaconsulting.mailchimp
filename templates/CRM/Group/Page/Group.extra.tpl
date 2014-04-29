@@ -2,13 +2,7 @@
 {if $action eq 16}
     {literal}
     <script>
-    var  lists_and_groups;
-    CRM.api('Mailchimp', 'getlistsandgroups', {'sequential': 1},
-        {success: function(data) {
-            lists_and_groups = data.values;    
-          }
-        }
-    );
+    var lists_and_groups = {/literal}{$lists_and_groups}{literal};
     
     cj(document).ajaxComplete(function(event, xhr, settings){
         if (settings.url.indexOf("civicrm/ajax/grouplist") >= 0) {

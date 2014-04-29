@@ -159,4 +159,65 @@ class CRM_Mailchimp_Utils {
     
     return $contactResult['id'];
   }
+  
+  /*
+   * Function to get the associated CiviCRM Groups IDs for the Grouping array sent from Mialchimp Webhook
+   */
+  static function getCiviGroupIdsforMcGroupings($listID, $mcGroupings) {
+    if (empty($listID) || empty($mcGroupings)) {
+      return NULL;
+    }
+    
+    $civiGroups = array();
+    foreach ($mcGroupings as $key => $mcGrouping) {
+      $mcGroups = @explode(',', $mcGrouping['groups']);
+      foreach ($mcGroups as $mcGroupKey => $mcGroupName) {
+        // Get Mailchimp group ID from group name. Only group name is passed in by Webhooks
+        $mcGroupID = self::getMailchimpGroupIdFromName($listID, trim($mcGroupName));
+        // Mailchimp group ID is unavailable
+        if (empty($mcGroupID)) {
+          break;
+        }
+        
+        // Find the CiviCRM group mapped with the Mailchimp List and Group
+        $civiGroupID = self::getGroupIdForMailchimp($listID, $mcGrouping['id'] , $mcGroupID);
+        if (!empty($civiGroupID)) {
+          $civiGroups[] = $civiGroupID;
+        }
+      }
+    }
+   
+    return $civiGroups;
+  } 
+  
+  /*
+   * Function to get CiviCRM Groups for the specific Mailchimp list in which the Contact is Added to
+   */
+  static function getGroupSubscriptionforMailchimpList($listID, $contactID) {
+    if (empty($listID) || empty($contactID)) {
+      return NULL;
+    }
+    
+    $civiMcGroups = array();
+    $query  = "
+      SELECT  entity_id
+      FROM    civicrm_value_mailchimp_settings mcs
+      WHERE   mc_list_id = %1";
+    $params = array('1' => array($listID, 'String'));
+    
+    $dao = CRM_Core_DAO::executeQuery($query ,$params);
+    while ($dao->fetch()) {
+      $groupContact = new CRM_Contact_BAO_GroupContact();
+      $groupContact->group_id = $dao->entity_id;
+      $groupContact->contact_id = $contactID;
+      $groupContact->whereAdd("status = 'Added'");
+      $groupContact->find();
+      if ($groupContact->fetch()) {
+        $civiMcGroups[] = $dao->entity_id;
+      }
+    }
+   
+    return $civiMcGroups;
+  }
+  
 }
