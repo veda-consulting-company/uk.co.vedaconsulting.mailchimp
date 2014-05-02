@@ -61,6 +61,17 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
   public function postProcess() {
     // Store the submitted values in an array.
     $params = $this->controller->exportValues($this->_name);
+    
+    // Check the security key empty
+    try {
+      if(empty($params['security_key'])) {
+      throw new Exception("You must enter a Security Key");    
+      }
+    }
+    catch (Exception $e) {
+        CRM_Core_Session::setStatus($e->getMessage());
+        return FALSE;
+    }      
 
     // Save the API Key & Save the Security Key
     if (CRM_Utils_Array::value('api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
