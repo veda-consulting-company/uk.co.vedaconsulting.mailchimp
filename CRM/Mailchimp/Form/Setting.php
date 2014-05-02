@@ -15,8 +15,13 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     // Add the API Key Element
     $this->addElement('text', 'api_key', ts('API Key'), array(
       'size' => 48,
+    ));    
+    
+    // Add the User Security Key Element    
+    $this->addElement('text','security_key',ts('Security Key'), array(
+        'size'=> 24,
     ));
-
+    
     // Create the Submit Button.
     $buttons = array(
       array(
@@ -35,8 +40,14 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $apiKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
       'api_key', NULL, FALSE
     );
+    
+    $securityKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
+      'security_key', NULL, FALSE
+    );
+    
     $defaults['api_key'] = $apiKey;
-
+    $defaults['security_key'] =  $securityKey;
+    
     return $defaults;
   }
 
@@ -51,12 +62,18 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     // Store the submitted values in an array.
     $params = $this->controller->exportValues($this->_name);
 
-    // Save the API Key.
-    if (CRM_Utils_Array::value('api_key', $params)) {
+    // Save the API Key & Save the Security Key
+    if (CRM_Utils_Array::value('api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
       CRM_Core_BAO_Setting::setItem($params['api_key'],
         self::MC_SETTING_GROUP,
         'api_key'
       );
+      
+      CRM_Core_BAO_Setting::setItem($params['security_key'],
+        self::MC_SETTING_GROUP,
+        'security_key'
+      );
+      
       try {
         $mcClient = new Mailchimp($params['api_key']);
         $mcHelper = new Mailchimp_Helper($mcClient);

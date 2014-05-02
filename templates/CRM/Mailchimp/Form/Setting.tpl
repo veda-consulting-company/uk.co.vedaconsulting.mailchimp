@@ -14,6 +14,13 @@
 	          </span>
           </td>
         </tr>
+          <tr class="crm-mailchimp-setting-security-key-block">
+          <td class="label">{$form.security_key.label}</td>
+          <td>{$form.security_key.html}<br/>
+      	    <span class="description">{ts}User Defined Key{/ts}
+	          </span>
+          </td>
+        </tr>
       </table>
     </div>
     <div class="crm-submit-buttons">
