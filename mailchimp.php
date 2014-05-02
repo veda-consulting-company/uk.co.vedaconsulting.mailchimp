@@ -200,3 +200,22 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
     }
   }
 }
+
+/**
+ * Implementation of hook_civicrm_pageRun
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
+ */
+function mailchimp_civicrm_pageRun( &$page ) {
+  if ($page->getVar('_name') == 'CRM_Group_Page_Group') {
+    $params = array(
+      'version' => 3,
+      'sequential' => 1,
+    );
+    // Get all the mailchimp lists/groups and pass it to template as JS array
+    // To reduce the no. of AJAX calls to get the list/group name in Group Listing Page
+    $result = civicrm_api('Mailchimp', 'getlistsandgroups', $params);
+    $list_and_groups = json_encode($result['values']);
+    $page->assign('lists_and_groups', $list_and_groups);
+  }
+}
