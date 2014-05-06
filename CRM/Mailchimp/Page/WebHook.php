@@ -8,7 +8,17 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     $my_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
       'security_key', NULL, FALSE
     );
-      
+    
+    // Check the key
+    try{
+      if(!isset($_GET['key']) || $_GET['key'] != $my_key ) {
+      throw new Exception("No security key provided or not match");
+      }
+    }
+    catch (Exception $e) {
+      CRM_Core_Session::setStatus($e->getMessage());
+      return FALSE;
+    }      
     // Check the security key to run webhook
     if (isset($_GET['key']) && $_GET['key']==$my_key) {
 
@@ -106,7 +116,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     
     // Get the associated CiviCRM Group IDs for the Mailchimp List & Grouping
     $civiGroups = CRM_Mailchimp_Utils::getCiviGroupIdsforMcGroupings($listID, $mcGroupings);
-    
+ 
     // Add or Remove from the CiviCRM Groups
     foreach ($civiGroups as $key => $groupID) {
       if ($action == 'subscribe') {

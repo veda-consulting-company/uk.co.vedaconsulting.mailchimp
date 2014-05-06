@@ -20,7 +20,14 @@
       	    <span class="description">{ts}Define a security key to be used in Mail Chimp{/ts}
 	          </span>
           </td>
-        </tr>
+        </tr> 
+         <tr class="crm-mailchimp-setting-default-group-block">
+          <td class ="label" >{$form.default_group.label}</td>
+          <td>{$form.default_group.html}<br/>
+      	    <span class="description">{ts}Define a default group which is not mapped in Mail Chimp{/ts}
+	          </span>
+          </td>
+        </tr>    
       </table>
     </div>
     <div class="crm-submit-buttons">

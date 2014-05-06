@@ -1,6 +1,9 @@
 <?php
 
 class CRM_Mailchimp_Utils {
+  
+  const 
+    MC_SETTING_GROUP = 'MailChimp Preferences';
 
   static function mailchimp() {
     $apiKey   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
@@ -184,9 +187,13 @@ class CRM_Mailchimp_Utils {
         if (!empty($civiGroupID)) {
           $civiGroups[] = $civiGroupID;
         }
+        else{
+          $civiGroups[] = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
+            'default_group', NULL, FALSE
+          );
+        }
       }
-    }
-   
+    }   
     return $civiGroups;
   } 
   
