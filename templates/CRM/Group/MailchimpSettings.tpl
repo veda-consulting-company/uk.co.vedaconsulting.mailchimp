@@ -59,7 +59,8 @@ cj( document ).ready(function() {
 
 });
 
-function populateGroups(list_id , mailing_group_id = null) {
+function populateGroups(list_id, mailing_group_id) {
+    mailing_group_id = typeof mailing_group_id !== 'undefined' ?  mailing_group_id : null;
     if (list_id) {
         cj('#mailchimp_group').find('option').remove().end().append('<option value="0">- select -</option>');
         CRM.api('Mailchimp', 'getgroups', {'id': list_id},
