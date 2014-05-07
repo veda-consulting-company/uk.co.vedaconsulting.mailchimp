@@ -140,7 +140,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $groupContact->find();
 
         $emailToIDs = array();
-        $mapper     = array();
+        $mapper     = array();        
+        $groupings  = array();
+        $mapper2    = array();
+       
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();
           $contact->id = $groupContact->contact_id;
@@ -179,12 +182,43 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               ),
             );
           } 
+          
+          else if ($email->email && 
+            ($contact->is_opt_out   == 1) || $email->email &&
+            ($contact->do_not_email == 1) || $email->email &&
+            ($email->on_hold        == 1)
+          ) {         
+            $query = "SELECT email_id as email_id, mc_euid as euid, mc_leid as leid FROM civicrm_mc_sync WHERE is_latest = '0'";
+            $dao = CRM_Core_DAO::executeQuery($query);
+            $batch2=array();
+            
+            while ($dao->fetch()) {
+              if($dao->email_id == $email->id) {
+                $emailun = $email->email;
+                $leidun = $dao->leid;
+                $euidun = $dao->euid;
+          
+                $mapper2[$listID]['batch'][] = array(
+                  'email'  => $emailun,
+                  'euid'  => $euidun,
+                  'leid' =>  $leidun,       
+                );
+              }
+            }           
+            }
+    
           if ($email->id) {
             $emailToIDs["{$email->email}"]['id'] = $email->id;
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
-          }
+          }        
         }
-
+        
+        foreach ($mapper2 as $listID => $vals) {
+          // sync contacts using batchunsubscribe
+          $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+          $mailchimp->batchUnsubscribe($listID, $vals['batch'],TRUE,TRUE,TRUE);
+        }
+   
         foreach ($mapper as $listID => $vals) {
           // sync contacts using batchsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -195,6 +229,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             TRUE, 
             FALSE
           );
+          
           // fill sync table based on response
           foreach (array('adds', 'updates', 'errors') as $key) {
             foreach ($results[$key] as $data) {
@@ -207,7 +242,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
                 'mc_leid'    => CRM_Utils_Array::value('leid',$data),
                 'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
               );
-              CRM_Mailchimp_BAO_MCSync::create($params);
+              CRM_Mailchimp_BAO_MCSync::create($params);          
             }
           }
         }

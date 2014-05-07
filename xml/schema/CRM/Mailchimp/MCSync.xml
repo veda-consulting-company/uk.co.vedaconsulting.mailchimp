@@ -79,4 +79,12 @@
     <comment>Sync action result</comment>
     <title>Last Sync Status</title>
   </field>
+  
+  <field>
+      <name>is_latest</name>
+      <type>BOOLEAN</type>
+      <default>TRUE</default>
+      <comment>Check sync latest</comment>
+      <title>Is Latest</title>      
+  </field>
 </table>
