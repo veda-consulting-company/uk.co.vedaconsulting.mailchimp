@@ -14,6 +14,7 @@ CREATE TABLE `civicrm_mc_sync` (
   `mc_group`   varchar(128) DEFAULT NULL COMMENT 'The mailchimp group email is sync\'d to',
   `mc_euid`    varchar(64)  DEFAULT NULL COMMENT 'Email id in mailchimp',
   `mc_leid`    varchar(64)  DEFAULT NULL COMMENT 'Email id for the list in mailchimp',
+  `is_latest`  BOOLEAN      DEFAULT TRUE COMMENT 'Check sync latest',
   `sync_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last date when sync happened',
   `sync_status` enum('Added', 'Updated', 'Removed', 'Error') COMMENT 'Sync action e.g: Added, Updated, Removed, Error'    ,
   PRIMARY KEY ( `id` ),
