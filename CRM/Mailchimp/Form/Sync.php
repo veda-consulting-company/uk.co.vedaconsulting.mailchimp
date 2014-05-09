@@ -140,7 +140,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $groupContact->find();
 
         $emailToIDs = array();
-        $mapper     = array();
+        $toSubscribe = array();        
+        $groupings  = array();
+        $toUnsubscribe = array();
+               
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();
           $contact->id = $groupContact->contact_id;
@@ -170,7 +173,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             ($contact->do_not_email == 0) &&
             ($email->on_hold        == 0)
           ) {
-            $mapper[$listID]['batch'][] = array(
+            $toSubscribe[$listID]['batch'][] = array(
               'email'       => array('email' => $email->email),
               'merge_vars'  => array(
                 'fname'     => $contact->first_name, 
@@ -179,13 +182,59 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               ),
             );
           } 
+          
+          else if ($email->email && 
+            ($contact->is_opt_out   == 1 || 
+             $contact->do_not_email == 1 || 
+             $email->on_hold        == 1)
+          ) {         
+            $query = "SELECT email_id as email_id, mc_euid as euid, mc_leid as leid FROM civicrm_mc_sync WHERE is_latest = '0' AND email_id = $email->id AND sync_status != 'Removed' LIMIT 1";
+            $dao = CRM_Core_DAO::executeQuery($query);           
+            
+            while ($dao->fetch()) {
+              
+                $emailun = $email->email;
+                $leidun = $dao->leid;
+                $euidun = $dao->euid;
+          
+                $toUnsubscribe[$listID]['batch'][] = array(
+                  'email'  => $emailun,
+                  'euid'  => $euidun,
+                  'leid' =>  $leidun,       
+                );
+              
+            }           
+            }
+    
           if ($email->id) {
             $emailToIDs["{$email->email}"]['id'] = $email->id;
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
-          }
+          }        
         }
-
-        foreach ($mapper as $listID => $vals) {
+        
+        foreach ($toUnsubscribe as $listID => $vals) {      
+          // sync contacts using batchunsubscribe
+          $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+          $mailchimp->batchUnsubscribe($listID, $vals['batch'],TRUE,TRUE,TRUE);        
+        }     
+        
+        foreach($toUnsubscribe as $listID => $vals) {
+          foreach($vals['batch'] as $key => $val) {
+              
+              $params = array(
+                'email_id'   => $emailToIDs["{$val['email']}"]['id'],
+                'mc_list_id' => $listID,
+                'mc_group'   => $emailToIDs["{$val['email']}"]['group'],
+                'mc_euid'    => $val['euid'],
+                'mc_leid'    => $val['leid'],
+                'sync_status' => 'Removed'
+              );
+              CRM_Mailchimp_BAO_MCSync::create($params);    
+              
+          }
+        }            
+        
+        foreach ($toSubscribe as $listID => $vals) {
           // sync contacts using batchsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
           $results   = $mailchimp->batchSubscribe( 
@@ -194,7 +243,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             FALSE,
             TRUE, 
             FALSE
-          );
+          );          
+    
           // fill sync table based on response
           foreach (array('adds', 'updates', 'errors') as $key) {
             foreach ($results[$key] as $data) {
@@ -207,7 +257,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
                 'mc_leid'    => CRM_Utils_Array::value('leid',$data),
                 'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
               );
-              CRM_Mailchimp_BAO_MCSync::create($params);
+              CRM_Mailchimp_BAO_MCSync::create($params);          
             }
           }
         }

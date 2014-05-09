@@ -137,6 +137,12 @@ class CRM_Mailchimp_DAO_MCSync extends CRM_Core_DAO
    */
   public $sync_status;
   /**
+   * Checked is latest
+   *
+   * @var tinyint
+   */
+  public $is_latest;
+  /**
    * class constructor
    *
    * @access public
@@ -225,6 +231,12 @@ class CRM_Mailchimp_DAO_MCSync extends CRM_Core_DAO
           'title' => ts('Last Sync Status') ,
           'enumValues' => 'Added, Updated, Removed, Error',
         ) ,
+        'is_latest' => array(
+          'name' => 'is_latest',
+          'type' => CRM_Utils_Type::T_BOOLEAN,          
+          'default' => TRUE,
+          'title' => ts('Is Latest') , 
+        )
       );
     }
     return self::$_fields;
