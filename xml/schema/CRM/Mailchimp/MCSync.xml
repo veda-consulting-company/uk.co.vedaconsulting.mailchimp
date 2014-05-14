@@ -75,7 +75,7 @@
   <field>
     <name>sync_status</name>
     <type>enum</type>
-    <values>Added, Updated, Removed, Error</values>
+    <values>Added, Updated, Removed, Deleted, Error</values>
     <comment>Sync action result</comment>
     <title>Last Sync Status</title>
   </field>
