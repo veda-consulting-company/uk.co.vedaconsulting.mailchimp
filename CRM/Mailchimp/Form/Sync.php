@@ -6,7 +6,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   const END_URL    = 'civicrm/mailchimp/sync';
   const END_PARAMS = 'state=done';
   const BATCH_COUNT = 10;
-
+  
   /**
    * Function to pre processing
    *
@@ -63,7 +63,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       'name'  => self::QUEUE_NAME,
       'type'  => 'Sql',
       'reset' => TRUE,
-    ));
+    ));     
     
     $groups = CRM_Mailchimp_Utils::getGroupsToSync();
     foreach ($groups as $groupID => $groupVals) {
@@ -128,7 +128,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    *
    * @return TRUE
    */
-  static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {
+  static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {    
     if (!empty($groupID)) {
       $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
 
@@ -142,7 +142,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $emailToIDs = array();
         $toSubscribe = array();        
         $groupings  = array();
-        $toUnsubscribe = array();
+        $toUnsubscribe = array();        
                
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();
@@ -212,6 +212,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           }        
         }
         
+       
         foreach ($toUnsubscribe as $listID => $vals) {      
           // sync contacts using batchunsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
