@@ -101,12 +101,12 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       }
 
       $message = "Following is the account information received from API callback:<br/>
-        <table>
+        <table style='color:white;background-color:green;border-collapse: collapse;'>
         <tr><td>Company:</td><td>{$details['contact']['company']}</td></tr>
         <tr><td>First Name:</td><td>{$details['contact']['fname']}</td></tr>
         <tr><td>Last Name:</td><td>{$details['contact']['lname']}</td></tr>
         </table>";
-      CRM_Core_Session::setStatus($message);
+        CRM_Core_Session::setStatus($message);
     }
   }
 }

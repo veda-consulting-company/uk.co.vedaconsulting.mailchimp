@@ -221,50 +221,29 @@ function mailchimp_civicrm_pageRun( &$page ) {
   }
 }
 
-function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ){
-  $params = array(
+/**
+ * Implementation of hook_civicrm_pre
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pre
+ */
+function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
+  $params1=  array(
   'version' => 3,
   'sequential' => 1,
-  'contact_id' => $objectId,
-  'id' => $objectId,
-  'skip_undelete' => 1,
-  'restore' => 0, 
-    
+  'contact_id' => $id,
+  'id' => $id,    
   );
   
-  if ($op == 'delete') {
-    $email = "";
-    
-    $result = civicrm_api('Contact', 'get', $params);
+  if($op == ('delete' || 'edit') && $objectName == 'Email') {
+    CRM_Mailchimp_Utils::deleteMcEmail($id);
+    }
+  if ($op == 'delete' && $objectName == 'Individual') {    
+    $result = civicrm_api('Contact', 'get', $params1);
     $emailId = $result['values'][0]['email_id'];
-    $email = $result['values'][0]['email'];
-
-      $toDelete=array();
-      $listID = array();
-      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id = $emailId ORDER BY id DESC limit 1";
-      $dao = CRM_Core_DAO::executeQuery($query);       
-        
-        while ($dao->fetch()) {
-          $leidun = $dao->mc_leid;
-          $euidun = $dao->mc_euid;
-          $listID= $dao->mc_list_id;             
-  
-          $toDelete[$listID]['batch'][] = array(
-            'email'  => $email,
-            'euid'  => $euidun,
-            'leid' =>  $leidun,       
-          );
-            
-          foreach ($toDelete as $listID => $val) {                  
-                 
-            $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-            $results=$mailchimp->batchUnsubscribe($listID, $val['batch'],TRUE,TRUE,TRUE);   
-       
-          }
-        }       
-     $results = civicrm_api('Contact', 'delete', $params); 
-
-  }
-  
+    CRM_Mailchimp_Utils::deleteMcEmail($emailId); 
+     
+    } 
 }
+  
+
 

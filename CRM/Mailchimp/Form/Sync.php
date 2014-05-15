@@ -145,12 +145,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $toUnsubscribe = array();        
                
         while ($groupContact->fetch()) {
-          $contact = new CRM_Contact_BAO_Contact();
-          $contact->id = $groupContact->contact_id;
-          $contact->find(TRUE);
+          $contact = new CRM_Contact_BAO_Contact();          
+          $contact->id = $groupContact->contact_id;  
+          $contact->is_deleted != 1;
+          $contact->find(TRUE);       
 
           $email = new CRM_Core_BAO_Email();
-          $email->contact_id = $groupContact->contact_id;
+          $email->contact_id = $groupContact->contact_id;         
           $email->is_primary = TRUE;
           $email->find(TRUE);
 
@@ -180,7 +181,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
                 'lname'     => $contact->last_name,
                 'groupings' => $groupings,
               ),
-            );
+            );        
           } 
           
           else if ($email->email && 
@@ -211,7 +212,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
           }        
         }
-        
+   
        
         foreach ($toUnsubscribe as $listID => $vals) {      
           // sync contacts using batchunsubscribe
@@ -234,7 +235,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               
           }
         }            
-        
+
         foreach ($toSubscribe as $listID => $vals) {
           // sync contacts using batchsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
