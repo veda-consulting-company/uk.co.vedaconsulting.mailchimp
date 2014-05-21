@@ -12,6 +12,9 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
+    
+    CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
+    
     // Add the API Key Element
     $this->addElement('text', 'api_key', ts('API Key'), array(
       'size' => 48,
@@ -99,9 +102,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         CRM_Core_Session::setStatus($e->getMessage());
         return FALSE;
       }
-
+      
+      
       $message = "Following is the account information received from API callback:<br/>
-        <table style='color:white;background-color:green;border-collapse: collapse;'>
+        <table class='mailchimp-table'>
         <tr><td>Company:</td><td>{$details['contact']['company']}</td></tr>
         <tr><td>First Name:</td><td>{$details['contact']['fname']}</td></tr>
         <tr><td>Last Name:</td><td>{$details['contact']['lname']}</td></tr>

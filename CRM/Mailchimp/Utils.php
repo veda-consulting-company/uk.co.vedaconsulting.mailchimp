@@ -230,7 +230,7 @@ class CRM_Mailchimp_Utils {
    /*
    * Function to delete Mailchimp contact for given CiviCRM email ID
    */
-  static function deleteMcEmail($emailId) {
+  static function deleteMCEmail($emailId) {
     if (empty($emailId)) {
       return NULL;
     }
@@ -238,7 +238,7 @@ class CRM_Mailchimp_Utils {
     $toDelete = array();
     $listID = array();
     $id = $emailId;
-    $email = "";
+    $email = NULL;
   
     $query = "SELECT * FROM civicrm_mc_sync WHERE email_id = $id ORDER BY id DESC limit 1";
     $dao = CRM_Core_DAO::executeQuery($query);       
@@ -247,19 +247,15 @@ class CRM_Mailchimp_Utils {
       $leidun = $dao->mc_leid;
       $euidun = $dao->mc_euid;
       $listID= $dao->mc_list_id;   
-          
-      $query2 = "SELECT * FROM civicrm_email WHERE id = $id";
-      $dao2 = CRM_Core_DAO::executeQuery($query2);
-      while($dao2->fetch()) {
-        $email = $dao2->email;
-      }
-  
+      
+      $email  = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Email', $id, 'email', 'id');
+ 
       $toDelete[$listID]['batch'][] = array(
         'email'  => $email,
         'euid'  => $euidun,
         'leid' =>  $leidun,       
-      );          
-      foreach ($toDelete as $listID => $val) {                  
+      ); 
+        foreach ($toDelete as $listID => $val) {                  
         $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
         $results=$mailchimp->batchUnsubscribe($listID, $val['batch'],TRUE,TRUE,TRUE);          
       }     

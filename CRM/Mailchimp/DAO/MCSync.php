@@ -133,7 +133,7 @@ class CRM_Mailchimp_DAO_MCSync extends CRM_Core_DAO
   /**
    * Sync action result
    *
-   * @var enum('Added', 'Updated', 'Deleted', 'Removed', 'Error')
+   * @var enum('Added', 'Updated', 'Removed', 'Error')
    */
   public $sync_status;
   /**

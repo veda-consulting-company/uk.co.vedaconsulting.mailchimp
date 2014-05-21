@@ -235,12 +235,12 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
   );
   
   if($op == ('delete' || 'edit') && $objectName == 'Email') {
-    CRM_Mailchimp_Utils::deleteMcEmail($id);
+    CRM_Mailchimp_Utils::deleteMCEmail($id);
     }
   if ($op == 'delete' && $objectName == 'Individual') {    
     $result = civicrm_api('Contact', 'get', $params1);
     $emailId = $result['values'][0]['email_id'];
-    CRM_Mailchimp_Utils::deleteMcEmail($emailId); 
+    CRM_Mailchimp_Utils::deleteMCEmail($emailId); 
      
     } 
 }
