@@ -227,22 +227,23 @@ function mailchimp_civicrm_pageRun( &$page ) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pre
  */
 function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
-  $params1=  array(
-  'version' => 3,
-  'sequential' => 1,
-  'contact_id' => $id,
-  'id' => $id,    
+  $params1 = array(
+    'version' => 3,
+    'sequential' => 1,
+    'contact_id' => $id,
+    'id' => $id,    
   );
   
   if($op == ('delete' || 'edit') && $objectName == 'Email') {
     CRM_Mailchimp_Utils::deleteMCEmail($id);
-    }
+  }
   if ($op == 'delete' && $objectName == 'Individual') {    
     $result = civicrm_api('Contact', 'get', $params1);
     $emailId = $result['values'][0]['email_id'];
+    
     CRM_Mailchimp_Utils::deleteMCEmail($emailId); 
      
-    } 
+  } 
 }
   
 

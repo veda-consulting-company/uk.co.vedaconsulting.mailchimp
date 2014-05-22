@@ -142,7 +142,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $emailToIDs = array();
         $toSubscribe = array();        
         $groupings  = array();
-        $toUnsubscribe = array();        
+             
                
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();          
@@ -188,23 +188,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             ($contact->is_opt_out   == 1 || 
              $contact->do_not_email == 1 || 
              $email->on_hold        == 1)
-          ) {         
-            $query = "SELECT email_id as email_id, mc_euid as euid, mc_leid as leid FROM civicrm_mc_sync WHERE is_latest = '0' AND email_id = $email->id AND sync_status != 'Removed' LIMIT 1";
-            $dao = CRM_Core_DAO::executeQuery($query);           
-            
-            while ($dao->fetch()) {
-              
-                $emailun = $email->email;
-                $leidun = $dao->leid;
-                $euidun = $dao->euid;
-          
-                $toUnsubscribe[$listID]['batch'][] = array(
-                  'email'  => $emailun,
-                  'euid'  => $euidun,
-                  'leid' =>  $leidun,       
-                );
-              
-            }           
+          ) { 
+            CRM_Mailchimp_Utils::deleteMCEmail($email->id);           
             }
     
           if ($email->id) {
@@ -220,22 +205,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           $mailchimp->batchUnsubscribe($listID, $vals['batch'],TRUE,TRUE,TRUE);        
         }     
         
-        foreach($toUnsubscribe as $listID => $vals) {
-          foreach($vals['batch'] as $key => $val) {
-              
-              $params = array(
-                'email_id'   => $emailToIDs["{$val['email']}"]['id'],
-                'mc_list_id' => $listID,
-                'mc_group'   => $emailToIDs["{$val['email']}"]['group'],
-                'mc_euid'    => $val['euid'],
-                'mc_leid'    => $val['leid'],
-                'sync_status' => 'Removed'
-              );
-              CRM_Mailchimp_BAO_MCSync::create($params);    
-              
-          }
-        }            
-
         foreach ($toSubscribe as $listID => $vals) {
           // sync contacts using batchsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
