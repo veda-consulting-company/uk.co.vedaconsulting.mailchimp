@@ -196,14 +196,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             $emailToIDs["{$email->email}"]['id'] = $email->id;
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
           }        
-        }
+        }  
    
-       
-        foreach ($toUnsubscribe as $listID => $vals) {      
-          // sync contacts using batchunsubscribe
-          $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-          $mailchimp->batchUnsubscribe($listID, $vals['batch'],TRUE,TRUE,TRUE);        
-        }     
         
         foreach ($toSubscribe as $listID => $vals) {
           // sync contacts using batchsubscribe
