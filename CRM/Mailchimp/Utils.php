@@ -230,51 +230,55 @@ class CRM_Mailchimp_Utils {
    /*
    * Function to delete Mailchimp contact for given CiviCRM email ID
    */
-  static function deleteMCEmail($emailId) {
+  static function deleteMCEmail($emailId, $batch = FALSE ) {
     if (empty($emailId)) {
       return NULL;
     }
-    
     $toDelete = array();
     $listID = array();
-    $id = $emailId;
     $email = NULL;
-  
-    $query = "SELECT * FROM civicrm_mc_sync WHERE email_id = $id ORDER BY id DESC limit 1";
+    $id = $emailId; 
+    $query = NULL;
+    
+    if(!$batch) {        
+      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id = $id ORDER BY id DESC limit 1";
+    }
+    else {
+      $emailIds = implode(',', $emailId);      
+      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC limit 1";
+    }
     $dao = CRM_Core_DAO::executeQuery($query);       
         
     while ($dao->fetch()) {
       $leidun = $dao->mc_leid;
       $euidun = $dao->mc_euid;
-      $listID= $dao->mc_list_id;   
+      $listID = $dao->mc_list_id;   
       $mc_group = $dao->mc_group;
-      $email  = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Email', $id, 'email', 'id');
+      $email_id = $dao->email_id;
+      $email = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Email', $dao->email_id, 'email', 'id');
  
       $toDelete[$listID]['batch'][] = array(
-        'email'  => $email,
+        'email' => $email,
         'euid'  => $euidun,
-        'leid' =>  $leidun,       
-      ); 
-        foreach ($toDelete as $listID => $val) {                  
-        $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-        $results=$mailchimp->batchUnsubscribe($listID, $val['batch'],TRUE,TRUE,TRUE);          
-      }    
-             foreach($toDelete as $listID => $vals) {
-          foreach($vals['batch'] as $key => $val) {
-              
-              $params = array(
-                'email_id'   => $id,
-                'mc_list_id' => $listID,
-                'mc_group'   => $mc_group,
-                'mc_euid'    => $val['euid'],
-                'mc_leid'    => $val['leid'],
-                'sync_status' => 'Removed'
-              );
-              CRM_Mailchimp_BAO_MCSync::create($params);    
-              
-          }
-        }            
-
+        'leid'  => $leidun,       
+      );      
+                 
+      $params = array(
+        'email_id'   => $dao->email_id,
+        'mc_list_id' => $listID,
+        'mc_group'   => $mc_group,
+        'mc_euid'  => $euidun,
+        'mc_leid' => $leidun,            
+        'sync_status' => 'Removed'
+      );
+      
+      CRM_Mailchimp_BAO_MCSync::create($params);   
     } 
-  }  
+     
+    if(!$batch) {         
+      $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());            
+      $results = $mailchimp->unsubscribe($listID, $toDelete[$listID]['batch'][0],TRUE,TRUE,TRUE);            
+    }
+    return $toDelete;
+  }
 }

@@ -234,7 +234,7 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     'id' => $id,    
   );
   
-  if($op == ('delete' || 'edit') && $objectName == 'Email') {
+  if($op == ('delete' || 'edit') && ($objectName == 'Email' && $params['on_hold'] == 0)) {
     CRM_Mailchimp_Utils::deleteMCEmail($id);
   }
   if ($op == 'delete' && $objectName == 'Individual') {    
