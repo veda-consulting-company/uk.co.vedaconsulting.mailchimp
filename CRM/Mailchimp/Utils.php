@@ -46,10 +46,26 @@ class CRM_Mailchimp_Utils {
   }
 
   static function getMemberCountForGroupsToSync($groupIDs = array()) {
+    $group = new CRM_Contact_DAO_Group();
+    foreach ($groupIDs as $key => $value) {
+    $group->id  = $value;      
+    }
+    $group->find(TRUE);
+    
     if (empty($groupIDs)) {
       $groupIDs = self::getGroupIDsToSync();
     }
-    if (!empty($groupIDs)) {
+
+   
+    if(!empty($groupIDs) && $group->saved_search_id){
+      $groupIDs = implode(',', $groupIDs);
+      $smartGroupQuery = " 
+                  SELECT count(*)
+                  FROM civicrm_group_contact_cache smartgroup_contact
+                  WHERE smartgroup_contact.group_id IN ($groupIDs)";
+      return CRM_Core_DAO::singleValueQuery($smartGroupQuery);
+    }
+    else {
       $groupIDs = implode(',', $groupIDs);
       $query    = "
         SELECT  count(*)

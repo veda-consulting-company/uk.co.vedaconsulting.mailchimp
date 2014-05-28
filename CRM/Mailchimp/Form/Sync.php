@@ -130,21 +130,86 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    */
   static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {    
     if (!empty($groupID)) {
-      $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
+      $mcGroups         = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
+      $listID           = $mcGroups[$groupID]['list_id'];
+      $group            = $mcGroups[$groupID]['group_name'];
+      $groupingID       = $mcGroups[$groupID]['grouping_id'];
+      $emailToIDs       = array();
+      $toSubscribe      = array();        
+      $toUnsubscribe    = array();
+      $toDeleteEmailIDs = array();
+      $groupings        = array();
+      
+      if ($groupingID && $group) {
+        $groupings      = 
+          array(
+            array(
+              'id'     => $groupingID,
+              'groups' => array($group)
+            )
+          );
+      }
+      $groupNew         = new CRM_Contact_DAO_Group();
+      $groupNew->id=$groupID;
+      $groupNew->find();
+      while($groupNew->fetch()){
+      //Check smart groups  
+        if(!empty($mcGroups) && $groupNew->saved_search_id){
+          $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
+          $groupContactCache->group_id = $groupID;
+          $groupContactCache->limit($start, self::BATCH_COUNT);
+          $groupContactCache->find();            
 
+          while ($groupContactCache->fetch()) {
+            $contact = new CRM_Contact_BAO_Contact();          
+            $contact->id = $groupContactCache->contact_id;  
+            $contact->is_deleted != 1;
+            $contact->find(TRUE); 
+
+            $email = new CRM_Core_BAO_Email();
+            $email->contact_id = $groupContactCache->contact_id;         
+            $email->is_primary = TRUE;
+            $email->find(TRUE);
+
+
+            if ($email->email && 
+              ($contact->is_opt_out   == 0 && 
+              $contact->do_not_email  == 0 &&
+              $contact->is_deleted    == 0 &&
+              $email->on_hold         == 0)
+            ) {
+              $toSubscribe[$listID]['batch'][] = array(
+                'email'       => array('email' => $email->email),
+                'merge_vars'  => array(
+                  'fname'     => $contact->first_name, 
+                  'lname'     => $contact->last_name,
+                  'groupings' => $groupings,
+                ),
+              );        
+            } 
+
+            else if ($email->email && 
+              ($contact->is_opt_out   == 1 || 
+               $contact->do_not_email == 1 || 
+               $email->on_hold        == 1)
+            ) {               
+              $toDeleteEmailIDs[] = $email->id;
+              }
+
+            if ($email->id) {
+              $emailToIDs["{$email->email}"]['id'] = $email->id;
+              $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
+            }    
+
+          }
+        }
+      }
       if (!empty($mcGroups)) {
         $groupContact = new CRM_Contact_BAO_GroupContact();
         $groupContact->group_id = $groupID;
         $groupContact->whereAdd("status = 'Added'");
         $groupContact->limit($start, self::BATCH_COUNT);
-        $groupContact->find();
-
-        $emailToIDs = array();
-        $toSubscribe = array();        
-        $groupings  = array();
-        $toUnsubscribe = array();
-        $toDeleteEmailIDs = array();
-             
+        $groupContact->find();             
                
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();          
@@ -157,19 +222,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           $email->is_primary = TRUE;
           $email->find(TRUE);
 
-          $listID      = $mcGroups[$groupContact->group_id]['list_id'];
-          $group       = $mcGroups[$groupContact->group_id]['group_name'];
-          $groupID     = $mcGroups[$groupContact->group_id]['group_id'];
-          $groupingID  = $mcGroups[$groupContact->group_id]['grouping_id'];
-          if ($groupingID && $group) {
-            $groupings = 
-              array(
-                array(
-                  'id'     => $groupingID,
-                  'groups' => array($group)
-                )
-              );
-          }
 
           if ($email->email && 
             ($contact->is_opt_out   == 0 && 
@@ -200,6 +252,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
           }        
         }  
+      }
+      
         $toUnsubscribe  = CRM_Mailchimp_Utils::deleteMCEmail($toDeleteEmailIDs);
                   
         foreach ($toSubscribe as $listID => $vals) {
@@ -229,7 +283,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             }
           }
         }
-      }
     }
     return CRM_Queue_Task::TASK_SUCCESS;
   }
