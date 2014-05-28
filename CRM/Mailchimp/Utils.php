@@ -230,20 +230,16 @@ class CRM_Mailchimp_Utils {
    /*
    * Function to delete Mailchimp contact for given CiviCRM email ID
    */
-  static function deleteMCEmail($emailId, $batch = FALSE ) {
+  static function deleteMCEmail($emailId = array() ) {
     if (empty($emailId)) {
       return NULL;
     }
     $toDelete = array();
     $listID = array();
     $email = NULL;
-    $id = $emailId; 
     $query = NULL;
     
-    if(!$batch) {        
-      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id = $id ORDER BY id DESC limit 1";
-    }
-    else {
+    if (!empty($emailId)) {      
       $emailIds = implode(',', $emailId);      
       $query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC";
     }
@@ -274,13 +270,18 @@ class CRM_Mailchimp_Utils {
       
       CRM_Mailchimp_BAO_MCSync::create($params);   
     } 
-     
-    if(!$batch) {   
-      foreach ($toDelete[$listID]['batch'] as $key => $vals) {
-      $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());            
-      $results = $mailchimp->unsubscribe($listID, $vals,TRUE,TRUE,TRUE);
-      }
-    }
+    
+    foreach ($toDelete as $listID => $vals) {
+      // sync contacts using batchunsubscribe
+      $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+      $results   = $mailchimp->batchUnsubscribe( 
+        $listID,
+        $vals['batch'], 
+        TRUE,
+        TRUE, 
+        TRUE
+      );  
+    }       
     return $toDelete;
   }
 }

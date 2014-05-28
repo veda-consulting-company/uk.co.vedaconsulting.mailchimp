@@ -245,14 +245,14 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     ( ($op == 'delete') || 
       ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0) )
   ) {
-    CRM_Mailchimp_Utils::deleteMCEmail($id);
+    CRM_Mailchimp_Utils::deleteMCEmail(array($id));
   }
   
   if ($op == 'delete' && $objectName == 'Individual') {    
     $result = civicrm_api('Contact', 'get', $params1);
     foreach ($result['values'] as $key => $value) {
       $emailId  = $value['email_id'];
-      CRM_Mailchimp_Utils::deleteMCEmail($emailId); 
+      CRM_Mailchimp_Utils::deleteMCEmail(array($emailId)); 
     }   
   } 
 }
