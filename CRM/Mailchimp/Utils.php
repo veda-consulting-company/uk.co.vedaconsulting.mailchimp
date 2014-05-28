@@ -245,7 +245,7 @@ class CRM_Mailchimp_Utils {
     }
     else {
       $emailIds = implode(',', $emailId);      
-      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC limit 1";
+      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC";
     }
     $dao = CRM_Core_DAO::executeQuery($query);       
         
@@ -275,9 +275,11 @@ class CRM_Mailchimp_Utils {
       CRM_Mailchimp_BAO_MCSync::create($params);   
     } 
      
-    if(!$batch) {         
+    if(!$batch) {   
+      foreach ($toDelete[$listID]['batch'] as $key => $vals) {
       $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());            
-      $results = $mailchimp->unsubscribe($listID, $toDelete[$listID]['batch'][0],TRUE,TRUE,TRUE);            
+      $results = $mailchimp->unsubscribe($listID, $vals,TRUE,TRUE,TRUE);
+      }
     }
     return $toDelete;
   }

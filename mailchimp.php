@@ -233,16 +233,27 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     'contact_id' => $id,
     'id' => $id,    
   );
+  $email  = NULL;
   
-  if($op == ('delete' || 'edit') && ($objectName == 'Email' && $params['on_hold'] == 0)) {
+  if($objectName == 'Email') {
+    $email = new CRM_Core_BAO_Email();
+    $email->id = $id;
+    $email->find(TRUE);    
+  }
+  
+  if($objectName == 'Email' && 
+    ( ($op == 'delete') || 
+      ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0) )
+  ) {
     CRM_Mailchimp_Utils::deleteMCEmail($id);
   }
+  
   if ($op == 'delete' && $objectName == 'Individual') {    
     $result = civicrm_api('Contact', 'get', $params1);
-    $emailId = $result['values'][0]['email_id'];
-    
-    CRM_Mailchimp_Utils::deleteMCEmail($emailId); 
-     
+    foreach ($result['values'] as $key => $value) {
+      $emailId  = $value['email_id'];
+      CRM_Mailchimp_Utils::deleteMCEmail($emailId); 
+    }   
   } 
 }
   

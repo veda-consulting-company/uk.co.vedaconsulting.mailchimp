@@ -150,7 +150,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           $contact = new CRM_Contact_BAO_Contact();          
           $contact->id = $groupContact->contact_id;  
           $contact->is_deleted != 1;
-          $contact->find(TRUE);       
+          $contact->find(TRUE); 
 
           $email = new CRM_Core_BAO_Email();
           $email->contact_id = $groupContact->contact_id;         
@@ -172,9 +172,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           }
 
           if ($email->email && 
-            ($contact->is_opt_out   == 0) && 
-            ($contact->do_not_email == 0) &&
-            ($email->on_hold        == 0)
+            ($contact->is_opt_out   == 0 && 
+            $contact->do_not_email  == 0 &&
+            $contact->is_deleted    == 0 &&
+            $email->on_hold         == 0)
           ) {
             $toSubscribe[$listID]['batch'][] = array(
               'email'       => array('email' => $email->email),
@@ -200,9 +201,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           }        
         }  
         $toUnsubscribe= CRM_Mailchimp_Utils::deleteMCEmail($toDeleteEmailIDs, TRUE);
-        
+
         foreach ($toUnsubscribe as $listID => $vals) {
-          // sync contacts using batchsubscribe
+          // sync contacts using batchunsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
           $results   = $mailchimp->batchUnsubscribe( 
             $listID,
