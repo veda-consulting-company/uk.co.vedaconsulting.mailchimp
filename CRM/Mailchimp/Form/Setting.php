@@ -12,6 +12,9 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
+    
+    CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
+    
     // Add the API Key Element
     $this->addElement('text', 'api_key', ts('API Key'), array(
       'size' => 48,
@@ -55,7 +58,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     
     $defaults['api_key'] = $apiKey;
     $defaults['security_key'] = $securityKey;
-    $details['default_group'] = $defaultGroup;
+    $defaults['default_group'] = $defaultGroup;
     
     return $defaults;
   }
@@ -70,7 +73,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
   public function postProcess() {
     // Store the submitted values in an array.
     $params = $this->controller->exportValues($this->_name);    
-        
+      
     // Save the API Key & Save the Security Key & Save the Default Group
     if (CRM_Utils_Array::value('api_key', $params) || CRM_Utils_Array::value('security_key', $params) || CRM_Utils_Array::value('default_group', $params, NULL)) {
       CRM_Core_BAO_Setting::setItem($params['api_key'],
@@ -87,7 +90,6 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         self::MC_SETTING_GROUP,
         'default_group'
       ); 
-             
       try {
         $mcClient = new Mailchimp($params['api_key']);
         $mcHelper = new Mailchimp_Helper($mcClient);
@@ -99,14 +101,15 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         CRM_Core_Session::setStatus($e->getMessage());
         return FALSE;
       }
-
-      $message = "Following is the account information received from API callback:<br/>
-        <table>
+      
+         
+        $message = "Following is the account information received from API callback:<br/>
+        <table class='mailchimp-table'>
         <tr><td>Company:</td><td>{$details['contact']['company']}</td></tr>
         <tr><td>First Name:</td><td>{$details['contact']['fname']}</td></tr>
         <tr><td>Last Name:</td><td>{$details['contact']['lname']}</td></tr>
         </table>";
-      CRM_Core_Session::setStatus($message);
+        CRM_Core_Session::setStatus($message);
     }
   }
 }

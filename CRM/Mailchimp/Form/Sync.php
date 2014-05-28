@@ -6,7 +6,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   const END_URL    = 'civicrm/mailchimp/sync';
   const END_PARAMS = 'state=done';
   const BATCH_COUNT = 10;
-
+  
   /**
    * Function to pre processing
    *
@@ -63,7 +63,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       'name'  => self::QUEUE_NAME,
       'type'  => 'Sql',
       'reset' => TRUE,
-    ));
+    ));     
     
     $groups = CRM_Mailchimp_Utils::getGroupsToSync();
     foreach ($groups as $groupID => $groupVals) {
@@ -128,7 +128,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    *
    * @return TRUE
    */
-  static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {
+  static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {    
     if (!empty($groupID)) {
       $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
 
@@ -143,14 +143,17 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $toSubscribe = array();        
         $groupings  = array();
         $toUnsubscribe = array();
+        $toDeleteEmailIDs = array();
+             
                
         while ($groupContact->fetch()) {
-          $contact = new CRM_Contact_BAO_Contact();
-          $contact->id = $groupContact->contact_id;
-          $contact->find(TRUE);
+          $contact = new CRM_Contact_BAO_Contact();          
+          $contact->id = $groupContact->contact_id;  
+          $contact->is_deleted != 1;
+          $contact->find(TRUE); 
 
           $email = new CRM_Core_BAO_Email();
-          $email->contact_id = $groupContact->contact_id;
+          $email->contact_id = $groupContact->contact_id;         
           $email->is_primary = TRUE;
           $email->find(TRUE);
 
@@ -169,9 +172,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           }
 
           if ($email->email && 
-            ($contact->is_opt_out   == 0) && 
-            ($contact->do_not_email == 0) &&
-            ($email->on_hold        == 0)
+            ($contact->is_opt_out   == 0 && 
+            $contact->do_not_email  == 0 &&
+            $contact->is_deleted    == 0 &&
+            $email->on_hold         == 0)
           ) {
             $toSubscribe[$listID]['batch'][] = array(
               'email'       => array('email' => $email->email),
@@ -180,60 +184,24 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
                 'lname'     => $contact->last_name,
                 'groupings' => $groupings,
               ),
-            );
+            );        
           } 
           
           else if ($email->email && 
             ($contact->is_opt_out   == 1 || 
              $contact->do_not_email == 1 || 
              $email->on_hold        == 1)
-          ) {         
-            $query = "SELECT email_id as email_id, mc_euid as euid, mc_leid as leid FROM civicrm_mc_sync WHERE is_latest = '0' AND email_id = $email->id AND sync_status != 'Removed' LIMIT 1";
-            $dao = CRM_Core_DAO::executeQuery($query);           
-            
-            while ($dao->fetch()) {
-              
-                $emailun = $email->email;
-                $leidun = $dao->leid;
-                $euidun = $dao->euid;
-          
-                $toUnsubscribe[$listID]['batch'][] = array(
-                  'email'  => $emailun,
-                  'euid'  => $euidun,
-                  'leid' =>  $leidun,       
-                );
-              
-            }           
+          ) {               
+            $toDeleteEmailIDs[] = $email->id;
             }
     
           if ($email->id) {
             $emailToIDs["{$email->email}"]['id'] = $email->id;
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
           }        
-        }
-        
-        foreach ($toUnsubscribe as $listID => $vals) {      
-          // sync contacts using batchunsubscribe
-          $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-          $mailchimp->batchUnsubscribe($listID, $vals['batch'],TRUE,TRUE,TRUE);        
-        }     
-        
-        foreach($toUnsubscribe as $listID => $vals) {
-          foreach($vals['batch'] as $key => $val) {
-              
-              $params = array(
-                'email_id'   => $emailToIDs["{$val['email']}"]['id'],
-                'mc_list_id' => $listID,
-                'mc_group'   => $emailToIDs["{$val['email']}"]['group'],
-                'mc_euid'    => $val['euid'],
-                'mc_leid'    => $val['leid'],
-                'sync_status' => 'Removed'
-              );
-              CRM_Mailchimp_BAO_MCSync::create($params);    
-              
-          }
-        }            
-        
+        }  
+        $toUnsubscribe  = CRM_Mailchimp_Utils::deleteMCEmail($toDeleteEmailIDs);
+                  
         foreach ($toSubscribe as $listID => $vals) {
           // sync contacts using batchsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());

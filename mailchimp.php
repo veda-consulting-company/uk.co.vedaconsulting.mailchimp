@@ -2,6 +2,7 @@
 
 require_once 'mailchimp.civix.php';
 require_once 'vendor/mailchimp/Mailchimp.php';
+require_once 'vendor/mailchimp/Mailchimp/Lists.php';
 
 /**
  * Implementation of hook_civicrm_config
@@ -219,3 +220,42 @@ function mailchimp_civicrm_pageRun( &$page ) {
     $page->assign('lists_and_groups', $list_and_groups);
   }
 }
+
+/**
+ * Implementation of hook_civicrm_pre
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pre
+ */
+function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
+  $params1 = array(
+    'version' => 3,
+    'sequential' => 1,
+    'contact_id' => $id,
+    'id' => $id,    
+  );
+  $email  = NULL;
+  
+  if($objectName == 'Email') {
+    $email = new CRM_Core_BAO_Email();
+    $email->id = $id;
+    $email->find(TRUE);    
+  }
+  
+  if($objectName == 'Email' && 
+    ( ($op == 'delete') || 
+      ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0) )
+  ) {
+    CRM_Mailchimp_Utils::deleteMCEmail(array($id));
+  }
+  
+  if ($op == 'delete' && $objectName == 'Individual') {    
+    $result = civicrm_api('Contact', 'get', $params1);
+    foreach ($result['values'] as $key => $value) {
+      $emailId  = $value['email_id'];
+      CRM_Mailchimp_Utils::deleteMCEmail(array($emailId)); 
+    }   
+  } 
+}
+  
+
+
