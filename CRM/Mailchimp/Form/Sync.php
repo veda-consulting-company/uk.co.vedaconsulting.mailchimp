@@ -137,18 +137,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $toDeleteEmailIDs = array();
       $groupings        = array();
       
-      if ($groupingID && $groupName) {
-        $groupings      = 
-          array(
-            array(
-              'id'     => $groupingID,
-              'groups' => array($groupName)
-            )
-          );
-      }
       $group           = new CRM_Contact_DAO_Group();
       $group->id       = $groupID;
       $group->find();
+      
       while($group->fetch()){
       //Check smart groups  
         if(!empty($mcGroups) && $group->saved_search_id){
