@@ -306,7 +306,7 @@ class CRM_Mailchimp_Utils {
     $group->id       = $groupID;
     $group->find();
 
-    while($group->fetch()){
+    if($group->fetch()){
       //Check smart groups  
       if($group->saved_search_id){
         $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
@@ -324,6 +324,6 @@ class CRM_Mailchimp_Utils {
         return $groupContact;
       }
     }
-    return 0;
+    return FALSE;
   }
 }
