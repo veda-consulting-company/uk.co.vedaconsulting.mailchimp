@@ -4,7 +4,6 @@ class CRM_Mailchimp_Utils {
   
   const 
     MC_SETTING_GROUP = 'MailChimp Preferences';
-
   static function mailchimp() {
     $apiKey   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
     $mcClient = new Mailchimp($apiKey);
@@ -46,10 +45,24 @@ class CRM_Mailchimp_Utils {
   }
 
   static function getMemberCountForGroupsToSync($groupIDs = array()) {
+    $group = new CRM_Contact_DAO_Group();
+    foreach ($groupIDs as $key => $value) {
+    $group->id  = $value;      
+    }
+    $group->find(TRUE);
+    
     if (empty($groupIDs)) {
       $groupIDs = self::getGroupIDsToSync();
     }
-    if (!empty($groupIDs)) {
+    if(!empty($groupIDs) && $group->saved_search_id){
+      $groupIDs = implode(',', $groupIDs);
+      $smartGroupQuery = " 
+                  SELECT count(*)
+                  FROM civicrm_group_contact_cache smartgroup_contact
+                  WHERE smartgroup_contact.group_id IN ($groupIDs)";
+      return CRM_Core_DAO::singleValueQuery($smartGroupQuery);
+    }
+    else if (!empty($groupIDs)) {
       $groupIDs = implode(',', $groupIDs);
       $query    = "
         SELECT  count(*)
@@ -283,5 +296,34 @@ class CRM_Mailchimp_Utils {
       );  
     }       
     return $toDelete;
+  }
+  
+   /*
+   * Function to call syncontacts with smart groups and static groups
+   */
+  static function getGroupContactObject($groupID, $start) {
+    $group           = new CRM_Contact_DAO_Group();
+    $group->id       = $groupID;
+    $group->find();
+
+    if($group->fetch()){
+      //Check smart groups  
+      if($group->saved_search_id){
+        $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
+        $groupContactCache->group_id = $groupID;
+        $groupContactCache->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
+        $groupContactCache->find(); 
+        return $groupContactCache;     
+      }
+      else {
+        $groupContact = new CRM_Contact_BAO_GroupContact();
+        $groupContact->group_id = $groupID;
+        $groupContact->whereAdd("status = 'Added'");
+        $groupContact->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
+        $groupContact->find();    
+        return $groupContact;
+      }
+    }
+    return FALSE;
   }
 }
