@@ -131,21 +131,33 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {    
     if (!empty($groupID)) {
       $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
-
-      if (!empty($mcGroups)) {
-        $groupContact = new CRM_Contact_BAO_GroupContact();
-        $groupContact->group_id = $groupID;
-        $groupContact->whereAdd("status = 'Added'");
-        $groupContact->limit($start, self::BATCH_COUNT);
-        $groupContact->find();
-
-        $emailToIDs = array();
-        $toSubscribe = array();        
-        $groupings  = array();
-        $toUnsubscribe = array();
-        $toDeleteEmailIDs = array();
-             
-               
+      $emailToIDs       = array();
+      $toSubscribe      = array();        
+      $toUnsubscribe    = array();
+      $toDeleteEmailIDs = array();
+      $groupings        = array();
+      
+      if ($groupingID && $groupName) {
+        $groupings      = 
+          array(
+            array(
+              'id'     => $groupingID,
+              'groups' => array($groupName)
+            )
+          );
+      }
+      $group           = new CRM_Contact_DAO_Group();
+      $group->id       = $groupID;
+      $group->find();
+      while($group->fetch()){
+      //Check smart groups  
+        if(!empty($mcGroups) && $group->saved_search_id){
+          $groupContact  = CRM_Mailchimp_Utils::syncSmartOrStaticContacts($groupID, $start, TRUE);
+        }
+        else if(!empty($mcGroups)) {
+          $groupContact = CRM_Mailchimp_Utils::syncSmartOrStaticContacts($groupID, $start);
+        }
+      
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();          
           $contact->id = $groupContact->contact_id;  
@@ -158,15 +170,15 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           $email->find(TRUE);
 
           $listID      = $mcGroups[$groupContact->group_id]['list_id'];
-          $group       = $mcGroups[$groupContact->group_id]['group_name'];
+          $groupName   = $mcGroups[$groupContact->group_id]['group_name'];
           $groupID     = $mcGroups[$groupContact->group_id]['group_id'];
           $groupingID  = $mcGroups[$groupContact->group_id]['grouping_id'];
-          if ($groupingID && $group) {
+          if ($groupingID && $groupName) {
             $groupings = 
               array(
                 array(
                   'id'     => $groupingID,
-                  'groups' => array($group)
+                  'groups' => array($groupName)
                 )
               );
           }
