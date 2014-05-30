@@ -4,7 +4,6 @@ class CRM_Mailchimp_Utils {
   
   const 
     MC_SETTING_GROUP = 'MailChimp Preferences';
-  const BATCH_COUNT = 10;
   static function mailchimp() {
     $apiKey   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
     $mcClient = new Mailchimp($apiKey);
@@ -302,21 +301,28 @@ class CRM_Mailchimp_Utils {
    /*
    * Function to call syncontacts with smart groups and static groups
    */
-  static function syncSmartOrStaticContacts($groupID, $start, $cache = FALSE) {
-    if($cache) {
-      $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
-      $groupContactCache->group_id = $groupID;
-      $groupContactCache->limit($start, self::BATCH_COUNT);
-      $groupContactCache->find(); 
-      return $groupContactCache;     
-    }
-    else {
-      $groupContact = new CRM_Contact_BAO_GroupContact();
-      $groupContact->group_id = $groupID;
-      $groupContact->whereAdd("status = 'Added'");
-      $groupContact->limit($start, self::BATCH_COUNT);
-      $groupContact->find();    
-      return $groupContact;
+  static function getGroupContactObject($groupID, $start) {
+    $group           = new CRM_Contact_DAO_Group();
+    $group->id       = $groupID;
+    $group->find();
+
+    while($group->fetch()){
+      //Check smart groups  
+      if($group->saved_search_id){
+        $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
+        $groupContactCache->group_id = $groupID;
+        $groupContactCache->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
+        $groupContactCache->find(); 
+        return $groupContactCache;     
+      }
+      else {
+        $groupContact = new CRM_Contact_BAO_GroupContact();
+        $groupContact->group_id = $groupID;
+        $groupContact->whereAdd("status = 'Added'");
+        $groupContact->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
+        $groupContact->find();    
+        return $groupContact;
+      }
     }
     return 0;
   }

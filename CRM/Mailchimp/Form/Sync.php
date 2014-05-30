@@ -137,19 +137,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $toDeleteEmailIDs = array();
       $groupings        = array();
       
-      $group           = new CRM_Contact_DAO_Group();
-      $group->id       = $groupID;
-      $group->find();
-      
-      while($group->fetch()){
-      //Check smart groups  
-        if(!empty($mcGroups) && $group->saved_search_id){
-          $groupContact  = CRM_Mailchimp_Utils::syncSmartOrStaticContacts($groupID, $start, TRUE);
-        }
-        else if(!empty($mcGroups)) {
-          $groupContact = CRM_Mailchimp_Utils::syncSmartOrStaticContacts($groupID, $start);
-        }
-      
+      if(!empty($mcGroups)) {
+        $groupContact = CRM_Mailchimp_Utils::getGroupContactObject($groupID, $start);
+
         while ($groupContact->fetch()) {
           $contact = new CRM_Contact_BAO_Contact();          
           $contact->id = $groupContact->contact_id;  
@@ -190,7 +180,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               ),
             );        
           } 
-          
+
           else if ($email->email && 
             ($contact->is_opt_out   == 1 || 
              $contact->do_not_email == 1 || 
@@ -198,14 +188,14 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           ) {               
             $toDeleteEmailIDs[] = $email->id;
             }
-    
+
           if ($email->id) {
             $emailToIDs["{$email->email}"]['id'] = $email->id;
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
           }        
         }  
         $toUnsubscribe  = CRM_Mailchimp_Utils::deleteMCEmail($toDeleteEmailIDs);
-                  
+
         foreach ($toSubscribe as $listID => $vals) {
           // sync contacts using batchsubscribe
           $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -216,7 +206,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             TRUE, 
             FALSE
           );          
-    
+
           // fill sync table based on response
           foreach (array('adds', 'updates', 'errors') as $key) {
             foreach ($results[$key] as $data) {
