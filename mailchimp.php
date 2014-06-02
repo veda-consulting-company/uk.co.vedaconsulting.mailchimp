@@ -182,21 +182,22 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       'sequential' => 1,
     );
     $lists = civicrm_api('Mailchimp', 'getlists', $params);
+    if(!$lists['is_error']){
+      // Add form elements
+      $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
+      $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
 
-    // Add form elements
-    $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
-    $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
+      // Prepopulate details if 'edit' action
+      $groupId = $form->getVar('_id');
+      if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
 
-    // Prepopulate details if 'edit' action
-    $groupId = $form->getVar('_id');
-    if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
-      
-      $mcDetails  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupId));
-      
-      if (!empty($mcDetails)) {
-        $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
-        $form->setDefaults($defaults);  
-        $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
+        $mcDetails  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupId));
+
+        if (!empty($mcDetails)) {
+          $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
+          $form->setDefaults($defaults);  
+          $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
+        }
       }
     }
   }
@@ -216,8 +217,10 @@ function mailchimp_civicrm_pageRun( &$page ) {
     // Get all the mailchimp lists/groups and pass it to template as JS array
     // To reduce the no. of AJAX calls to get the list/group name in Group Listing Page
     $result = civicrm_api('Mailchimp', 'getlistsandgroups', $params);
+    if(!$result['is_error']){
     $list_and_groups = json_encode($result['values']);
     $page->assign('lists_and_groups', $list_and_groups);
+    }
   }
 }
 
