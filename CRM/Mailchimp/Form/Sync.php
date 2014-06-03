@@ -211,14 +211,16 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           foreach (array('adds', 'updates', 'errors') as $key) {
             foreach ($results[$key] as $data) {
               $email  = $key == 'errors' ? $data['email']['email'] : $data['email'];
-              $params = array(
-                'email_id'   => $emailToIDs[$email]['id'],
-                'mc_list_id' => $listID,
-                'mc_group'   => $emailToIDs[$email]['group'],
-                'mc_euid'    => CRM_Utils_Array::value('euid',$data),
-                'mc_leid'    => CRM_Utils_Array::value('leid',$data),
-                'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
-              );
+              if($emailToIDs[$email]['id']) {
+                $params = array(
+                  'email_id'   => $emailToIDs[$email]['id'],
+                  'mc_list_id' => $listID,
+                  'mc_group'   => $emailToIDs[$email]['group'],
+                  'mc_euid'    => CRM_Utils_Array::value('euid',$data),
+                  'mc_leid'    => CRM_Utils_Array::value('leid',$data),
+                  'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
+                );
+              }
               CRM_Mailchimp_BAO_MCSync::create($params);          
             }
           }
