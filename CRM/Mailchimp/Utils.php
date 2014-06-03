@@ -271,16 +271,14 @@ class CRM_Mailchimp_Utils {
         'euid'  => $euidun,
         'leid'  => $leidun,       
       );      
-      if($dao->email_id) {         
-        $params = array(
-          'email_id'   => $dao->email_id,
-          'mc_list_id' => $listID,
-          'mc_group'   => $mc_group,
-          'mc_euid'  => $euidun,
-          'mc_leid' => $leidun,            
-          'sync_status' => 'Removed'
-        );
-      }
+      $params = array(
+        'email_id'   => $dao->email_id,
+        'mc_list_id' => $listID,
+        'mc_group'   => $mc_group,
+        'mc_euid'  => $euidun,
+        'mc_leid' => $leidun,            
+        'sync_status' => 'Removed'
+      );
       CRM_Mailchimp_BAO_MCSync::create($params);   
     } 
     

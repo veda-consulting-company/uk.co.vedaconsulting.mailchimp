@@ -4,8 +4,14 @@ class CRM_Mailchimp_BAO_MCSync extends CRM_Mailchimp_DAO_MCSync {
 
   public static function create($params) {
     $instance = new self();
-    $instance->copyValues($params);
-    $instance->save();
+    if ($params['email_id'] && $params['mc_list_id']) {
+      $instance->copyValues($params);
+      $instance->save();
+    }
+    else {
+      // log civicrm error 
+      CRM_Core_Error::debug_log_message( 'CRM_Mailchimp_BAO_MCSync $params= '. print_r($params, true), $out = false );
+    }
   }
 
   public static function getSyncStats() {
