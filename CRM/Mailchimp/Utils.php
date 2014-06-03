@@ -271,7 +271,6 @@ class CRM_Mailchimp_Utils {
         'euid'  => $euidun,
         'leid'  => $leidun,       
       );      
-                 
       $params = array(
         'email_id'   => $dao->email_id,
         'mc_list_id' => $listID,
@@ -280,7 +279,6 @@ class CRM_Mailchimp_Utils {
         'mc_leid' => $leidun,            
         'sync_status' => 'Removed'
       );
-      
       CRM_Mailchimp_BAO_MCSync::create($params);   
     } 
     
