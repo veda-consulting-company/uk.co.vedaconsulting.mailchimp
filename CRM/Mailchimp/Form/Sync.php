@@ -210,7 +210,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           // fill sync table based on response
           foreach (array('adds', 'updates', 'errors') as $key) {
             foreach ($results[$key] as $data) {
-              $email  = $key == 'errors' ? $data['email']['email'] : $data['email'];
+              $email  = $key == 'errors' ? strtolower($data['email']['email']) : strtolower($data['email']);
               $params = array(
                 'email_id'   => $emailToIDs[$email]['id'],
                 'mc_list_id' => $listID,
