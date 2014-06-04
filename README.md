@@ -4,7 +4,7 @@ The new extension builds on the existing work done by the science gallery, addin
 
 Install the CiviCRM Mailchimp Extension
 
-1. Download extension from https://github.com/veda-consulting/uk.co.vedaconsulting.mailchimp/archive/1.0-beta2.zip.
+1. Download extension from https://github.com/veda-consulting/uk.co.vedaconsulting.mailchimp/releases/latest.
 2. Unzip / untar the package and place it in your configured extensions directory.
 3. When you reload the Manage Extensions page the new “Mailchimp” extension should be listed with an Install link.
 4. Proceed with install.
