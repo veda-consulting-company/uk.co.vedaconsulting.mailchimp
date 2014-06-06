@@ -18,7 +18,9 @@
           <td class="label">{$form.security_key.label}</td>
           <td>{$form.security_key.html}<br/>
       	    <span class="description">{ts} Define a security key to be used with webhooks{/ts}
-	          </span>
+	          </span><br/>
+            <span class="description" id ="webhook_url">{ts}{$webhook_url}{/ts}
+                  </span>
           </td>
         </tr> 
          <tr class="crm-mailchimp-setting-default-group-block">
@@ -35,3 +37,19 @@
     </div>
   </div>
 </div>
+    
+{*script*}
+{literal}
+
+<script type="text/javascript">
+ cj(document).ready(function(){
+    var URL = "{/literal}{$webhook_url}{literal}" + '&key=';
+    cj("#security_key").on('keyup', function() {
+      var focusedValue = cj(this).val();
+      cj('#webhook_url').text(URL + focusedValue);
+    });
+ });
+
+</script>
+{/literal}
+{*end*}
