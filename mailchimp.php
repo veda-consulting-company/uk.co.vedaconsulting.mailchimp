@@ -46,11 +46,6 @@ function mailchimp_civicrm_install() {
           'name'  => 'Mailchimp_Sync',
           'url'   => 'civicrm/mailchimp/sync&reset=1',
         ),
-        array(
-          'label' => ts('Mailchimp Webhook'),
-          'name'  => 'Mailchimp_Webhook',
-          'url'   => 'civicrm/mailchimp/webhook&reset=1',
-        ),
       );
 
     foreach ($mailchimpMenuTree as $key => $menuItems) {
@@ -87,7 +82,6 @@ function mailchimp_civicrm_uninstall() {
   $mailchimpMenuItems = array(
     'Mailchimp_Settings', 
     'Mailchimp_Sync', 
-    'Mailchimp_Webhook',
   );
 
   foreach ($mailchimpMenuItems as $name) {
@@ -259,6 +253,16 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     }   
   } 
 }
+
+/**
+ * Implementation of hook_civicrm_permission
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
+ */
+function mailchimp_civicrm_permission( &$permissions ) {  
+  $prefix = ts('Mailchimp') . ': '; // name of extension or module
+  $permissions = array(
+    'allow webhook posts' => $prefix . ts('allow webhook posts'),
+  );  
+}
   
-
-

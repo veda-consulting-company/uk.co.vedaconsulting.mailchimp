@@ -16,7 +16,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
     
     $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', 'reset=1', true);
-    $this->assign( 'webhook_url', $webhook_url);
+    $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
    
     // Add the API Key Element
     $this->addElement('text', 'api_key', ts('API Key'), array(
