@@ -83,7 +83,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         'title' => ts('Mailchimp Sync'),
         'queue' => $queue,
         'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
-        'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS),
+        'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
       ));
       // reset sync table
       CRM_Mailchimp_BAO_MCSync::resetTable();
