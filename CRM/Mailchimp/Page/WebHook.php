@@ -31,14 +31,15 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
           // Create/Update contact details in CiviCRM
           $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges']);
+          $contactArray = array($contactID);
 
           // Subscribe/Unsubscribe to related CiviCRM groups 
-          self::manageCiviCRMGroupSubcription($contactID , $requestData , $requestType);
+          self::manageCiviCRMGroupSubcription($contactArray , $requestData , $requestType);
         }
 
         // Mailchimp Email Update event
         else if($requestType == 'profile') {
-
+            
           // Create/Update contact details in CiviCRM
           $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges']);
           $contactArray = array($contactID);
@@ -105,7 +106,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
   /*
    * Add/Remove contact from CiviCRM Groups mapped with Mailchimp List & Groups 
    */
-  static function manageCiviCRMGroupSubcription($contactID , $requestData , $action) {
+  static function manageCiviCRMGroupSubcription($contactID = array(), $requestData , $action) {
     if (empty($contactID) || empty($requestData['merges']['GROUPINGS']) || empty($requestData['list_id']) || empty($action)) {
       return NULL;
     }
@@ -120,12 +121,12 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // Add or Remove from the CiviCRM Groups
     foreach ($civiGroups as $key => $groupID) {
       if ($action == 'subscribe') {
-        CRM_Contact_BAO_GroupContact::addContactsToGroup(array($contactID), $groupID, 'Admin', 'Added');
+        CRM_Contact_BAO_GroupContact::addContactsToGroup($contactID, $groupID, 'Admin', 'Added');
       }
 
       // Remove the contact from CiviCRM group
       if ($action == 'unsubscribe') {
-        CRM_Contact_BAO_GroupContact::removeContactsFromGroup(array($contactID), $groupID, 'Admin', 'Removed');
+        CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactID, $groupID, 'Admin', 'Removed');
       }
     }
   } 
