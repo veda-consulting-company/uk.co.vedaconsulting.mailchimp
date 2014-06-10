@@ -162,6 +162,8 @@ class CRM_Mailchimp_Utils {
           'email'         => $params['EMAIL'],
         );
     
+    //To avoid a new duplicate contact to be created as both profile and upemail events are happening at the same time
+    sleep(20);
     $email = new CRM_Core_BAO_Email();
 		$email->get('email', $params['EMAIL']);
     
