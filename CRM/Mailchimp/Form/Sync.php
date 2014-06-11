@@ -176,6 +176,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               'merge_vars'  => array(
                 'fname'     => $contact->first_name, 
                 'lname'     => $contact->last_name,
+                'crmid'     => $contact->id,
                 'groupings' => $groupings,
               ),
             );        
@@ -222,6 +223,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               CRM_Mailchimp_BAO_MCSync::create($params);          
             }
           }
+         // $results2 = $mailchimp->members($listID, $status);
+        //   CRM_Core_Error::debug_log_message( 'mailchimp_sync_contacts $results2= '. print_r($results2, true), $out = false );
         }
       }
     }
