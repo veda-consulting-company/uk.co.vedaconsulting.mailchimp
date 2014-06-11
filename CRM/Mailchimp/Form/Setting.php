@@ -15,6 +15,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
     
+    $civi_version = CRM_Utils_System::version();
+    if($civi_version<4.4) {
+      CRM_Core_Session::setStatus("You need to upgrade to version 4.4 or above","Version:",'info');
+    }
     $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', 'reset=1',  TRUE, NULL, FALSE, TRUE);
     $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
    
