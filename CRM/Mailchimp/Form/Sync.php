@@ -176,7 +176,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               'merge_vars'  => array(
                 'fname'     => $contact->first_name, 
                 'lname'     => $contact->last_name,
-                'crmid'     => $contact->id,
                 'groupings' => $groupings,
               ),
             );        
