@@ -222,8 +222,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               CRM_Mailchimp_BAO_MCSync::create($params);          
             }
           }
-        }
       }
+    }
     }
     return CRM_Queue_Task::TASK_SUCCESS;
   }

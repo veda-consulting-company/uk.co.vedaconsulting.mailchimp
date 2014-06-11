@@ -4,7 +4,30 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
 
   const 
     MC_SETTING_GROUP = 'MailChimp Preferences';
-
+  
+   /**
+   * Function to pre processing
+   *
+   * @return None
+   * @access public
+   */
+  function preProcess() { 
+    $currentVer = CRM_Core_BAO_Domain::version(TRUE);
+    //if current version is less than 4.4 dont save setting
+    if (version_compare($currentVer, '4.4') < 0) {
+      CRM_Core_Session::setStatus("You need to upgrade to version 4.4 or above to work with extension Mailchimp","Version:");
+    }
+  }  
+  
+  public static function formRule($params){
+    $currentVer = CRM_Core_BAO_Domain::version(TRUE);
+    $errors = array();
+    if (version_compare($currentVer, '4.4') < 0) {        
+      $errors['version_error'] = " You need to upgrade to version 4.4 or above to work with extension Mailchimp";
+    }
+    return empty($errors) ? TRUE : $errors;
+  }
+  
   /**
    * Function to actually build the form
    *
@@ -12,12 +35,13 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
+    $this->addFormRule(array('CRM_Mailchimp_Form_Setting', 'formRule'), $this);
     
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
     
     $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', 'reset=1',  TRUE, NULL, FALSE, TRUE);
     $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
-   
+    
     // Add the API Key Element
     $this->addElement('text', 'api_key', ts('API Key'), array(
       'size' => 48,
