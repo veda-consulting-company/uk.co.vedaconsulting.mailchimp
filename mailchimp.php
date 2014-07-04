@@ -266,3 +266,24 @@ function mailchimp_civicrm_permission( &$permissions ) {
   );  
 }
   
+function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
+  if ($op == 'delete' && $objectName == 'GroupContact') { 
+    $emailIds= array();
+    $contactIds = array();
+    $contactIds = $objectRef;
+    if (empty($contactIds)) {
+      return NULL;
+    }
+    if (!empty($contactIds)) {      
+      $contactIDs = implode(',', $contactIds); 
+      $query = "
+        SELECT ce.id FROM `civicrm_email` ce
+        WHERE ce.contact_id IN ($contactIDs) AND ce.id is not null";
+      $dao = CRM_Core_DAO::executeQuery($query); 
+      while ($dao->fetch()) {
+        $emailIds[] = $dao->id;
+      }
+    }
+    CRM_Mailchimp_Utils::deleteMCEmail($emailIds); 
+  }
+}
