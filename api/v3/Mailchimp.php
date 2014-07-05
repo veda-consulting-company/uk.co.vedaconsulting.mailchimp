@@ -31,6 +31,26 @@ function civicrm_api3_mailchimp_getlists($params) {
 }
 
 /**
+ * Mailchimp Get Mailchimp Membercount API
+ *
+ * @param array $params
+ * @return array API result descriptor
+ * @see civicrm_api3_create_success
+ * @see civicrm_api3_create_error
+ * @throws API_Exception
+ */ 
+function civicrm_api3_mailchimp_getmembercount($params) {
+  $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+  
+  $results = $mcLists->getList();
+  $listmembercount = array();
+  foreach($results['data'] as $list) {
+    $listmembercount[$list['id']] = $list['stats']['member_count'];
+  }
+
+  return civicrm_api3_create_success($listmembercount);
+}
+/**
  * Mailchimp Get Mailchimp Groups API
  *
  * @param array $params

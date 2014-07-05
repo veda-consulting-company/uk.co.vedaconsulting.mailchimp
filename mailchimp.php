@@ -46,6 +46,11 @@ function mailchimp_civicrm_install() {
           'name'  => 'Mailchimp_Sync',
           'url'   => 'civicrm/mailchimp/sync&reset=1',
         ),
+        array(
+          'label' => ts('Mailchimp Pull'),
+          'name'  => 'Mailchimp_Pull',
+          'url'   => 'civicrm/mailchimp/pull&reset=1',
+        ),
       );
 
     foreach ($mailchimpMenuTree as $key => $menuItems) {
@@ -81,7 +86,8 @@ function mailchimp_civicrm_install() {
 function mailchimp_civicrm_uninstall() {
   $mailchimpMenuItems = array(
     'Mailchimp_Settings', 
-    'Mailchimp_Sync', 
+    'Mailchimp_Sync',
+    'Mailchimp_Pull',
   );
 
   foreach ($mailchimpMenuItems as $name) {
