@@ -19,4 +19,10 @@
     <title>WebHook</title>
     <access_arguments>allow webhook posts</access_arguments>
   </item>
+  <item>
+    <path>civicrm/mailchimp/pull</path>
+    <page_callback>CRM_Mailchimp_Form_Pull</page_callback>
+    <title>Mailchimp Pull</title>
+    <access_arguments>administer CiviCRM</access_arguments>
+  </item>
 </menu>
