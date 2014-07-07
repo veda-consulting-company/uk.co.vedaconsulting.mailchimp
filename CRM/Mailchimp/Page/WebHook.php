@@ -41,7 +41,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
         else if($requestType == 'profile') {
             
           // Create/Update contact details in CiviCRM
-          $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges']);
+          $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges'], TRUE);
           $contactArray = array($contactID);
 
           $listID = $requestData['list_id'];

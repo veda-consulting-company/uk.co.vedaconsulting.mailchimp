@@ -148,7 +148,7 @@ class CRM_Mailchimp_Utils {
   /*
    * Create/Update contact details in CiviCRM, based on the data from Mailchimp webhook
    */
-  static function updateContactDetails($params) {
+  static function updateContactDetails($params, $delay = FALSE) {
     if (empty($params)) {
       return NULL;
     }
@@ -162,8 +162,10 @@ class CRM_Mailchimp_Utils {
           'email'         => $params['EMAIL'],
         );
     
-    //To avoid a new duplicate contact to be created as both profile and upemail events are happening at the same time
-    sleep(20);
+    if($delay){
+      //To avoid a new duplicate contact to be created as both profile and upemail events are happening at the same time
+      sleep(20);
+    }
     $email = new CRM_Core_BAO_Email();
 		$email->get('email', $params['EMAIL']);
     

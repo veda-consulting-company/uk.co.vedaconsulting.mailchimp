@@ -5,7 +5,8 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   const QUEUE_NAME = 'mc-pull';
   const END_URL    = 'civicrm/mailchimp/pull';
   const END_PARAMS = 'state=done';
-  
+  const BATCH_COUNT = 10;
+
   public function buildQuickForm() {
     // Create the Submit Button.
     $buttons = array(
@@ -44,10 +45,11 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     $lists            = civicrm_api('Mailchimp' , 'getlists' , array('version' => 3));
 
     foreach ($lists['values'] as $listid => $listname) {
+      $count = $listmembercount['values'][$listid];
       $task = new CRM_Queue_Task(
         array('CRM_Mailchimp_Form_Pull', 'pullLists'),
         array($listid),
-        "Pulling '{$listname}' - Contacts of {$listmembercount['values'][$listid]}"
+        "Pulling '{$listname}' - Contacts of {$count}"
       );
         
       // Add the Task to the Queu
@@ -67,30 +69,47 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     return FALSE;
   }
   
-  static function pullLists(CRM_Queue_TaskContext $ctx, $listid) { 
+  static function pullLists(CRM_Queue_TaskContext $ctx, $listid) {
     
-    $apikey       = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
-    $pullcontacts = array();
-    $contactID    = array();
-    $dc           = 'us'.substr($apikey, -1);
-    $url          = 'http://'.$dc.'.api.mailchimp.com/export/1.0/list?apikey='.$apikey.'&id='.$listid;
-    $json         = file_get_contents($url);
-    $temp         = explode("\n", $json);
+    $apikey         = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
+    $contactColumns = array();
+    $contacts       = array();
+    $columnNames    = array();
+    $dc             = 'us'.substr($apikey, -1);
+    $url            = 'http://'.$dc.'.api.mailchimp.com/export/1.0/list?apikey='.$apikey.'&id='.$listid;
+    $json           = file_get_contents($url);
+    $temp           = explode("\n", $json);
     foreach($temp as $key => $value){
-      if($key == 0)
+      if($key == 0){
+        $contactColumns = json_decode($value,TRUE);
         continue;
-      $data       = json_decode($value,TRUE);
-      $pullcontacts[$listid][] = array(
-        'EMAIL'     => $data[0], 
-        'FNAME'     => $data[1],
-        'LNAME'     => $data[2],
-      );  
-    }
-    
-    foreach($pullcontacts as $listid => $vals){
-      foreach($vals as $key => $params){
-        $contactID[] = CRM_Mailchimp_Utils::updateContactDetails($params);
       }
+      $data       = json_decode($value,TRUE);
+      $contacts[$listid][] =  array_combine($contactColumns, $data);
+    }
+    $groupContact = array();
+    $mcGroups = civicrm_api('Mailchimp' , 'getgroupid' , array('version' => 3,'id'=>$listid));
+    foreach($contacts[$listid] as $key => $contact){
+      $updateParams = array(
+        'EMAIL' =>  $contact['Email Address'],
+        'FNAME' =>  $contact['First Name'],
+        'LNAME' =>  $contact['Last Name'],
+      );
+      $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams);
+      foreach ($contact as $parms => $value){
+        if(!empty($mcGroups)){
+          foreach ($mcGroups['values'] as $mcGroupDetails){
+            if (in_array($value, $mcGroupDetails)) {
+              $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
+              if(!empty($contactID) && !empty($civiGroupID))
+              $groupContact[$civiGroupID][] = $contactID;
+            }
+          }
+        }
+      }
+    }
+    foreach($groupContact as $groupID => $contactIDs ){
+      CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIDs, $groupID, 'Admin', 'Added');
     }
     return CRM_Queue_Task::TASK_SUCCESS;
   }  
