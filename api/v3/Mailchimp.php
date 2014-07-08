@@ -81,6 +81,35 @@ function civicrm_api3_mailchimp_getgroups($params) {
 }
 
 /**
+ * Mailchimp Get Mailchimp Groupids API
+ *
+ * @param array $params
+ * @return array API result descriptor
+ * @see civicrm_api3_create_success
+ * @see civicrm_api3_create_error
+ * @throws API_Exception
+ */ 
+function civicrm_api3_mailchimp_getgroupid($params) {
+  $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+  try {
+    $results = $mcLists->interestGroupings($params['id']);
+  } 
+  catch (Exception $e) {
+    return array();
+  }
+  $groups = array();
+  foreach($results as $result) {
+    foreach($result['groups'] as $group) {
+        $groups[] = array(
+          'groupingid'  => $result['id'],
+          'groupname' =>  $group['name'],
+          'groupid' =>  $group['id'],
+        );
+    }
+  }
+  return civicrm_api3_create_success($groups);
+}
+/**
  * Mailchimp Get all Mailchimp Lists & Groups API
  *
  * @param array $params

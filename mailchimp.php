@@ -42,12 +42,12 @@ function mailchimp_civicrm_install() {
           'url'   => 'civicrm/mailchimp/settings&reset=1',
         ),
         array(
-          'label' => ts('Mailchimp Sync'),
+          'label' => ts('Sync Contacts To Mailchimp'),
           'name'  => 'Mailchimp_Sync',
           'url'   => 'civicrm/mailchimp/sync&reset=1',
         ),
         array(
-          'label' => ts('Mailchimp Pull'),
+          'label' => ts('Bulk Import Mailchimp Contacts'),
           'name'  => 'Mailchimp_Pull',
           'url'   => 'civicrm/mailchimp/pull&reset=1',
         ),
