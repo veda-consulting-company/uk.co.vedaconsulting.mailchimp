@@ -156,6 +156,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
               }
             }
           }
+        } else {
+          // if a list doesn't have groups,assign the contact to default group
+          $groupContact[$defaultgroup][]  = $contactID;
         }
       }
     }
