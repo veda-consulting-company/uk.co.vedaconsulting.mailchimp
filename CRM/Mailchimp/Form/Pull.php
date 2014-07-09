@@ -88,7 +88,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       $start   = $i * self::BATCH_COUNT;
       $counter = ($rounds > 1) ? ($start + self::BATCH_COUNT) : $count;
       $task    = new CRM_Queue_Task(
-        array('CRM_Mailchimp_Form_Pull', 'pullLists'),
+        array('CRM_Mailchimp_Form_Pull', 'syncContacts'),
         array($listid, $start),
         "Pulling '{$lists['values'][$listid]}' - Contacts {$counter} of {$count}"
       );
@@ -100,7 +100,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     return CRM_Queue_Task::TASK_SUCCESS;
   }
   
-  static function pullLists(CRM_Queue_TaskContext $ctx, $listid, $start) {
+  static function syncContacts(CRM_Queue_TaskContext $ctx, $listid, $start) {
     
     $apikey         = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
     $defaultgroup   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'default_group');
@@ -127,38 +127,40 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         'FNAME' =>  $contact['First Name'],
         'LNAME' =>  $contact['Last Name'],
       );
-      $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams);
-      foreach ($contact as $parms => $value){
-        if(!empty($mcGroups)){
-          foreach ($mcGroups['values'] as $mcGroupDetails) {
-            //check whether a contact belongs to more than one group under one grouping
-            if(strpos($value, ',') !== FALSE) {
-              $valuearray = explode(',', $value);
-              foreach($valuearray as $val){
-                if (in_array(trim($val), $mcGroupDetails)) {
-                  $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
-                  if(!empty($contactID) && !empty($civiGroupID)) {
-                    $groupContact[$civiGroupID][]   = $contactID;
-                  } else {
-                    $groupContact[$defaultgroup][]  = $contactID;
+      $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams, FALSE, TRUE);
+      if(!empty($contactID)) {
+        foreach ($contact as $parms => $value){
+          if(!empty($mcGroups)){
+            foreach ($mcGroups['values'] as $mcGroupDetails) {
+              //check whether a contact belongs to more than one group under one grouping
+              if(strpos($value, ',') !== FALSE) {
+                $valuearray = explode(',', $value);
+                foreach($valuearray as $val){
+                  if (in_array(trim($val), $mcGroupDetails)) {
+                    $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
+                    if(!empty($civiGroupID)) {
+                      $groupContact[$civiGroupID][]   = $contactID;
+                    } else {
+                      $groupContact[$defaultgroup][]  = $contactID;
+                    }
                   }
                 }
+                continue;
               }
-              continue;
-            }
-            //check contact's single group 
-            if (in_array($value, $mcGroupDetails)) {
-              $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
-              if(!empty($contactID) && !empty($civiGroupID)) {
-                $groupContact[$civiGroupID][]   = $contactID;
-              } else {
-                $groupContact[$defaultgroup][]  = $contactID;
+              //check contact's single group 
+              if (in_array($value, $mcGroupDetails)) {
+                $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
+                if(!empty($civiGroupID)) {
+                  $groupContact[$civiGroupID][]   = $contactID;
+                } else {
+                  $groupContact[$defaultgroup][]  = $contactID;
+                }
               }
             }
+          } else {
+            // if a list doesn't have groups,assign the contact to default group
+            $groupContact[$defaultgroup][]  = $contactID;
           }
-        } else {
-          // if a list doesn't have groups,assign the contact to default group
-          $groupContact[$defaultgroup][]  = $contactID;
         }
       }
     }

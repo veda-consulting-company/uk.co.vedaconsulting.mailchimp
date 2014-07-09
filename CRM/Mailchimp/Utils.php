@@ -148,7 +148,7 @@ class CRM_Mailchimp_Utils {
   /*
    * Create/Update contact details in CiviCRM, based on the data from Mailchimp webhook
    */
-  static function updateContactDetails($params, $delay = FALSE) {
+  static function updateContactDetails($params, $delay = FALSE, $pull = FALSE) {
     if (empty($params)) {
       return NULL;
     }
@@ -173,7 +173,22 @@ class CRM_Mailchimp_Utils {
     if (!empty($email->contact_id)) {
       $contactParams['id'] = $email->contact_id;
     }
-    
+    if($pull) {
+      $contactids = array();
+      $query = "SELECT `contact_id` FROM `civicrm_email` WHERE `email` = '{$params['EMAIL']}'";
+      $dao   = CRM_Core_DAO::executeQuery($query);     
+      while ($dao->fetch()) {
+        $contactids[] = $dao->contact_id;      
+      }
+      if(count($contactids) > 1) {
+         CRM_Core_Error::debug_log_message( 'Mailchimp_Pull: Multiple contacts found for the email address '. print_r($params['EMAIL'], true), $out = false );
+         return NULL;
+      }
+      if(count($contactids) == 1) {
+        $contactResult = civicrm_api('Contact' , 'create' , array('version' => 3,'contact_type' => 'Individual','id' => $contactids[0]));
+        return $contactResult['id'];
+      }
+    }
     // Create/Update Contact details
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);
     
