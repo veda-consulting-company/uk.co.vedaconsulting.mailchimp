@@ -12,7 +12,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     $buttons = array(
       array(
         'type' => 'submit',
-        'name' => ts('Pull'),
+        'name' => ts('Import'),
       ),
     );
     // Add the Buttons.
@@ -20,12 +20,17 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   }
   
   public function postProcess() {
+    $setting_url = CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE);
+    $defaultgroup = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'default_group');
+    if(empty($defaultgroup)) {
+      CRM_Core_Session::setStatus(ts('Nothing to pull. Make sure default group is configured in the <a href='.$setting_url.'>setting page</a>.'));
+      return FALSE;
+    }
     $runner = self::getRunner();
     if ($runner) {
       // Run Everything in the Queue via the Web.
       $runner->runAllViaWeb();
     } else {
-      $setting_url = CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE);
       CRM_Core_Session::setStatus(ts('Nothing to pull. Make sure mailchimp settings are configured in the <a href='.$setting_url.'>setting page</a>.'));
     }
   }
@@ -38,18 +43,14 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       'reset' => TRUE,
     ));    
      
-    $lists            = array();
-    $listmembercount  = array();
-    $listname         = array();
-    $listmembercount  = civicrm_api('Mailchimp' , 'getmembercount' , array('version' => 3));
-    $lists            = civicrm_api('Mailchimp' , 'getlists' , array('version' => 3));
+    $lists  = array();
+    $lists  = civicrm_api('Mailchimp' , 'getlists' , array('version' => 3));
 
     foreach ($lists['values'] as $listid => $listname) {
-      $count = $listmembercount['values'][$listid];
       $task = new CRM_Queue_Task(
-        array('CRM_Mailchimp_Form_Pull', 'pullLists'),
+        array('CRM_Mailchimp_Form_Pull', 'syncLists'),
         array($listid),
-        "Pulling '{$listname}' - Contacts of {$count}"
+        "Preparing queue for '{$listname}'"
       );
         
       // Add the Task to the Queu
@@ -59,7 +60,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     if (!empty($lists['values'])) {
       // Setup the Runner
       $runner = new CRM_Queue_Runner(array(
-        'title' => ts('Mailchimp Pull'),
+        'title' => ts('Import From Mailchimp'),
         'queue' => $queue,
         'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
         'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
@@ -69,12 +70,43 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     return FALSE;
   }
   
-  static function pullLists(CRM_Queue_TaskContext $ctx, $listid) {
+  static function syncLists(CRM_Queue_TaskContext $ctx, $listid) {
+    
+    $lists            = array();
+    $listmembercount  = array();
+    $listmembercount  = civicrm_api('Mailchimp' , 'getmembercount' , array('version' => 3));
+    $lists            = civicrm_api('Mailchimp' , 'getlists' , array('version' => 3));
+    // get member count
+    $count  = $listmembercount['values'][$listid];
+
+    // Set the Number of Rounds
+    $rounds = ceil($count/self::BATCH_COUNT);
+
+    // Setup a Task in the Queue
+    $i = 0;
+    while ($i < $rounds) {
+      $start   = $i * self::BATCH_COUNT;
+      $counter = ($rounds > 1) ? ($start + self::BATCH_COUNT) : $count;
+      $task    = new CRM_Queue_Task(
+        array('CRM_Mailchimp_Form_Pull', 'pullLists'),
+        array($listid, $start),
+        "Pulling '{$lists['values'][$listid]}' - Contacts {$counter} of {$count}"
+      );
+
+      // Add the Task to the Queu
+      $ctx->queue->createItem($task);
+      $i++;
+    }
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+  
+  static function pullLists(CRM_Queue_TaskContext $ctx, $listid, $start) {
     
     $apikey         = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
+    $defaultgroup   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'default_group');
     $contactColumns = array();
     $contacts       = array();
-    $columnNames    = array();
+    $groupContact   = array();
     $dc             = 'us'.substr($apikey, -1);
     $url            = 'http://'.$dc.'.api.mailchimp.com/export/1.0/list?apikey='.$apikey.'&id='.$listid;
     $json           = file_get_contents($url);
@@ -84,12 +116,12 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         $contactColumns = json_decode($value,TRUE);
         continue;
       }
-      $data       = json_decode($value,TRUE);
-      $contacts[$listid][] =  array_combine($contactColumns, $data);
+      $data = json_decode($value,TRUE);
+      $contacts[$listid][] = array_combine($contactColumns, $data);
     }
-    $groupContact = array();
-    $mcGroups = civicrm_api('Mailchimp' , 'getgroupid' , array('version' => 3,'id'=>$listid));
-    foreach($contacts[$listid] as $key => $contact){
+    $contactsarray  = array_slice($contacts[$listid], $start, self::BATCH_COUNT, TRUE);
+    $mcGroups       = civicrm_api('Mailchimp' , 'getgroupid' , array('version' => 3,'id'=>$listid));
+    foreach($contactsarray as $key => $contact){
       $updateParams = array(
         'EMAIL' =>  $contact['Email Address'],
         'FNAME' =>  $contact['First Name'],
@@ -98,11 +130,30 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams);
       foreach ($contact as $parms => $value){
         if(!empty($mcGroups)){
-          foreach ($mcGroups['values'] as $mcGroupDetails){
+          foreach ($mcGroups['values'] as $mcGroupDetails) {
+            //check whether a contact belongs to more than one group under one grouping
+            if(strpos($value, ',') !== FALSE) {
+              $valuearray = explode(',', $value);
+              foreach($valuearray as $val){
+                if (in_array(trim($val), $mcGroupDetails)) {
+                  $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
+                  if(!empty($contactID) && !empty($civiGroupID)) {
+                    $groupContact[$civiGroupID][]   = $contactID;
+                  } else {
+                    $groupContact[$defaultgroup][]  = $contactID;
+                  }
+                }
+              }
+              continue;
+            }
+            //check contact's single group 
             if (in_array($value, $mcGroupDetails)) {
               $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
-              if(!empty($contactID) && !empty($civiGroupID))
-              $groupContact[$civiGroupID][] = $contactID;
+              if(!empty($contactID) && !empty($civiGroupID)) {
+                $groupContact[$civiGroupID][]   = $contactID;
+              } else {
+                $groupContact[$defaultgroup][]  = $contactID;
+              }
             }
           }
         }
