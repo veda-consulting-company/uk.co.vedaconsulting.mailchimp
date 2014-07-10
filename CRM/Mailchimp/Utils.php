@@ -166,14 +166,19 @@ class CRM_Mailchimp_Utils {
       //To avoid a new duplicate contact to be created as both profile and upemail events are happening at the same time
       sleep(20);
     }
-    $email = new CRM_Core_BAO_Email();
-		$email->get('email', $params['EMAIL']);
-    
-    // If the Email was found.
-    if (!empty($email->contact_id)) {
-      $contactParams['id'] = $email->contact_id;
+    $contactids = array();
+    $query = "SELECT `contact_id` FROM `civicrm_email` WHERE `email` = %1";
+    $dao   = CRM_Core_DAO::executeQuery($query, array( '1' => array("{$params['EMAIL']}", 'String')));     
+    while ($dao->fetch()) {
+      $contactids[] = $dao->contact_id;      
     }
-    
+    if(count($contactids) > 1) {
+       CRM_Core_Error::debug_log_message( 'Mailchimp Pull/Webhook: Multiple contacts found for the email address '. print_r($params['EMAIL'], true), $out = false );
+       return NULL;
+    }
+    if(count($contactids) == 1) {
+      $contactParams['id'] = $contactids[0];
+    }
     // Create/Update Contact details
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);
     
