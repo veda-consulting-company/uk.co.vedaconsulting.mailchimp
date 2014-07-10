@@ -120,20 +120,19 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       $contacts[$listid][] = array_combine($contactColumns, $data);
     }
     $contactsarray  = array_slice($contacts[$listid], $start, self::BATCH_COUNT, TRUE);
-    $mcGroups       = civicrm_api('Mailchimp' , 'getgroupid' , array('version' => 3,'id'=>$listid));
+    $mcGroups       = civicrm_api('Mailchimp' , 'getgroupid' , array('version' => 3,'id' => $listid));
     foreach($contactsarray as $key => $contact){
       $updateParams = array(
         'EMAIL' =>  $contact['Email Address'],
         'FNAME' =>  $contact['First Name'],
         'LNAME' =>  $contact['Last Name'],
       );
-      $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams, FALSE, TRUE);
+      $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams);
       if(!empty($contactID)) {
         foreach ($contact as $parms => $value){
           if(!empty($mcGroups)){
             foreach ($mcGroups['values'] as $mcGroupDetails) {
               //check whether a contact belongs to more than one group under one grouping
-              if(strpos($value, ',') !== FALSE) {
                 $valuearray = explode(',', $value);
                 foreach($valuearray as $val){
                   if (in_array(trim($val), $mcGroupDetails)) {
@@ -145,17 +144,6 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
                     }
                   }
                 }
-                continue;
-              }
-              //check contact's single group 
-              if (in_array($value, $mcGroupDetails)) {
-                $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
-                if(!empty($civiGroupID)) {
-                  $groupContact[$civiGroupID][]   = $contactID;
-                } else {
-                  $groupContact[$defaultgroup][]  = $contactID;
-                }
-              }
             }
           } else {
             // if a list doesn't have groups,assign the contact to default group
