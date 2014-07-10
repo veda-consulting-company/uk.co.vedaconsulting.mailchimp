@@ -167,13 +167,13 @@ class CRM_Mailchimp_Utils {
       sleep(20);
     }
     $contactids = array();
-    $query = "SELECT `contact_id` FROM `civicrm_email` WHERE `email` = '{$params['EMAIL']}'";
-    $dao   = CRM_Core_DAO::executeQuery($query);     
+    $query = "SELECT `contact_id` FROM `civicrm_email` WHERE `email` = %1";
+    $dao   = CRM_Core_DAO::executeQuery($query, array( '1' => array("{$params['EMAIL']}", 'String')));     
     while ($dao->fetch()) {
       $contactids[] = $dao->contact_id;      
     }
     if(count($contactids) > 1) {
-       CRM_Core_Error::debug_log_message( 'Mailchimp_Pull: Multiple contacts found for the email address '. print_r($params['EMAIL'], true), $out = false );
+       CRM_Core_Error::debug_log_message( 'Mailchimp Pull/Webhook: Multiple contacts found for the email address '. print_r($params['EMAIL'], true), $out = false );
        return NULL;
     }
     if(count($contactids) == 1) {
