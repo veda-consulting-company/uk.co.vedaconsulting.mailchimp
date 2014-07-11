@@ -192,30 +192,33 @@ class CRM_Mailchimp_Utils {
     if (empty($listID) || empty($mcGroupings)) {
       return NULL;
     }
-    
+    $defaultgroup = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'default_group', NULL, FALSE );
     $civiGroups = array();
     foreach ($mcGroupings as $key => $mcGrouping) {
-      $mcGroups = @explode(',', $mcGrouping['groups']);
-      foreach ($mcGroups as $mcGroupKey => $mcGroupName) {
-        // Get Mailchimp group ID from group name. Only group name is passed in by Webhooks
-        $mcGroupID = self::getMailchimpGroupIdFromName($listID, trim($mcGroupName));
-        // Mailchimp group ID is unavailable
-        if (empty($mcGroupID)) {
-          break;
+      if(!empty($mcGrouping['groups'])) {
+        $mcGroups = @explode(',', $mcGrouping['groups']);
+        foreach ($mcGroups as $mcGroupKey => $mcGroupName) {
+          // Get Mailchimp group ID from group name. Only group name is passed in by Webhooks
+          $mcGroupID = self::getMailchimpGroupIdFromName($listID, trim($mcGroupName));
+          // Mailchimp group ID is unavailable
+          if (empty($mcGroupID)) {
+            break;
+          }
+
+          // Find the CiviCRM group mapped with the Mailchimp List and Group
+          $civiGroupID = self::getGroupIdForMailchimp($listID, $mcGrouping['id'] , $mcGroupID);
+          if (!empty($civiGroupID)) {
+            $civiGroups[] = $civiGroupID;
+          }
+          else{
+            $civiGroups[] = $defaultgroup;
+          }
         }
-        
-        // Find the CiviCRM group mapped with the Mailchimp List and Group
-        $civiGroupID = self::getGroupIdForMailchimp($listID, $mcGrouping['id'] , $mcGroupID);
-        if (!empty($civiGroupID)) {
-          $civiGroups[] = $civiGroupID;
-        }
-        else{
-          $civiGroups[] = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-            'default_group', NULL, FALSE
-          );
-        }
-      }
-    }   
+      } else {
+          $civiGroups[] = $defaultgroup;
+      } 
+    } 
+    
     return $civiGroups;
   } 
   
