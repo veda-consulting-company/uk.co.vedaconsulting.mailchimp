@@ -102,6 +102,7 @@ function civicrm_api3_mailchimp_getgroupid($params) {
     foreach($result['groups'] as $group) {
         $groups[] = array(
           'groupingid'  => $result['id'],
+          'groupingname'  => $result['name'],
           'groupname' =>  $group['name'],
           'groupid' =>  $group['id'],
         );

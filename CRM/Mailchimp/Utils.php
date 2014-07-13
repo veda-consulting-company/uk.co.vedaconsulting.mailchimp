@@ -167,7 +167,10 @@ class CRM_Mailchimp_Utils {
       sleep(20);
     }
     $contactids = array();
-    $query = "SELECT `contact_id` FROM `civicrm_email` WHERE `email` = %1";
+    $query = "
+      SELECT `contact_id` FROM civicrm_email ce
+      INNER JOIN civicrm_contact cc ON ce.`contact_id` = cc.id
+      WHERE ce.email = %1 AND ce.is_primary = 1 AND cc.is_deleted = 0 ";
     $dao   = CRM_Core_DAO::executeQuery($query, array( '1' => array("{$params['EMAIL']}", 'String')));     
     while ($dao->fetch()) {
       $contactids[] = $dao->contact_id;      
@@ -178,6 +181,21 @@ class CRM_Mailchimp_Utils {
     }
     if(count($contactids) == 1) {
       $contactParams['id'] = $contactids[0];
+      unset($contactParams['contact_type']);
+      // Don't update firstname/lastname if it was empty
+      if(empty($params['FNAME']))
+        unset($contactParams['first_name']);
+      if(empty($params['LNAME']))
+        unset ($contactParams['last_name']);
+      $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+      CRM_Core_BAO_Setting::setItem(array('Updated' => (1 + $setting['Updated']), 'Added' => $setting['Added']),
+        CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+    }
+    if(empty($contactids)) {
+      $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+      CRM_Core_BAO_Setting::setItem(array('Added' => (1 + $setting['Added']), 'Updated' => $setting['Updated']),
+        CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats'
+      );
     }
     // Create/Update Contact details
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);
