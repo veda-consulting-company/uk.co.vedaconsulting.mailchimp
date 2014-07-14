@@ -148,11 +148,11 @@ class CRM_Mailchimp_Utils {
   /*
    * Create/Update contact details in CiviCRM, based on the data from Mailchimp webhook
    */
-  static function updateContactDetails($params, $delay = FALSE) {
+  static function updateContactDetails(&$params, $delay = FALSE) {
     if (empty($params)) {
       return NULL;
     }
-
+    $params['status'] = array('Added' => 0, 'Updated' => 0);
     $contactParams = 
         array(
           'version'       => 3,
@@ -181,21 +181,16 @@ class CRM_Mailchimp_Utils {
     }
     if(count($contactids) == 1) {
       $contactParams['id'] = $contactids[0];
+      $params['status']['Updated']  = 1;
       unset($contactParams['contact_type']);
       // Don't update firstname/lastname if it was empty
       if(empty($params['FNAME']))
         unset($contactParams['first_name']);
       if(empty($params['LNAME']))
         unset ($contactParams['last_name']);
-      $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
-      CRM_Core_BAO_Setting::setItem(array('Updated' => (1 + $setting['Updated']), 'Added' => $setting['Added']),
-        CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
     }
     if(empty($contactids)) {
-      $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
-      CRM_Core_BAO_Setting::setItem(array('Added' => (1 + $setting['Added']), 'Updated' => $setting['Updated']),
-        CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats'
-      );
+      $params['status']['Added']  = 1;
     }
     // Create/Update Contact details
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);

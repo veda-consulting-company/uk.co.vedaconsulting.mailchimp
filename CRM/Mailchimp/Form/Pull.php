@@ -79,7 +79,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
         'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
       ));
-      $query = "UPDATE civicrm_setting SET value = 0 WHERE name = 'pull_stats'"; 
+      $query = "UPDATE civicrm_setting SET value = NULL WHERE name = 'pull_stats'"; 
       CRM_Core_DAO::executeQuery($query);
       return $runner;
     }
@@ -148,6 +148,20 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         'LNAME' =>  $contact['Last Name'],
       );
       $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams);
+      if(!empty($updateParams)) {
+        if($updateParams['status']['Added'] == 1) {
+          $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+          CRM_Core_BAO_Setting::setItem(array('Added' => (1 + $setting['Added']), 'Updated' => $setting['Updated']),
+            CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats'
+          );
+        }
+        if($updateParams['status']['Updated'] == 1) {
+          $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+          CRM_Core_BAO_Setting::setItem(array('Updated' => (1 + $setting['Updated']), 'Added' => $setting['Added']),
+           CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+        }
+      }
+      
       if(!empty($contactID)) {
           if(!empty($mcGroups)){
             foreach ($contact as $parms => $value){
