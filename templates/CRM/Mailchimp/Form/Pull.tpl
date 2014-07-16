@@ -4,9 +4,9 @@
     <div class="help">
       {ts}Import completed with result counts as:{/ts}<br/> 
       <table class="form-layout-compressed bold">
-      <tr><td>{ts}Added{/ts}:</td><td>{$stats.Added}</td></tr>
-      <tr><td>{ts}Updated{/ts}:</td><td>{$stats.Updated}</td></tr>
-      <tr><td>{ts}Ignored{/ts}:</td><td>{$stats.Ignored}</td></tr>
+      <tr><td>{ts}Contacts Added{/ts}:</td><td>{$stats.Added}</td></tr>
+      <tr><td>{ts}Contacts Updated{/ts}:</td><td>{$stats.Updated}</td></tr>
+      <tr><td>{ts}Contacts Ignored{/ts}:</td><td>{$stats.Ignored}&nbsp; (Multiple Contacts Matches)</td></tr>
       <tr colspan=2><td>{ts}Total{/ts}:</td><td>{$stats.Total}</td></tr>
       </table>
     </div>

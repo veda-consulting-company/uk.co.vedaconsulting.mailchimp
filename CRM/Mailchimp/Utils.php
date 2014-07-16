@@ -161,43 +161,82 @@ class CRM_Mailchimp_Utils {
           'last_name'     => $params['LNAME'],
           'email'         => $params['EMAIL'],
         );
-    
+     
     if($delay){
       //To avoid a new duplicate contact to be created as both profile and upemail events are happening at the same time
       sleep(20);
     }
-    $contactids = array();
-    $query = "
-      SELECT `contact_id` FROM civicrm_email ce
-      INNER JOIN civicrm_contact cc ON ce.`contact_id` = cc.id
-      WHERE ce.email = %1 AND ce.is_primary = 1 AND cc.is_deleted = 0 ";
-    $dao   = CRM_Core_DAO::executeQuery($query, array( '1' => array("{$params['EMAIL']}", 'String')));     
-    while ($dao->fetch()) {
-      $contactids[] = $dao->contact_id;      
-    }
+    $contactids = CRM_Mailchimp_Utils::getContactFromEmail($params['EMAIL']);
+    
     if(count($contactids) > 1) {
        CRM_Core_Error::debug_log_message( 'Mailchimp Pull/Webhook: Multiple contacts found for the email address '. print_r($params['EMAIL'], true), $out = false );
        return NULL;
     }
     if(count($contactids) == 1) {
-      $contactParams['id'] = $contactids[0];
+      $contactParams  = CRM_Mailchimp_Utils::updateParamsExactMatch($contactids, $params);
       $params['status']['Updated']  = 1;
-      unset($contactParams['contact_type']);
-      // Don't update firstname/lastname if it was empty
-      if(empty($params['FNAME']))
-        unset($contactParams['first_name']);
-      if(empty($params['LNAME']))
-        unset ($contactParams['last_name']);
     }
     if(empty($contactids)) {
-      $params['status']['Added']  = 1;
+      //check for contacts with no primary email address
+      $id  = CRM_Mailchimp_Utils::getContactFromEmail($params['EMAIL'], FALSE);
+
+      if(count($id) > 1) {
+        CRM_Core_Error::debug_log_message( 'Mailchimp Pull/Webhook: Multiple contacts found for the email address which is not primary '. print_r($params['EMAIL'], true), $out = false );
+        return NULL;
+      }
+      if(count($id) == 1) {
+        $contactParams  = CRM_Mailchimp_Utils::updateParamsExactMatch($id, $params);
+        $params['status']['Updated']  = 1;
+      }
+      // Else create new contact
+      if(empty($id)) {
+        $params['status']['Added']  = 1;
+      }
+      
     }
     // Create/Update Contact details
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);
-    
+
     return $contactResult['id'];
   }
   
+  static function getContactFromEmail($email, $primary = TRUE) {
+    $primaryEmail  = 1;
+    if(!$primary) {
+     $primaryEmail = 0;
+    }
+    $contactids = array();
+    $query = "
+      SELECT `contact_id` FROM civicrm_email ce
+      INNER JOIN civicrm_contact cc ON ce.`contact_id` = cc.id
+      WHERE ce.email = %1 AND ce.is_primary = {$primaryEmail} AND cc.is_deleted = 0 ";
+    $dao   = CRM_Core_DAO::executeQuery($query, array( '1' => array($email, 'String'))); 
+    while($dao->fetch()) {
+      $contactids[] = $dao->contact_id;
+    }
+    return $contactids;
+  }
+  
+  static function updateParamsExactMatch($contactids = array(), $params) {
+    $contactParams = 
+        array(
+          'version'       => 3,
+          'contact_type'  => 'Individual',
+          'first_name'    => $params['FNAME'],
+          'last_name'     => $params['LNAME'],
+          'email'         => $params['EMAIL'],
+        );
+    if(count($contactids) == 1) {
+        $contactParams['id'] = $contactids[0];
+        unset($contactParams['contact_type']);
+        // Don't update firstname/lastname if it was empty
+        if(empty($params['FNAME']))
+          unset($contactParams['first_name']);
+        if(empty($params['LNAME']))
+          unset ($contactParams['last_name']);
+      }
+    return $contactParams;  
+  }
   /*
    * Function to get the associated CiviCRM Groups IDs for the Grouping array sent from Mialchimp Webhook
    */
