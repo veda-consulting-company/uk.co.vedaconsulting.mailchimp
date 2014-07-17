@@ -8,8 +8,8 @@
     <author>Deepak Srivastava, Rajesh Sundararajan, Kajan and Parvez Saleh</author>
     <email>support@vedaconsulting.co.uk</email>
   </maintainer>
-  <releaseDate>2014-06-17</releaseDate>
-  <version>1.0</version>
+  <releaseDate>2014-07-17</releaseDate>
+  <version>1.1</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
