@@ -188,8 +188,13 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
               }
             }
           }else {
-            // if a list doesn't have groups,assign the contact to default group
-            $groupContact[$defaultgroup][]  = $contactID;
+            // if a list doesn't have groups,assign the contact to a group if mapping present in civi otherwise to default group
+            $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, FALSE, FALSE);
+            if(!empty($civiGroupID)) {
+              $groupContact[$civiGroupID][]   = $contactID;
+            } else {
+              $groupContact[$defaultgroup][]  = $contactID;
+            }
           }
         }
       }

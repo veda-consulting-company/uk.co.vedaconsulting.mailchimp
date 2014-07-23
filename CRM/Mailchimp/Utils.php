@@ -125,14 +125,20 @@ class CRM_Mailchimp_Utils {
   }
   
   static function getGroupIdForMailchimp($listID, $groupingID, $groupID) {
-    if (empty($listID) || empty($groupingID) || empty($groupID)) {
+    if (empty($listID)) {
       return NULL;
+    }
+    
+    if (!empty($groupingID) && !empty($groupID)) {
+      $whereClause = "mc_list_id = %1 AND mc_grouping_id = %2 AND mc_group_id = %3";
+    } else {
+      $whereClause = "mc_list_id = %1";
     }
 
     $query  = "
       SELECT  entity_id
       FROM    civicrm_value_mailchimp_settings mcs
-      WHERE   mc_list_id = %1 AND mc_grouping_id = %2 AND mc_group_id = %3";
+      WHERE   $whereClause";
     $params = 
         array(
           '1' => array($listID , 'String'),
