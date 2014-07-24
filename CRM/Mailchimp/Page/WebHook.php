@@ -99,6 +99,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
     // Return the JSON output
     header('Content-type: application/json');
+    $data = NULL;// We should ideally throw some status
     print json_encode($data);
     CRM_Utils_System::civiExit();
   } 
