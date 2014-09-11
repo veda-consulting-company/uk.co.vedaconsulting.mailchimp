@@ -152,8 +152,16 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     }
 
     // Create an index of [mcGroupingName][mcGroupName] = civiGroupId.
+    $problems = array();
     foreach ($mcGroups['values'] as $_) {
-      $mcGrouping[$_['groupingname']][$_['groupname']] = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $_['groupingid'] , $_['groupid']);
+      $civiGroupId = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $_['groupingid'] , $_['groupid']);
+      $mcGroupings[$_['groupingname']][$_['groupname']] = $civiGroupId;
+      if (!$civiGroupId) {
+        $problems[] = "$_[groupingname]:$_[groupname] does not have a mapped group in CiviCRM.";
+      }
+    }
+    if ($problems) {
+      CRM_Core_Session::setStatus(implode("<br />\n",$problems), ts("Mailchimp/CiviCRM groups mismatch"));
     }
 
     // Loop the contacts from Mailchimp.

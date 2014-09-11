@@ -10,6 +10,18 @@ class CRM_Mailchimp_Utils {
     return $mcClient;
   }
 
+  /**
+   * Look up an array of CiviCRM groups linkes to Maichimp groupings.
+   *
+   * Indexed by CiviCRM groupId, including:
+   *
+   * - list_id    (MC)
+   * - grouping_id(MC)
+   * - group_id   (MC)
+   * - group_name (MC)
+   * - civigroup_title
+   *
+   */
   static function getGroupsToSync($ids = array()) {
     $groups = array();
 
@@ -22,7 +34,7 @@ class CRM_Mailchimp_Utils {
 
     $query  = "
       SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, cg.title as civigroup_title
-      FROM    civicrm_value_mailchimp_settings mcs
+ FROM    civicrm_value_mailchimp_settings mcs
       INNER JOIN civicrm_group cg ON mcs.entity_id = cg.id
       WHERE   $whereClause";
     $dao = CRM_Core_DAO::executeQuery($query);
@@ -370,6 +382,8 @@ class CRM_Mailchimp_Utils {
   
    /*
    * Function to call syncontacts with smart groups and static groups
+   *
+   * Returns object that can iterate over a slice of the live contacts in given group.
    */
   static function getGroupContactObject($groupID, $start) {
     $group           = new CRM_Contact_DAO_Group();

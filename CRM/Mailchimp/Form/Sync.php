@@ -138,16 +138,20 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $groupings        = array();
       
       if(!empty($mcGroups)) {
+        // Loop contacts in this group, gathering those with an available email
+        // to subscribe them to the MC List and group.
+        // Any who have an email, but have a opt-out/do-not-mail/on-hold flag set
+        // are gathered for deletion from MC.
         $groupContact = CRM_Mailchimp_Utils::getGroupContactObject($groupID, $start);
 
         while ($groupContact->fetch()) {
-          $contact = new CRM_Contact_BAO_Contact();          
-          $contact->id = $groupContact->contact_id;  
-          $contact->is_deleted != 1;
-          $contact->find(TRUE); 
+          $contact = new CRM_Contact_BAO_Contact();
+          $contact->id = $groupContact->contact_id;
+          $contact->is_deleted = 0;
+          $contact->find(TRUE);
 
           $email = new CRM_Core_BAO_Email();
-          $email->contact_id = $groupContact->contact_id;         
+          $email->contact_id = $groupContact->contact_id;
           $email->is_primary = TRUE;
           $email->find(TRUE);
 
@@ -156,8 +160,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           $groupID     = $mcGroups[$groupContact->group_id]['group_id'];
           $groupingID  = $mcGroups[$groupContact->group_id]['grouping_id'];
           if ($groupingID && $groupName) {
-            $groupings = 
-              array(
+            $groupings = array(
                 array(
                   'id'     => $groupingID,
                   'groups' => array($groupName)
@@ -165,8 +168,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
               );
           }
 
-          if ($email->email && 
-            ($contact->is_opt_out   == 0 && 
+          if ($email->email &&
+            ($contact->is_opt_out   == 0 &&
             $contact->do_not_email  == 0 &&
             $contact->is_deleted    == 0 &&
             $email->on_hold         == 0)
@@ -174,26 +177,26 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             $toSubscribe[$listID]['batch'][] = array(
               'email'       => array('email' => $email->email),
               'merge_vars'  => array(
-                'fname'     => $contact->first_name, 
+                'fname'     => $contact->first_name,
                 'lname'     => $contact->last_name,
                 'groupings' => $groupings,
               ),
-            );        
-          } 
+            );
+          }
 
-          else if ($email->email && 
-            ($contact->is_opt_out   == 1 || 
-             $contact->do_not_email == 1 || 
+          elseif ($email->email &&
+            ($contact->is_opt_out   == 1 ||
+             $contact->do_not_email == 1 ||
              $email->on_hold        == 1)
-          ) {               
+          ) {
             $toDeleteEmailIDs[] = $email->id;
-            }
+          }
 
           if ($email->id) {
             $emailToIDs["{$email->email}"]['id'] = $email->id;
             $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
-          }        
-        }  
+          }
+        }
         $toUnsubscribe  = CRM_Mailchimp_Utils::deleteMCEmail($toDeleteEmailIDs);
 
         foreach ($toSubscribe as $listID => $vals) {
