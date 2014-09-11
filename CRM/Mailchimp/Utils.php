@@ -336,6 +336,8 @@ class CRM_Mailchimp_Utils {
     
     if (!empty($emailId)) {      
       $emailIds = implode(',', $emailId);      
+      // @todo I think this code meant to include AND is_latest.
+      // Looks very inefficient otherwise?
       $query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC";
     }
     $dao = CRM_Core_DAO::executeQuery($query);       
