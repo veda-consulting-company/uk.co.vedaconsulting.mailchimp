@@ -204,6 +204,20 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
 }
 
 /**
+ * Implements hook_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors )
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_validateForm
+ *
+ */
+function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
+  if ($formName == 'CRM_Group_Form_Edit') {
+    // If a Mailchimp list is selected, a grouping must also be selected.
+    if (!empty($fields['mailchimp_list']) && !$fields['mailchimp_group']) {
+      $errors['mailchimp_group'] = ts('When mapping a CiviCRM group to a Mailchimp List you must also select a grouping. You might want to set up a "general" one for this.');
+    }
+  }
+}
+/**
  * Implementation of hook_civicrm_pageRun
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
@@ -234,30 +248,37 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     'version' => 3,
     'sequential' => 1,
     'contact_id' => $id,
-    'id' => $id,    
+    'id' => $id,
   );
-  $email  = NULL;
-  
+
   if($objectName == 'Email') {
     $email = new CRM_Core_BAO_Email();
     $email->id = $id;
-    $email->find(TRUE);    
+    $email->find(TRUE);
+
+    // If about to delete an email in CiviCRM, we must delete it from Mailchimp
+    // because we won't get chance to delete it once it's gone.
+    //
+    // The other case covered here is changing an email address's status
+    // from for-bulk-mail to not-for-bulk-mail.
+    // @todo Note: However, this will delete a subscriber and lose reporting
+    // info, where what they might have wanted was to change their email
+    // address.
+    if( ($op == 'delete') ||
+        ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0)
+    ) {
+      CRM_Mailchimp_Utils::deleteMCEmail(array($id));
+    }
   }
-  
-  if($objectName == 'Email' && 
-    ( ($op == 'delete') || 
-      ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0) )
-  ) {
-    CRM_Mailchimp_Utils::deleteMCEmail(array($id));
-  }
-  
-  if ($op == 'delete' && $objectName == 'Individual') {    
+
+  // If deleting an individual, delete their (bulk) email address from Mailchimp.
+  if ($op == 'delete' && $objectName == 'Individual') {
     $result = civicrm_api('Contact', 'get', $params1);
     foreach ($result['values'] as $key => $value) {
       $emailId  = $value['email_id'];
-      CRM_Mailchimp_Utils::deleteMCEmail(array($emailId)); 
-    }   
-  } 
+      CRM_Mailchimp_Utils::deleteMCEmail(array($emailId));
+    }
+  }
 }
 
 /**
@@ -265,31 +286,9 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
  */
-function mailchimp_civicrm_permission( &$permissions ) {  
+function mailchimp_civicrm_permission( &$permissions ) {
   $prefix = ts('Mailchimp') . ': '; // name of extension or module
   $permissions = array(
     'allow webhook posts' => $prefix . ts('allow webhook posts'),
-  );  
-}
-  
-function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
-  if ($op == 'delete' && $objectName == 'GroupContact') { 
-    $emailIds= array();
-    $contactIds = array();
-    $contactIds = $objectRef;
-    if (empty($contactIds)) {
-      return NULL;
-    }
-    if (!empty($contactIds)) {      
-      $contactIDs = implode(',', $contactIds); 
-      $query = "
-        SELECT ce.id FROM `civicrm_email` ce
-        WHERE ce.contact_id IN ($contactIDs) AND ce.id is not null";
-      $dao = CRM_Core_DAO::executeQuery($query); 
-      while ($dao->fetch()) {
-        $emailIds[] = $dao->id;
-      }
-    }
-    CRM_Mailchimp_Utils::deleteMCEmail($emailIds); 
-  }
+  );
 }

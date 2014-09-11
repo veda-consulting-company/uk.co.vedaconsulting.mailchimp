@@ -35,11 +35,6 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   
   public function postProcess() {
     $setting_url = CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE);
-    $defaultgroup = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'default_group');
-    if(empty($defaultgroup)) {
-      CRM_Core_Session::setStatus(ts('Nothing to pull. Make sure default group is configured in the <a href='.$setting_url.'>setting page</a>.'));
-      return FALSE;
-    }
     $runner = self::getRunner();
     if ($runner) {
       // Run Everything in the Queue via the Web.
@@ -134,20 +129,49 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     }
     return CRM_Queue_Task::TASK_SUCCESS;
   }
-  
+
+  /**
+   * Import name, email and groupings data from Mailchimp.
+   *
+   * All Mailchimp lists must have a grouping field set up;
+   * All groupings set up in Mailchimp should have a coresponding mapped group in CiviCRM.
+   *
+   * @todo this is an add-only operation; if someone is REMOVED from a group at MC end,
+   * this sync function will NOT remove them from the CiviCRM group.
+   */
   static function syncContacts(CRM_Queue_TaskContext $ctx, $listid, $contactsarray, $mcGroups) {
-    
+    file_put_contents('/tmp/sos-mc' .time() , print_r(array('listid' => $listid, 'contactsarray' => $contactsarray,'mcGroups'=>$mcGroups),1));
+
     $groupContact   = array();
-    $defaultgroup   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'default_group');
     $mcGroups       = array_shift($mcGroups);
     $contactsarray  = array_shift($contactsarray);
-    foreach($contactsarray as $key => $contact){
+
+    if(empty($mcGroups)) {
+      // Groupings are required.
+      return FALSE;
+    }
+
+    // Create an index of [mcGroupingName][mcGroupName] = civiGroupId.
+    foreach ($mcGroups['values'] as $_) {
+      $mcGrouping[$_['groupingname']][$_['groupname']] = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $_['groupingid'] , $_['groupid']);
+    }
+
+    // Loop the contacts from Mailchimp.
+    foreach($contactsarray as $key => $contact) {
+
+      // Update basic info in CiviCRM and get the CiviCRM ContactId.
       $updateParams = array(
         'EMAIL' =>  $contact['Email Address'],
         'FNAME' =>  $contact['First Name'],
         'LNAME' =>  $contact['Last Name'],
       );
       $contactID    = CRM_Mailchimp_Utils::updateContactDetails($updateParams);
+      if(empty($contactID)) {
+        // We were unable to create/update a contact in CiviCRM.
+        // (Should not happen, but just in case. If it were to happen, should
+        // include a status date as for added/updated.)
+        continue;
+      }
       if(!empty($updateParams)) {
         if($updateParams['status']['Added'] == 1) {
           $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
@@ -158,49 +182,36 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         if($updateParams['status']['Updated'] == 1) {
           $setting  = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
           CRM_Core_BAO_Setting::setItem(array('Updated' => (1 + $setting['Updated']), 'Added' => $setting['Added']),
-           CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+            CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
         }
       }
-      
-      if(!empty($contactID)) {
-          if(!empty($mcGroups)){
-            foreach ($contact as $parms => $value){
-              foreach ($mcGroups['values'] as $mcGroupDetails) {
-                //check whether a contact belongs to more than one group under one grouping
-                  $valuearray = explode(',', $value);
-                  if(empty($valuearray[0])) {
-                    if(in_array($parms, $mcGroupDetails )) {
-                      //Group Details are present but the contact is not assigned to any group in mailchimp
-                      $groupContact[$defaultgroup][]  = $contactID;
-                      break;
-                    }
-                  }
-                  foreach($valuearray as $val){
-                    if (in_array(trim($val), $mcGroupDetails)) {
-                      $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, $mcGroupDetails['groupingid'] , $mcGroupDetails['groupid']);
-                      if(!empty($civiGroupID)) {
-                        $groupContact[$civiGroupID][]   = $contactID;
-                      } else {
-                        $groupContact[$defaultgroup][]  = $contactID;
-                      }
-                    }
-                  }
-              }
-            }
-          }else {
-            // if a list doesn't have groups,assign the contact to a group if mapping present in civi otherwise to default group
-            $civiGroupID  = CRM_Mailchimp_Utils::getGroupIdForMailchimp($listid, FALSE, FALSE);
-            if(!empty($civiGroupID)) {
-              $groupContact[$civiGroupID][]   = $contactID;
-            } else {
-              $groupContact[$defaultgroup][]  = $contactID;
+
+      // Loop the defined MC groupings.
+      foreach ($mcGroupings as $mcGroupingName=>$mcGroupVals) {
+
+        // Does the MC contact have any groups in this grouping?
+        if (!empty($contact[$mcGroupingName])) {
+
+          // This contact has at least one value in this grouping.
+          // These come comma separated.
+          foreach (explode(',', $contact[$mcGroupingName]) as $groupName) {
+            $groupName = trim($groupName);
+
+            if (!empty($mcGroupVals[$groupName])) {
+              // We have a CiviCRM group mapped to this grouping:groupname
+              // Add this contact to the list of which contacts should be in which CiviCRM groups.
+              $groupContact[$mcGroupVals[$groupName]][]  = $contactID;
             }
           }
         }
       }
+    }
+
+    // Add all the contacts to the CiviCRM groups.
     foreach($groupContact as $groupID => $contactIDs ){
       CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIDs, $groupID, 'Admin', 'Added');
     }
+
     return CRM_Queue_Task::TASK_SUCCESS;
-  }  
+  }
 }

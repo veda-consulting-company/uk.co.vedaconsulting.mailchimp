@@ -244,13 +244,18 @@ class CRM_Mailchimp_Utils {
     return $contactParams;  
   }
   /*
-   * Function to get the associated CiviCRM Groups IDs for the Grouping array sent from Mialchimp Webhook
+   * Function to get the associated CiviCRM Groups IDs for the Grouping array
+   * sent from Mialchimp Webhook.
+   *
+   * Note: any groupings from Mailchimp that do not map to CiviCRM groups are
+   * silently ignored. Also, if a subscriber has no groupings, this function
+   * will not return any CiviCRM groups (because all groups must be mapped to
+   * both a list and a grouping).
    */
   static function getCiviGroupIdsforMcGroupings($listID, $mcGroupings) {
     if (empty($listID) || empty($mcGroupings)) {
-      return NULL;
+      return array();
     }
-    $defaultgroup = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'default_group', NULL, FALSE );
     $civiGroups = array();
     foreach ($mcGroupings as $key => $mcGrouping) {
       if(!empty($mcGrouping['groups'])) {
@@ -260,7 +265,8 @@ class CRM_Mailchimp_Utils {
           $mcGroupID = self::getMailchimpGroupIdFromName($listID, trim($mcGroupName));
           // Mailchimp group ID is unavailable
           if (empty($mcGroupID)) {
-            break;
+            // Try the next one.
+            continue;
           }
 
           // Find the CiviCRM group mapped with the Mailchimp List and Group
@@ -268,18 +274,12 @@ class CRM_Mailchimp_Utils {
           if (!empty($civiGroupID)) {
             $civiGroups[] = $civiGroupID;
           }
-          else{
-            $civiGroups[] = $defaultgroup;
-          }
         }
-      } else {
-          $civiGroups[] = $defaultgroup;
-      } 
-    } 
-    
+      }
+    }
     return $civiGroups;
-  } 
-  
+  }
+
   /*
    * Function to get CiviCRM Groups for the specific Mailchimp list in which the Contact is Added to
    */
