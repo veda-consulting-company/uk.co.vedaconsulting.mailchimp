@@ -63,36 +63,273 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       'name'  => self::QUEUE_NAME,
       'type'  => 'Sql',
       'reset' => TRUE,
-    ));     
-    
+    ));
+
+    // We need to process one list at a time.
     $groups = CRM_Mailchimp_Utils::getGroupsToSync();
+    if (!$groups) {
+      // Nothing to do.
+      return FALSE;
+    }
+    // Make an array mapping unique list_ids to arrays of groupIDs using that list
+    $lists = array();
     foreach ($groups as $groupID => $groupVals) {
+      $lists[$groupVals['list_id']][$groupID] = $groupVals;
+    }
+
+    // Each list is a task.
+    $listCount = 1;
+    foreach ($lists as $list_id => $groupIDs) {
+
+      $identifier = "List " . $listCount++ . " (id $list_id)";
+
       $task  = new CRM_Queue_Task(
-        array ('CRM_Mailchimp_Form_Sync', 'syncGroups'),
-        array($groupID),
-        "Preparing queue for '{$groupVals['civigroup_title']}'"
+        array ('CRM_Mailchimp_Form_Sync', 'syncPushList'),
+        array($list_id, $groups, $identifier),
+        "Preparing queue for $identifier"
       );
 
-      // Add the Task to the Queu
+      // Add the Task to the Queue
       $queue->createItem($task);
     }
 
-    if (!empty($groups)) {
-      // Setup the Runner
-      $runner = new CRM_Queue_Runner(array(
-        'title' => ts('Mailchimp Sync'),
-        'queue' => $queue,
-        'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
-        'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
-      ));
-      // reset sync table
-      CRM_Mailchimp_BAO_MCSync::resetTable();
+    // Setup the Runner
+    $runner = new CRM_Queue_Runner(array(
+      'title' => ts('Mailchimp Sync: CiviCRM to Mailchimp'),
+      'queue' => $queue,
+      'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
+      'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
+    ));
 
-      return $runner;
-    }
-    return FALSE;
+    // reset sync table
+    CRM_Mailchimp_BAO_MCSync::resetTable();
+
+    return $runner;
   }
 
+  /**
+   * Set up (sub)queue for syncing a Mailchimp List.
+   */
+  static function syncPushList(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+
+    // Split the work into parts:
+    // @todo 'force' method not implemented here.
+
+    // Add the Mailchimp collect data task to the queue
+    $ctx->queue->createItem( new CRM_Queue_Task(
+      array('CRM_Mailchimp_Form_Sync', 'syncPushCollectMailchimp'),
+      array($listID, $groups, $listDelta),
+      "$identifier: Fetching data from Mailchimp (can take a mo)"
+    ));
+
+    // Add the CiviCRM collect data task to the queue
+    $ctx->queue->createItem( new CRM_Queue_Task(
+      array('CRM_Mailchimp_Form_Sync', 'syncPushCollectCiviCRM'),
+      array($listID, $groups, $listDelta),
+      "$identifier: Fetching data from CiviCRM"
+    ));
+
+
+    // Add the removals task to the queue
+    $ctx->queue->createItem( new CRM_Queue_Task(
+      array('CRM_Mailchimp_Form_Sync', 'syncPushRemove'),
+      array($listID, $groups, $listDelta),
+      "$identifier: Removing those who should no longer be subscribed"
+    ));
+
+    // Add the removals task to the queue
+    $ctx->queue->createItem( new CRM_Queue_Task(
+      array('CRM_Mailchimp_Form_Sync', 'syncPushAdd'),
+      array($listID, $groups, $listDelta),
+      "$identifier: Adding new subscribers and updating existing data changes"
+    ));
+
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+
+  /**
+   * Collect Mailchimp data into temporary working table.
+   */
+  static function syncPushCollectMailchimp(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+    // Create a temporary table.
+    // Nb. these are temporary tables but we don't use TEMPORARY table because they are
+    // needed over multiple sessions because of queue.
+
+    $dao = CRM_Core_DAO::executeQuery(
+      "CREATE TABLE tmp_mailchimp_push_m (
+        email VARCHAR(200),
+        hash CHAR(32),
+        PRIMARY KEY (email, hash));");
+    // Cheekily access the database directly to obtain a prepared statement.
+    $db = $dao->getDatabaseConnection();
+    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m VALUES(?, ?)');
+
+    // we need to know the grouping and respective group names since these are identifiable in the export data.
+    $groupings = array();
+    foreach (CRM_Mailchimp_Utils::getMCInterestGroupings($listID) as $groupingID=>$grouping) {
+      // get names from groups
+      $groups = array();
+      foreach ($grouping['groups'] as $group) {
+        $groups[] = $group['name'];
+      }
+      $groupings[$grouping['name']] = $groups;
+    }
+
+    // Prepare to access Mailchimp export API
+    // Code structure from http://apidocs.mailchimp.com/export/1.0/list.func.php
+    // Example  (spacing added)
+    //  ["Email Address"  , "First Name" , "Last Name"  , "CiviCRM"          , "MEMBER_RATING" , "OPTIN_TIME" , "OPTIN_IP" , "CONFIRM_TIME"        , "CONFIRM_IP"  , "LATITUDE" , "LONGITUDE" , "GMTOFF" , "DSTOFF" , "TIMEZONE" , "CC" , "REGION" , "LAST_CHANGED"        , "LEID"      , "EUID"       , "NOTES"]
+    //  ["f2@example.com" , "Fred"       , "Flintstone" , "general, special" , 2               , ""           , null       , "2014-09-11 19:57:53" , "212.x.x.x"   , null       , null        , null     , null     , null       , null , null     , "2014-09-11 20:02:26" , "180020969" , "884d72639d" , null]
+    $apiKey   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
+    // The datacentre is usually appended to the apiKey after a hyphen.
+    $dataCentre = 'us1'; // default.
+    if (preg_match('/-(.+)$/', $apiKey, $matches)) {
+      $dataCentre = $matches[1];
+    }
+    $url = "https://$dataCentre.api.mailchimp.com/export/1.0/list?apikey=$apiKey&id=$listID";
+
+    $chunk_size = 4096; //in bytes
+    $handle = @fopen($url,'r');
+    if (!$handle) {
+      // @todo not sure a vanilla exception is best?
+      throw new \Exception("Failed to access Mailchimp export API");
+    }
+    else {
+      $i = 0;
+      $header = array();
+      while (!feof($handle)) {
+        $buffer = fgets($handle, $chunk_size);
+        if (trim($buffer)!=''){
+          $obj = json_decode($buffer);
+          if ($i==0){
+            // Header row.
+            // This will vary depending on how the list is setup.
+            // We need to know the indexes of our groupings.
+            $header = $obj;
+            foreach (array_keys($groupings) as $grouping_name) {
+              $grouping_index[$grouping_name] = array_search($grouping_name, $header);
+            }
+            // It's important that we do things in a predictable order or hashes won't match.
+            ksort($grouping_index);
+
+          } else {
+            // We need to store the email address and a hash of all the other data.
+            $email = $obj[0];
+            // email, first name, last name
+            $data_to_hash = "$email|$obj[1]|$obj[2]";
+            foreach ($grouping_index as $idx) {
+              // ensure values are in a known order, for comparison's sake.
+              $values = explode(', ', $obj[$idx]);
+              asort($values);
+              $data_to_hash .= "|" . implode(', ', $values);
+            }
+            $hash = md5($data_to_hash);
+            // run insert prepared statement
+            $db->execute($insert, array($email, $hash));
+          }
+          $i++;
+        }
+      }
+      fclose($handle);
+    }
+
+    // We don't need this any more.
+    $db->freePrepared($insert);
+
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+
+  /**
+   * Collect CiviCRM data into temporary working table.
+   */
+  static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+
+    // To create the table we need to know what grouping fields are in use by
+    // the CiviCRM's groups that use this List.
+    $fields = array();
+    $groupings = CRM_Mailchimp_Utils::getMCInterestGroupings($listID);
+    foreach ($groupings as $groupingId=>$grouping) {
+      $fields[] = "`$grouping[name]` VARCHAR(1024)";
+    }
+    $fields = implode(', ', $fields);
+
+    // Nb. these are temporary tables but we don't use TEMPORARY table because they are
+    // needed over multiple sessions because of queue.
+    //
+    // @todo: this assumes that a grouping name is OK as a column name. Is this safe?
+    // otherwise we can use 'grouping' . groupingId and have a map.
+    CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
+      email VARCHAR(200),
+      first_name VARCHAR(100),
+      last_name VARCHAR(100),
+      hash CHAR(32),
+      $fields
+    )");
+
+    // @todo Here we need to find all contacts in all groups (smart and fixed) that are mapped to this LIST.
+    // We need to add the data in taking care to order the grouping fields the right way
+    // when creating the hash so they match the Mailchimp hash if all the same.
+
+
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+
+  /**
+   * Remove contacts that are subscribed at Mailchimp but not in our list.
+   *
+   * This also removes from the temporary tables those records that do not need processing.
+   */
+  static function syncPushRemove(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+$x=1;
+    // Delete records have the same hash - these do not need an update.
+    CRM_Core_DAO::executeQuery(
+      "DELETE m, c
+       FROM tmp_mailchimp_push_m m
+       INNER JOIN tmp_mailchimp_push_c c ON m.email = c.email AND m.hash = c.hash;");
+
+    // Now identify those that need removing from Mailchimp.
+    // @todo implement the delete option, here just the unsubscribe is implemented.
+    $dao = CRM_Core_DAO::executeQuery(
+      "SELECT m.email
+       FROM tmp_mailchimp_push_m m
+       WHERE NOT EXISTS (
+         SELECT email FROM tmp_mailchimp_push_c c WHERE c.email = m.email
+       );");
+
+    // @todo loop the $dao object to make a list of emails to unsubscribe|delete from MC
+    //
+
+    // Finally we can delete the emails that we just processed from the mailchimp temp table.
+    CRM_Core_DAO::executeQuery(
+      "DELETE FROM tmp_mailchimp_push_m
+       WHERE NOT EXISTS (
+         SELECT email FROM tmp_mailchimp_push_c c WHERE c.email = tmp_mailchimp_push_m.email
+       );");
+
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+
+  /**
+   * Batch update Mailchimp with new contacts that need to be subscribed, or have changed data.
+   *
+   * This also does the clean-up tasks of removing the temporary tables.
+   */
+  static function syncPushAdd(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+
+    // @todo take the remaining details from tmp_mailchimp_push_c
+    // and construct a batchUpdate (do they need to be batched into 1000s? I can't recal).
+    //
+    // ...
+
+    // Finally, finish up by removing the two temporary tables
+    CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
+    CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
+
+    return CRM_Queue_Task::TASK_SUCCESS;
+  }
+
+
+  // the following code will not be used but I've not deleted it yet as it may have copy-and-paste-able stuff in!
   static function syncGroups(CRM_Queue_TaskContext $ctx, $groupID) {
     // get member count
     $count  = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync(array($groupID));

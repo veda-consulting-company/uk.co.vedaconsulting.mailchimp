@@ -85,8 +85,26 @@ class CRM_Mailchimp_Utils {
     return 0;
   }
 
+  /**
+   * return the group name for given list, grouping and group
+   *
+   */
   static function getMCGroupName($listID, $groupingID, $groupID) {
-    if (empty($listID) || empty($groupingID) || empty($groupID)) {
+    $info = static::getMCInterestGroupings($listID);
+
+    // Check list, grouping, and group exist
+    if (empty($info[$groupingID][$groupID])) {
+      return NULL;
+    }
+    return $info[$groupingID][$groupID]['name'];
+  }
+
+  /**
+   * Get interest groupings for given ListID (cached).
+   *
+   */
+  static function getMCInterestGroupings($listID) {
+    if (empty($listID)) {
       return NULL;
     }
 
@@ -97,20 +115,38 @@ class CRM_Mailchimp_Utils {
       $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
       try {
         $results = $mcLists->interestGroupings($listID);
-      } 
+      }
       catch (Exception $e) {
         return NULL;
       }
-
+      /*  re-map $result for quick access via grouping_id and groupId
+       *
+       *  Nb. keys for grouping:
+       *  - id
+       *  - name
+       *  - form_field    (not v interesting)
+       *  - display_order (not v interesting)
+       *  - groups: array as follows, keyed by GroupId
+       *
+       *  Keys for each group
+       *  - id
+       *  - bit ?
+       *  - name
+       *  - display_order
+       *  - subscribers ?
+       *
+       */
       foreach ($results as $grouping) {
+        $mapper[$listID][$grouping['id']] = $grouping;
+        unset($mapper[$listID][$grouping['id']]['groups']);
         foreach ($grouping['groups'] as $group) {
-          $mapper[$listID][$grouping['id']][$group['id']] = $group['name'];
+          $mapper[$listID][$grouping['id']]['groups'][$group['id']] = $group;
         }
       }
     }
-    return $mapper[$listID][$groupingID][$groupID];
+    return $mapper[$listID];
   }
-  
+
   /*
    * Get Mailchimp group ID group name
    */
