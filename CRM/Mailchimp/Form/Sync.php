@@ -158,11 +158,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
         email VARCHAR(200),
+        euid VARCHAR(10),
+        leid VARCHAR(10),
         hash CHAR(32),
         PRIMARY KEY (email, hash));");
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m VALUES(?, ?)');
+    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m VALUES(?, ?, ?, ?)');
 
     // we need to know the grouping and respective group names since these are identifiable in the export data.
     $groupings = array();
@@ -204,20 +206,22 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           if ($i==0){
             // Header row.
             // This will vary depending on how the list is setup.
-            // We need to know the indexes of our groupings.
+            // We need to know the indexes of our groupings, and LEID and EUID fields.
             $header = $obj;
             foreach (array_keys($groupings) as $grouping_name) {
-              $grouping_index[$grouping_name] = array_search($grouping_name, $header);
+              $col_index[$grouping_name] = array_search($grouping_name, $header);
             }
+            $leid_idx = array_search('LEID', $header);
+            $euid_idx = array_search('EUID', $header);
             // It's important that we do things in a predictable order or hashes won't match.
-            ksort($grouping_index);
+            ksort($col_index);
 
           } else {
             // We need to store the email address and a hash of all the other data.
             $email = $obj[0];
             // email, first name, last name
             $data_to_hash = "$email|$obj[1]|$obj[2]";
-            foreach ($grouping_index as $idx) {
+            foreach ($col_index as $idx) {
               // ensure values are in a known order, for comparison's sake.
               $values = explode(', ', $obj[$idx]);
               asort($values);
@@ -225,7 +229,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             }
             $hash = md5($data_to_hash);
             // run insert prepared statement
-            $db->execute($insert, array($email, $hash));
+            $db->execute($insert, array($email, $obj[$euid_idx], $obj[$leid_idx], $hash));
           }
           $i++;
         }
@@ -290,14 +294,14 @@ $x=1;
     // Now identify those that need removing from Mailchimp.
     // @todo implement the delete option, here just the unsubscribe is implemented.
     $dao = CRM_Core_DAO::executeQuery(
-      "SELECT m.email
+      "SELECT m.email, m.euid, m.leid
        FROM tmp_mailchimp_push_m m
        WHERE NOT EXISTS (
          SELECT email FROM tmp_mailchimp_push_c c WHERE c.email = m.email
        );");
 
     // @todo loop the $dao object to make a list of emails to unsubscribe|delete from MC
-    //
+    // http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
 
     // Finally we can delete the emails that we just processed from the mailchimp temp table.
     CRM_Core_DAO::executeQuery(
