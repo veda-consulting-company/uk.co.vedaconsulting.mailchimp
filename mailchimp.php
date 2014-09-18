@@ -250,14 +250,16 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
   ) {
     CRM_Mailchimp_Utils::deleteMCEmail(array($id));
   }
-  
-  if ($op == 'delete' && $objectName == 'Individual') {    
+
+  if ($op == 'delete' && $objectName == 'Individual') {
     $result = civicrm_api('Contact', 'get', $params1);
     foreach ($result['values'] as $key => $value) {
       $emailId  = $value['email_id'];
-      CRM_Mailchimp_Utils::deleteMCEmail(array($emailId)); 
-    }   
-  } 
+      if ($emailId) {
+        CRM_Mailchimp_Utils::deleteMCEmail(array($emailId));
+      }
+    }
+  }
 }
 
 /**
