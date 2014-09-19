@@ -207,6 +207,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
             FALSE
           );          
 
+          if (isset($results['errors']) && !is_array($results['errors']) && !empty($results['errors'])) 
+            foreach($results['errors'] as $item)
+               if (in_array($item['code'], array(212,213)) && isset($item['email']['email']))
+                    CRM_Contact_BAO_GroupContact::removeContactsFromGroup(
+                         CRM_Mailchimp_Utils::getContactFromEmail($item['email']['email']), $_groupID, 'Admin', 'Removed');
+			 
+
           // fill sync table based on response
           foreach (array('adds', 'updates', 'errors') as $key) {
             foreach ($results[$key] as $data) {

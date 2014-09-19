@@ -65,9 +65,9 @@ class CRM_Mailchimp_Utils {
     else if (!empty($groupIDs)) {
       $groupIDs = implode(',', $groupIDs);
       $query    = "
-        SELECT  count(*)
-        FROM    civicrm_group_contact
-        WHERE   status = 'Added' AND group_id IN ($groupIDs)";
+        SELECT count(DISTINCT contact_a.id)  FROM civicrm_contact contact_a  
+        LEFT JOIN civicrm_group_contact ON ( contact_a.id = civicrm_group_contact.contact_id AND civicrm_group_contact.group_id IN ( {$groupIDs} ) )  
+        WHERE  ( civicrm_group_contact.group_id IN ( {$groupIDs} ) AND `civicrm_group_contact`.status IN ('Added') )  AND (contact_a.is_deleted = 0)";
       return CRM_Core_DAO::singleValueQuery($query);
     }
     return 0;
