@@ -33,7 +33,7 @@ class CRM_Mailchimp_Utils {
     }
 
     $query  = "
-      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, cg.title as civigroup_title
+      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title
  FROM    civicrm_value_mailchimp_settings mcs
       INNER JOIN civicrm_group cg ON mcs.entity_id = cg.id
       WHERE   $whereClause";
@@ -44,6 +44,7 @@ class CRM_Mailchimp_Utils {
           'list_id'     => $dao->mc_list_id,
           'grouping_id' => $dao->mc_grouping_id,
           'group_id'    => $dao->mc_group_id,
+          'is_mc_update_grouping' => $dao->is_mc_update_grouping,
           'group_name'  => CRM_Mailchimp_Utils::getMCGroupName($dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id),
           'civigroup_title' => $dao->civigroup_title,
         );

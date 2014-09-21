@@ -201,8 +201,10 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
 
         if (!empty($mcDetails)) {
           $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
+          $defaults['is_mc_update_grouping'] = $mcDetails[$groupId]['is_mc_update_grouping'];
           $form->setDefaults($defaults);  
           $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
+          $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
         }
       }
     }
