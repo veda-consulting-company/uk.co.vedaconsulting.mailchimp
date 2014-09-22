@@ -1,11 +1,30 @@
 <table id="mailchimp_settings" style="display:none;">
-<tr class="custom_field-row mailchimp_list">
+<tr class="custom_field-row" id="mc_integration_option_0">
+  <td colspan=2>
+    <input type="radio" name="mc_integration_option" value="0">No integration<br/>
+  </td>
+</tr>
+<tr class="custom_field-row" id="mc_integration_option_1">
+  <td colspan=2>
+    <input type="radio" name="mc_integration_option" value="1">Sync membership of this group with membership of a Mailchimp List<br/>
+  </td>
+</tr>
+<tr class="custom_field-row" id="mc_integration_option_2">
+  <td colspan=2>
+    <input type="radio" name="mc_integration_option" value="2">Sync membership of with a Mailchimp interest grouping<br/>
+  </td>
+</tr>
+<tr class="custom_field-row mailchimp_list" id="mailchimp_list_tr">
     <td class="label">{$form.mailchimp_list.label}</td>
     <td class="html-adjust">{$form.mailchimp_list.html}</td>
 </tr>
-<tr class="custom_field-row mailchimp_group">
+<tr class="custom_field-row mailchimp_group" id="mailchimp_group_tr">
     <td class="label">{$form.mailchimp_group.label}</td>
     <td class="html-adjust">{$form.mailchimp_group.html}</td>
+</tr>
+<tr class="custom_field-row is_mc_update_grouping" id="is_mc_update_grouping_tr">
+    <td class="label">{$form.is_mc_update_grouping.label}</td>
+    <td class="html-adjust">{$form.is_mc_update_grouping.html}</td>
 </tr>
 </table>
 
@@ -20,6 +39,52 @@ cj( document ).ready(function() {
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Grouping']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").parent().parent().hide();
+
+    cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").closest('tr').next('tr').hide();
+    cj("#mailchimp_list_tr").hide();
+    cj("#mailchimp_group_tr").hide();
+    cj("#is_mc_update_grouping_tr").hide();
+
+    // action on selection of integration radio options
+    cj("input:radio[name=mc_integration_option]").change(function() {
+      var intopt = cj(this).val();
+      if (intopt == 1) {
+        cj("#mailchimp_list_tr").insertAfter(cj("#mc_integration_option_1"));
+        cj("#mailchimp_list_tr").show();
+        cj("#mailchimp_group_tr").hide();
+        cj("#is_mc_update_grouping_tr").hide();
+        cj("#mailchimp_group").val('');
+        cj("input:radio[name=is_mc_update_grouping]").prop('checked', false);
+      } else if (intopt == 2) {
+        cj("#mailchimp_list_tr").insertAfter(cj("#mc_integration_option_2"));
+        cj("#mailchimp_list_tr").show();
+        cj("#mailchimp_group_tr").show();
+        cj("#is_mc_update_grouping_tr").show();
+      } else {
+        cj("#mailchimp_list_tr").hide();
+        cj("#mailchimp_group_tr").hide();
+        cj("#is_mc_update_grouping_tr").hide();
+        cj("input:radio[name=is_mc_update_grouping]").prop('checked', false);
+        cj("#mailchimp_list").val('');
+        cj("#mailchimp_group").val('');
+      }
+    });
+
+    // set defaults for integration radio options
+    var mailchimpGroupId = '{/literal}{$mailchimp_group_id}{literal}';
+    var mailchimpListId  = '{/literal}{$mailchimp_list_id}{literal}';
+    if (mailchimpGroupId != '') {
+      cj("input:radio[name='mc_integration_option'][value='2']").prop('checked', true).change();
+    } else if (mailchimpListId != '') {
+      cj("input:radio[name='mc_integration_option'][value='1']").prop('checked', true).change();
+    } else {
+      cj("input:radio[name='mc_integration_option'][value='0']").prop('checked', true).change();
+    }
+
+    cj("input:radio[name=is_mc_update_grouping]").change(function() {
+      var gval = cj(this).val();
+      cj("input:radio[name^='custom_'][data-crm-custom^='Mailchimp_Settings:'][value='" + gval + "']").prop('checked', true);
+    });
 
     cj("#mailchimp_list").change(function() {
         var list_id = cj("#mailchimp_list :selected").val();

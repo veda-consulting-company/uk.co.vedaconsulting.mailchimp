@@ -187,6 +187,12 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
       $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
 
+      $options = array(
+        ts('Subscriber are NOT able to update this grouping using Mailchimp'),
+        ts('Subscriber are able to update this grouping using Mailchimp')
+      );
+      $form->addRadio('is_mc_update_grouping', '', $options, NULL, '<br/>');
+
       // Prepopulate details if 'edit' action
       $groupId = $form->getVar('_id');
       if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
@@ -195,8 +201,10 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
 
         if (!empty($mcDetails)) {
           $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
+          $defaults['is_mc_update_grouping'] = $mcDetails[$groupId]['is_mc_update_grouping'];
           $form->setDefaults($defaults);  
           $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
+          $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
         }
       }
     }
