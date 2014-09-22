@@ -193,6 +193,13 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       );
       $form->addRadio('is_mc_update_grouping', '', $options, NULL, '<br/>');
 
+      $options = array(
+        ts('No integration'),
+        ts('Sync membership of this group with membership of a Mailchimp List'),
+        ts('Sync membership of with a Mailchimp interest grouping')
+      );
+      $form->addRadio('mc_integration_option', '', $options, NULL, '<br/>');
+
       // Prepopulate details if 'edit' action
       $groupId = $form->getVar('_id');
       if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
@@ -202,9 +209,25 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
         if (!empty($mcDetails)) {
           $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
           $defaults['is_mc_update_grouping'] = $mcDetails[$groupId]['is_mc_update_grouping'];
+          if ($defaults['is_mc_update_grouping'] == NULL) {
+            $defaults['is_mc_update_grouping'] = 0;
+          }
+          if ($mcDetails[$groupId]['list_id'] && $mcDetails[$groupId]['group_id']) {
+            $defaults['mc_integration_option'] = 2;
+          } else if ($mcDetails[$groupId]['list_id']) {
+            $defaults['mc_integration_option'] = 1;
+          } else {
+            $defaults['mc_integration_option'] = 0;
+          }
+
           $form->setDefaults($defaults);  
           $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
           $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
+        } else {
+          // defaults for a new group
+          $defaults['mc_integration_option'] = 0;
+          $defaults['is_mc_update_grouping'] = 0;
+          $form->setDefaults($defaults);  
         }
       }
     }
@@ -220,8 +243,13 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
 function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
   if ($formName == 'CRM_Group_Form_Edit') {
     // If a Mailchimp list is selected, a grouping must also be selected.
-    if (!empty($fields['mailchimp_list']) && !$fields['mailchimp_group']) {
+    if (!empty($fields['mailchimp_list']) && 
+      !$fields['mailchimp_group'] && 
+      $fields['mc_integration_option'] == 2) 
+    {
       $errors['mailchimp_group'] = ts('When mapping a CiviCRM group to a Mailchimp List you must also select a grouping. You might want to set up a "general" one for this.');
+    } else if (empty($fields['mailchimp_list']) && $fields['mc_integration_option'] == 1) {
+      $errors['mailchimp_list'] = ts('Please specify the mailchimp list');
     }
   }
 }
