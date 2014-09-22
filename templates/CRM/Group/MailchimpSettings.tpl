@@ -54,7 +54,7 @@ cj( document ).ready(function() {
         cj("#mailchimp_group_tr").hide();
         cj("#is_mc_update_grouping_tr").hide();
         cj("#mailchimp_group").val('');
-        cj("input:radio[name=is_mc_update_grouping]").prop('checked', false);
+        cj("input:radio[name=is_mc_update_grouping][value=0]").prop('checked', true);
       } else if (intopt == 2) {
         cj("#mailchimp_list_tr").insertAfter(cj("#mc_integration_option_2"));
         cj("#mailchimp_list_tr").show();
@@ -64,7 +64,7 @@ cj( document ).ready(function() {
         cj("#mailchimp_list_tr").hide();
         cj("#mailchimp_group_tr").hide();
         cj("#is_mc_update_grouping_tr").hide();
-        cj("input:radio[name=is_mc_update_grouping]").prop('checked', false);
+        cj("input:radio[name=is_mc_update_grouping][value=0]").prop('checked', true);
         cj("#mailchimp_list").val('');
         cj("#mailchimp_group").val('');
       }

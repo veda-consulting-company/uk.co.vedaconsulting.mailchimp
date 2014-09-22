@@ -223,6 +223,11 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
           $form->setDefaults($defaults);  
           $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
           $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
+        } else {
+          // defaults for a new group
+          $defaults['mc_integration_option'] = 0;
+          $defaults['is_mc_update_grouping'] = 0;
+          $form->setDefaults($defaults);  
         }
       }
     }
