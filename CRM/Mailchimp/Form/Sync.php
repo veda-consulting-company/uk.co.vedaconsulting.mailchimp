@@ -38,8 +38,20 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   function preProcess() {
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
-      $stats = CRM_Mailchimp_BAO_MCSync::getSyncStats();
-      $this->assign('stats', $stats);
+      $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
+      $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only=TRUE);
+      if (!$groups) {
+        return;
+      }
+      $output_stats = array();
+      foreach ($groups as $group_id => $details) {
+        $list_stats = $stats[$details['list_id']];
+        $output_stats[] = array(
+          'name' => $details['civigroup_title'],
+          'stats' => $list_stats,
+        );
+      }
+      $this->assign('stats', $output_stats);
     }
   }
 
@@ -87,27 +99,33 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       'reset' => TRUE,
     ));
 
+    // reset push stats
+    CRM_Core_BAO_Setting::setItem(Array(), CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
+    $stats = array();
+
     // We need to process one list at a time.
-    $groups = CRM_Mailchimp_Utils::getGroupsToSync();
+    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only=TRUE);
     if (!$groups) {
       // Nothing to do.
       return FALSE;
     }
-    // Make an array mapping unique list_ids to arrays of groupIDs using that list
-    $lists = array();
-    foreach ($groups as $groupID => $groupVals) {
-      $lists[$groupVals['list_id']][$groupID] = $groupVals;
-    }
 
     // Each list is a task.
     $listCount = 1;
-    foreach ($lists as $list_id => $groupIDs) {
+    foreach ($groups as $group_id => $details) {
+      $stats[$details['list_id']] = array(
+        'mc_count' => 0,
+        'c_count' => 0,
+        'in_sync' => 0,
+        'added' => 0,
+        'removed' => 0,
+      ) ;
 
-      $identifier = "List " . $listCount++ . " (id $list_id)";
+      $identifier = "List " . $listCount++ . " " . $details['civigroup_title'];
 
       $task  = new CRM_Queue_Task(
         array ('CRM_Mailchimp_Form_Sync', 'syncPushList'),
-        array($list_id, $groups, $identifier),
+        array($details['list_id'], $identifier),
         "Preparing queue for $identifier"
       );
 
@@ -123,8 +141,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
     ));
 
-    // reset sync table
-    CRM_Mailchimp_BAO_MCSync::resetTable();
+    static::updatePushStats($stats);
 
     return $runner;
   }
@@ -132,7 +149,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   /**
    * Set up (sub)queue for syncing a Mailchimp List.
    */
-  static function syncPushList(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+  static function syncPushList(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
 
     // Split the work into parts:
     // @todo 'force' method not implemented here.
@@ -140,28 +157,28 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Add the Mailchimp collect data task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushCollectMailchimp'),
-      array($listID, $groups, $listDelta),
+      array($listID, $listDelta),
       "$identifier: Fetching data from Mailchimp (can take a mo)"
     ));
 
     // Add the CiviCRM collect data task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushCollectCiviCRM'),
-      array($listID, $groups, $listDelta),
+      array($listID, $listDelta),
       "$identifier: Fetching data from CiviCRM"
     ));
 
     // Add the removals task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushRemove'),
-      array($listID, $groups, $listDelta),
+      array($listID, $listDelta),
       "$identifier: Removing those who should no longer be subscribed"
     ));
 
     // Add the batchUpdate to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushAdd'),
-      array($listID, $groups, $listDelta),
+      array($listID, $listDelta),
       "$identifier: Adding new subscribers and updating existing data changes"
     ));
 
@@ -171,9 +188,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   /**
    * Collect Mailchimp data into temporary working table.
    */
-  static function syncPushCollectMailchimp(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+  static function syncPushCollectMailchimp(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
 
-    static::syncCollectMailchimp($listID);
+    $stats[$listID]['mc_count'] = static::syncCollectMailchimp($listID);
+    static::updatePushStats($stats);
 
     return CRM_Queue_Task::TASK_SUCCESS;
   }
@@ -181,18 +199,19 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   /**
    * Collect CiviCRM data into temporary working table.
    */
-  static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+  static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
 
-    static::syncCollectCiviCRM($listID);
+    $stats[$listID]['c_count'] = static::syncCollectCiviCRM($listID);
+    static::updatePushStats($stats);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 
   /**
    * Unsubscribe contacts that are subscribed at Mailchimp but not in our list.
    */
-  static function syncPushRemove(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+  static function syncPushRemove(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
     // Delete records have the same hash - these do not need an update.
-    static::syncIdentical();
+    $stats[$listID]['in_sync'] = static::syncIdentical();
 
     // Now identify those that need removing from Mailchimp.
     // @todo implement the delete option, here just the unsubscribe is implemented.
@@ -208,6 +227,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     $batch = array();
     while ($dao->fetch()) {
       $batch[] = array('email' => $dao->email, 'euid' => $dao->euid, 'leid' => $dao->leid);
+      $stats[$listID]['removed']++;
     }
     if (!$batch) {
       // Nothing to do
@@ -227,6 +247,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
          SELECT email FROM tmp_mailchimp_push_c c WHERE c.email = tmp_mailchimp_push_m.email
        );");
 
+    static::updatePushStats($stats);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 
@@ -235,25 +256,14 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    *
    * This also does the clean-up tasks of removing the temporary tables.
    */
-  static function syncPushAdd(CRM_Queue_TaskContext $ctx, $listID, $groups, $identifier) {
+  static function syncPushAdd(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
 
     // @todo take the remaining details from tmp_mailchimp_push_c
     // and construct a batchUpdate (do they need to be batched into 1000s? I can't recal).
 
     $dao = CRM_Core_DAO::executeQuery( "SELECT * FROM tmp_mailchimp_push_c;");
 
-/* - list_id    (MC)
-   * - grouping_id(MC)
-   * - group_id   (MC)
-   * - is_mc_update_grouping (bool) - is the subscriber allowed to update this via MC interface?
-   * - group_name (MC)
-   * - grouping_name (MC)
-   * - civigroup_title
-   * - civigroup_is_smart boolean
-   * */
-
-    // Loop the $dao object to make a list of emails to unsubscribe|delete from MC
-    // http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
+    // Loop the $dao object to make a list of emails to subscribe/update
     $batch = array();
     while ($dao->fetch()) {
       $merge = array(
@@ -277,6 +287,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $merge['groupings'] = array_values($merge_groups);
 
       $batch[] = array('email' => array('email' => $dao->email), 'email_type' => 'html', 'merge_vars' => $merge);
+      $stats[$listID]['added']++;
     }
     if (!$batch) {
       // Nothing to do
@@ -290,6 +301,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // @todo check result (keys: error_count, add_count, update_count)
 
+    static::updatePushStats($stats);
     // Finally, finish up by removing the two temporary tables
     CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
     CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
@@ -404,6 +416,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Tidy up.
     fclose($handle);
     $db->freePrepared($insert);
+
+    $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(*) c  FROM tmp_mailchimp_push_m");
+    $dao->fetch();
+    return $dao->c;
   }
 
   /**
@@ -415,6 +431,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // needed over multiple sessions because of queue.
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_c;");
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
+        contact_id INT(10) UNSIGNED NOT NULL,
         email VARCHAR(200),
         first_name VARCHAR(100),
         last_name VARCHAR(100),
@@ -424,7 +441,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         );");
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?)');
+    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
 
     // We need to know what groupings we have maps to.
     // We only care about CiviCRM groups that are mapped to this MC List:
@@ -511,13 +528,29 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       //          email,           first name,      last name,      groupings
       $hash = md5($email->email . $contact->first_name . $contact->last_name . $info);
       // run insert prepared statement
-      $db->execute($insert, array($email->email, $contact->first_name, $contact->last_name, $hash, $info));
+      $db->execute($insert, array($contact->id, $email->email, $contact->first_name, $contact->last_name, $hash, $info));
     }
 
     // Tidy up.
     $db->freePrepared($insert);
+    // count
+    $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(*) c  FROM tmp_mailchimp_push_c");
+    $dao->fetch();
+    return $dao->c;
   }
 
+  /**
+   * Update the push stats setting.
+   */
+  static function updatePushStats($updates) {
+    $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
+    foreach ($updates as $listId=>$settings) {
+      foreach ($settings as $key=>$val) {
+        $stats[$listId][$key] = $val;
+      }
+    }
+    CRM_Core_BAO_Setting::setItem($stats, CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
+  }
   // the following code will not be used but I've not deleted it yet as it may have copy-and-paste-able stuff in!
   static function syncGroups(CRM_Queue_TaskContext $ctx, $groupID) {
     // get member count
@@ -661,10 +694,16 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    */
   static function syncIdentical() {
     // Delete records have the same hash - these do not need an update.
+    // count
+    $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(c.email) co FROM tmp_mailchimp_push_m m
+      INNER JOIN tmp_mailchimp_push_c c ON m.email = c.email AND m.hash = c.hash;");
+    $dao->fetch();
+    $count = $dao->co;
     CRM_Core_DAO::executeQuery(
       "DELETE m, c
        FROM tmp_mailchimp_push_m m
        INNER JOIN tmp_mailchimp_push_c c ON m.email = c.email AND m.hash = c.hash;");
+    return $count;
   }
 
 }

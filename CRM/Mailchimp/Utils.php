@@ -45,7 +45,7 @@ class CRM_Mailchimp_Utils {
     }
 
     if ($membership_only) {
-      $whereClause .= " AND mc_grouping_id IS NULL";
+      $whereClause .= " AND (mc_grouping_id IS NULL OR mc_grouping_id = '')";
     }
 
     $query  = "
