@@ -41,14 +41,20 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
    *
    * @return TRUE on success
    * @throws Exception
-   *
-  public function upgrade_4200() {
-    $this->ctx->log->info('Applying update 4200');
-    CRM_Core_DAO::executeQuery('UPDATE foo SET bar = "whiz"');
-    CRM_Core_DAO::executeQuery('DELETE FROM bang WHERE willy = wonka(2)');
-    return TRUE;
-  } // */
+   */
+  public function upgrade_13() {
+    $this->ctx->log->info('Applying update v1.3');
 
+    $cgId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', 'Mailchimp_Settings', 'id', 'name');
+    if ($cgId) {
+      $query = "INSERT INTO `civicrm_custom_field` (`custom_group_id`, `name`, `label`, `data_type`, `html_type`, `default_value`, `is_required`, `is_searchable`, `is_search_range`, `weight`, `is_active`, `is_view`, `options_per_line`, `text_length`, `start_date_years`, `end_date_years`, `date_format`, `time_format`, `note_columns`, `note_rows`, `column_name`) VALUES ($cgId, 'is_mc_update_grouping', 'Are subscriber able to update this grouping from mailchimp?', 'Boolean', 'Radio', NULL, 0, 0, 0, 4, 1, 0, NULL, 255, NULL, NULL, NULL, NULL, 60, 4, 'is_mc_update_grouping')";
+      CRM_Core_DAO::executeQuery($query);
+
+      $query = "Alter table civicrm_value_mailchimp_settings add column is_mc_update_grouping BOOLEAN  DEFAULT NULL COMMENT 'Are subscribers able to update this grouping using mailchimp?'";
+      CRM_Core_DAO::executeQuery($query);
+    }
+    return TRUE;
+  }
 
   /**
    * Example: Run an external SQL script
