@@ -79,12 +79,6 @@
     <comment>Sync action result</comment>
     <title>Last Sync Status</title>
   </field>
-
-  <field>
-    <name>is_mc_update_grouping</name>
-    <type>boolean</type>
-    <comment>Are subscribers able to update this grouping using mailchimp?</comment>
-  </field>
   
   <field>
       <name>is_latest</name>

@@ -16,7 +16,6 @@ CREATE TABLE `civicrm_mc_sync` (
   `mc_leid`    varchar(64)  DEFAULT NULL COMMENT 'Email id for the list in mailchimp',
   `is_latest`  BOOLEAN      DEFAULT TRUE COMMENT 'Check sync latest',
   `sync_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last date when sync happened',
-  `is_mc_update_grouping`  BOOLEAN  DEFAULT NULL COMMENT 'Are subscribers able to update this grouping using mailchimp?',
   `sync_status` enum('Added', 'Updated', 'Removed', 'Error') COMMENT 'Sync action e.g: Added, Updated, Removed, Error'    ,
   PRIMARY KEY ( `id` ),
   CONSTRAINT `FK_civicrm_mc_sync_email_id` FOREIGN KEY (`email_id`) REFERENCES `civicrm_email`(`id`) ON DELETE CASCADE
