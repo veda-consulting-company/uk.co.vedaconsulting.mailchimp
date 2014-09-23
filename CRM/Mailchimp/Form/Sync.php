@@ -488,6 +488,12 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $email->is_primary = TRUE;
       $email->find(TRUE);
 
+      // If no email, it's like they're not there.
+      if (!$email->email || $email->on_hold || $contact->is_opt_out || $contact->do_not_email) {
+        //@todo update stats.
+        continue;
+      }
+
       // Find out if they're in any groups that we care about.
       // Start off as not in the groups...
       $info = $default_info;
