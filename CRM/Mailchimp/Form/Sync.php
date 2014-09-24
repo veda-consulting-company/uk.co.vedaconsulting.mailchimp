@@ -1,25 +1,7 @@
 <?php
-/*
- * do not process half and half with the updates. updates is a per-grouping setting (hmmm. how to fix that)
- *
- * Q how to diff the groupings and groups.
- * 
- * With care:
- * for each grouping that we have a mapping for:
- *   for each group that we have a mapping for:
- *     $info[$grouping_id][$group_id]= (bool) (has group in mc)
- * 
- * Hash that.
- *
- * on the civi side,
- * for each grouping that we have a mapping for:
- *   for each mc group that we have a mapping for:
- *     $info[$grouping_id][$group_id]= (bool) (has group in civi)
- *
- * As long as we loop in the same order, this should be fine.
- *
- * When c>mc syncing then only process those marked as updateable.
- *
+/**
+ * @file
+ * This provides the Sync Push from CiviCRM to Mailchimp form.
  */
 
 class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
@@ -27,7 +9,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   const QUEUE_NAME = 'mc-sync';
   const END_URL    = 'civicrm/mailchimp/sync';
   const END_PARAMS = 'state=done';
-  const BATCH_COUNT = 10;
 
   /**
    * Function to pre processing
@@ -556,144 +537,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       }
     }
     CRM_Core_BAO_Setting::setItem($stats, CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
-  }
-  // the following code will not be used but I've not deleted it yet as it may have copy-and-paste-able stuff in!
-  static function syncGroups(CRM_Queue_TaskContext $ctx, $groupID) {
-    // get member count
-    $count  = CRM_Mailchimp_Utils::getMemberCountForGroupsToSync(array($groupID));
-
-    // Set the Number of Rounds
-    $rounds = ceil($count/self::BATCH_COUNT);
-
-    // Get group info for display
-    $groupInfo = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
-
-    // Setup a Task in the Queue
-    $i = 0;
-    while ($i < $rounds) {
-      $start   = $i * self::BATCH_COUNT;
-      $counter = ($rounds > 1) ? ($start + self::BATCH_COUNT) : $count;
-      $task    = new CRM_Queue_Task(
-        array('CRM_Mailchimp_Form_Sync', 'syncContacts'),
-        array($groupID, $start),
-        "Syncing '{$groupInfo[$groupID]['civigroup_title']}' - Contacts {$counter} of {$count}"
-      );
-
-      // Add the Task to the Queu
-      $ctx->queue->createItem($task);
-      $i++;
-    }
-    return CRM_Queue_Task::TASK_SUCCESS;
-  }
-
-  /**
-   * Run the From
-   *
-   * @access public
-   *
-   * @return TRUE
-   */
-  static function syncContacts(CRM_Queue_TaskContext $ctx, $groupID, $start) {    
-    if (!empty($groupID)) {
-      $mcGroups  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupID));
-      $emailToIDs       = array();
-      $toSubscribe      = array();        
-      $toUnsubscribe    = array();
-      $toDeleteEmailIDs = array();
-      $groupings        = array();
-      
-      if(!empty($mcGroups)) {
-        // Loop contacts in this group, gathering those with an available email
-        // to subscribe them to the MC List and group.
-        // Any who have an email, but have a opt-out/do-not-mail/on-hold flag set
-        // are gathered for deletion from MC.
-        $groupContact = CRM_Mailchimp_Utils::getGroupContactObject($groupID, $start);
-
-        while ($groupContact->fetch()) {
-          $contact = new CRM_Contact_BAO_Contact();
-          $contact->id = $groupContact->contact_id;
-          $contact->is_deleted = 0;
-          $contact->find(TRUE);
-
-          $email = new CRM_Core_BAO_Email();
-          $email->contact_id = $groupContact->contact_id;
-          $email->is_primary = TRUE;
-          $email->find(TRUE);
-
-          $listID      = $mcGroups[$groupContact->group_id]['list_id'];
-          $groupName   = $mcGroups[$groupContact->group_id]['group_name'];
-          $groupID     = $mcGroups[$groupContact->group_id]['group_id'];
-          $groupingID  = $mcGroups[$groupContact->group_id]['grouping_id'];
-          if ($groupingID && $groupName) {
-            $groupings = array(
-                array(
-                  'id'     => $groupingID,
-                  'groups' => array($groupName)
-                )
-              );
-          }
-
-          if ($email->email &&
-            ($contact->is_opt_out   == 0 &&
-            $contact->do_not_email  == 0 &&
-            $contact->is_deleted    == 0 &&
-            $email->on_hold         == 0)
-          ) {
-            $toSubscribe[$listID]['batch'][] = array(
-              'email'       => array('email' => $email->email),
-              'merge_vars'  => array(
-                'fname'     => $contact->first_name,
-                'lname'     => $contact->last_name,
-                'groupings' => $groupings,
-              ),
-            );
-          }
-
-          elseif ($email->email &&
-            ($contact->is_opt_out   == 1 ||
-             $contact->do_not_email == 1 ||
-             $email->on_hold        == 1)
-          ) {
-            $toDeleteEmailIDs[] = $email->id;
-          }
-
-          if ($email->id) {
-            $emailToIDs["{$email->email}"]['id'] = $email->id;
-            $emailToIDs["{$email->email}"]['group'] = $groupID ? $groupID : "null";
-          }
-        }
-        $toUnsubscribe  = CRM_Mailchimp_Utils::deleteMCEmail($toDeleteEmailIDs);
-
-        foreach ($toSubscribe as $listID => $vals) {
-          // sync contacts using batchsubscribe
-          $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-          $results   = $mailchimp->batchSubscribe( 
-            $listID,
-            $vals['batch'], 
-            FALSE,
-            TRUE, 
-            FALSE
-          );          
-
-          // fill sync table based on response
-          foreach (array('adds', 'updates', 'errors') as $key) {
-            foreach ($results[$key] as $data) {
-              $email  = $key == 'errors' ? strtolower($data['email']['email']) : strtolower($data['email']);
-              $params = array(
-                'email_id'   => $emailToIDs[$email]['id'],
-                'mc_list_id' => $listID,
-                'mc_group'   => $emailToIDs[$email]['group'],
-                'mc_euid'    => CRM_Utils_Array::value('euid',$data),
-                'mc_leid'    => CRM_Utils_Array::value('leid',$data),
-                'sync_status' => $key == 'adds' ? 'Added' : ( $key == 'updates' ? 'Updated' : 'Error')
-              );
-              CRM_Mailchimp_BAO_MCSync::create($params);          
-            }
-          }
-      }
-    }
-    }
-    return CRM_Queue_Task::TASK_SUCCESS;
   }
   /**
    * Removes from the temporary tables those records that do not need processing.
