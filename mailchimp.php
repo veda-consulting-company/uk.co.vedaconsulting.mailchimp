@@ -188,8 +188,8 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
 
       $options = array(
-        ts('Subscriber are NOT able to update this grouping using Mailchimp'),
-        ts('Subscriber are able to update this grouping using Mailchimp')
+        ts('Subscribers are NOT able to update this grouping using Mailchimp'),
+        ts('Subscribers are able to update this grouping using Mailchimp')
       );
       $form->addRadio('is_mc_update_grouping', '', $options, NULL, '<br/>');
 
@@ -241,15 +241,61 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
  *
  */
 function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
-  if ($formName == 'CRM_Group_Form_Edit') {
-    // If a Mailchimp list is selected, a grouping must also be selected.
-    if (!empty($fields['mailchimp_list']) && 
-      !$fields['mailchimp_group'] && 
-      $fields['mc_integration_option'] == 2) 
-    {
-      $errors['mailchimp_group'] = ts('When mapping a CiviCRM group to a Mailchimp List you must also select a grouping. You might want to set up a "general" one for this.');
-    } else if (empty($fields['mailchimp_list']) && $fields['mc_integration_option'] == 1) {
+  if ($formName != 'CRM_Group_Form_Edit') {
+    return;
+  }
+  if ($fields['mc_integration_option'] == 1) {
+    // Setting up a membership group.
+    if (empty($fields['mailchimp_list'])) {
       $errors['mailchimp_list'] = ts('Please specify the mailchimp list');
+    }
+    else {
+      // We need to make sure that this is the only membership tracking group for this list.
+      $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE);
+      $thisGroup = $form->getVar('_group');
+      if ($thisGroup) {
+        unset($otherGroups[$thisGroup->id]);
+      }
+      if (!empty($otherGroups)) {
+        $otherGroup = reset($otherGroups);
+        $errors['mailchimp_list'] = ts('There is already a CiviCRM group tracking this List, called "'
+          . $otherGroup['civigroup_title'].'"');
+      }
+    }
+  }
+  elseif ($fields['mc_integration_option'] == 2) {
+    // Setting up a group mapped to an interest grouping.
+    if (empty($fields['mailchimp_list'])) {
+      $errors['mailchimp_list'] = ts('Please specify the mailchimp list');
+    }
+    else {
+      // First we have to ensure that there is a pre-existing membership group
+      // set up for this list.
+      if (! CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE)) {
+        $errors['mailchimp_list'] = ts('The list you selected does not have a membership group set up. You must set up a group to track membership of the Mailchimp list before you set up group(s) for the lists\'s interest groupings.');
+      }
+      else {
+        // The List is OK, now let's check the interest grouping...
+        if (empty($fields['mailchimp_group'])) {
+          // Check a grouping group was selected.
+          $errors['mailchimp_group'] = ts('Please select an interest grouping.');
+        }
+        else {
+          // OK, we have a group, let's check we're not duplicating work.
+          $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list']);
+          $thisGroup = $form->getVar('_group');
+          if ($thisGroup) {
+            unset($otherGroups[$thisGroup->id]);
+          }
+          list($mc_grouping_id, $mc_group_id) = explode('|', $fields['mailchimp_group']);
+          foreach($otherGroups as $otherGroup) {
+            if ($otherGroup['group_id'] == $mc_group_id) {
+              $errors['mailchimp_group'] = ts('There is already a CiviCRM group tracking this interest grouping, called "'
+                . $otherGroup['civigroup_title'].'"');
+            }
+          }
+        }
+      }
     }
   }
 }
