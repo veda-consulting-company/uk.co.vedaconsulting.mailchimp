@@ -186,6 +186,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       ;");
 
     // Loop the $dao object creating/finding contacts in CiviCRM.
+    $groupContactRemoves = $groupContact = array();
     while ($dao->fetch()) {
       $params = array(
         'FNAME' => $dao->first_name,
@@ -256,7 +257,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     if ($groupContactRemoves) {
       // We have some contacts to add into groups...
       foreach($groupContactRemoves as $groupID => $contactIDs ) {
-        CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Added');
+        CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Removed');
       }
     }
 
