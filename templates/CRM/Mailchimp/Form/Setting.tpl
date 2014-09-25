@@ -23,13 +23,6 @@
                   </span>
           </td>
         </tr> 
-         <tr class="crm-mailchimp-setting-default-group-block">
-          <td class ="label" >{$form.default_group.label}</td>
-          <td>{$form.default_group.html}<br/>
-      	    <span class="description">{ts}Set a default group where contacts are sync'd to, when a mailchimp group is not mapped to any civicrm group{/ts}
-	          </span>
-          </td>
-        </tr>    
       </table>
     </div>
     <div class="crm-submit-buttons">

@@ -187,6 +187,19 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
       $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
 
+      $options = array(
+        ts('Subscribers are NOT able to update this grouping using Mailchimp'),
+        ts('Subscribers are able to update this grouping using Mailchimp')
+      );
+      $form->addRadio('is_mc_update_grouping', '', $options, NULL, '<br/>');
+
+      $options = array(
+        ts('No integration'),
+        ts('Sync membership of this group with membership of a Mailchimp List'),
+        ts('Sync membership of with a Mailchimp interest grouping')
+      );
+      $form->addRadio('mc_integration_option', '', $options, NULL, '<br/>');
+
       // Prepopulate details if 'edit' action
       $groupId = $form->getVar('_id');
       if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
@@ -195,14 +208,97 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
 
         if (!empty($mcDetails)) {
           $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
+          $defaults['is_mc_update_grouping'] = $mcDetails[$groupId]['is_mc_update_grouping'];
+          if ($defaults['is_mc_update_grouping'] == NULL) {
+            $defaults['is_mc_update_grouping'] = 0;
+          }
+          if ($mcDetails[$groupId]['list_id'] && $mcDetails[$groupId]['group_id']) {
+            $defaults['mc_integration_option'] = 2;
+          } else if ($mcDetails[$groupId]['list_id']) {
+            $defaults['mc_integration_option'] = 1;
+          } else {
+            $defaults['mc_integration_option'] = 0;
+          }
+
           $form->setDefaults($defaults);  
           $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
+          $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
+        } else {
+          // defaults for a new group
+          $defaults['mc_integration_option'] = 0;
+          $defaults['is_mc_update_grouping'] = 0;
+          $form->setDefaults($defaults);  
         }
       }
     }
   }
 }
 
+/**
+ * Implements hook_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors )
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_validateForm
+ *
+ */
+function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
+  if ($formName != 'CRM_Group_Form_Edit') {
+    return;
+  }
+  if ($fields['mc_integration_option'] == 1) {
+    // Setting up a membership group.
+    if (empty($fields['mailchimp_list'])) {
+      $errors['mailchimp_list'] = ts('Please specify the mailchimp list');
+    }
+    else {
+      // We need to make sure that this is the only membership tracking group for this list.
+      $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE);
+      $thisGroup = $form->getVar('_group');
+      if ($thisGroup) {
+        unset($otherGroups[$thisGroup->id]);
+      }
+      if (!empty($otherGroups)) {
+        $otherGroup = reset($otherGroups);
+        $errors['mailchimp_list'] = ts('There is already a CiviCRM group tracking this List, called "'
+          . $otherGroup['civigroup_title'].'"');
+      }
+    }
+  }
+  elseif ($fields['mc_integration_option'] == 2) {
+    // Setting up a group mapped to an interest grouping.
+    if (empty($fields['mailchimp_list'])) {
+      $errors['mailchimp_list'] = ts('Please specify the mailchimp list');
+    }
+    else {
+      // First we have to ensure that there is a pre-existing membership group
+      // set up for this list.
+      if (! CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE)) {
+        $errors['mailchimp_list'] = ts('The list you selected does not have a membership group set up. You must set up a group to track membership of the Mailchimp list before you set up group(s) for the lists\'s interest groupings.');
+      }
+      else {
+        // The List is OK, now let's check the interest grouping...
+        if (empty($fields['mailchimp_group'])) {
+          // Check a grouping group was selected.
+          $errors['mailchimp_group'] = ts('Please select an interest grouping.');
+        }
+        else {
+          // OK, we have a group, let's check we're not duplicating work.
+          $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list']);
+          $thisGroup = $form->getVar('_group');
+          if ($thisGroup) {
+            unset($otherGroups[$thisGroup->id]);
+          }
+          list($mc_grouping_id, $mc_group_id) = explode('|', $fields['mailchimp_group']);
+          foreach($otherGroups as $otherGroup) {
+            if ($otherGroup['group_id'] == $mc_group_id) {
+              $errors['mailchimp_group'] = ts('There is already a CiviCRM group tracking this interest grouping, called "'
+                . $otherGroup['civigroup_title'].'"');
+            }
+          }
+        }
+      }
+    }
+  }
+}
 /**
  * Implementation of hook_civicrm_pageRun
  *
@@ -234,23 +330,30 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     'version' => 3,
     'sequential' => 1,
     'contact_id' => $id,
-    'id' => $id,    
+    'id' => $id,
   );
-  $email  = NULL;
-  
+
   if($objectName == 'Email') {
     $email = new CRM_Core_BAO_Email();
     $email->id = $id;
-    $email->find(TRUE);    
-  }
-  
-  if($objectName == 'Email' && 
-    ( ($op == 'delete') || 
-      ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0) )
-  ) {
-    CRM_Mailchimp_Utils::deleteMCEmail(array($id));
+    $email->find(TRUE);
+
+    // If about to delete an email in CiviCRM, we must delete it from Mailchimp
+    // because we won't get chance to delete it once it's gone.
+    //
+    // The other case covered here is changing an email address's status
+    // from for-bulk-mail to not-for-bulk-mail.
+    // @todo Note: However, this will delete a subscriber and lose reporting
+    // info, where what they might have wanted was to change their email
+    // address.
+    if( ($op == 'delete') ||
+        ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0)
+    ) {
+      CRM_Mailchimp_Utils::deleteMCEmail(array($id));
+    }
   }
 
+  // If deleting an individual, delete their (bulk) email address from Mailchimp.
   if ($op == 'delete' && $objectName == 'Individual') {
     $result = civicrm_api('Contact', 'get', $params1);
     foreach ($result['values'] as $key => $value) {
@@ -267,31 +370,9 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
  */
-function mailchimp_civicrm_permission( &$permissions ) {  
+function mailchimp_civicrm_permission( &$permissions ) {
   $prefix = ts('Mailchimp') . ': '; // name of extension or module
   $permissions = array(
     'allow webhook posts' => $prefix . ts('allow webhook posts'),
-  );  
-}
-  
-function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
-  if ($op == 'delete' && $objectName == 'GroupContact') { 
-    $emailIds= array();
-    $contactIds = array();
-    $contactIds = $objectRef;
-    if (empty($contactIds)) {
-      return NULL;
-    }
-    if (!empty($contactIds)) {      
-      $contactIDs = implode(',', $contactIds); 
-      $query = "
-        SELECT ce.id FROM `civicrm_email` ce
-        WHERE ce.contact_id IN ($contactIDs) AND ce.id is not null";
-      $dao = CRM_Core_DAO::executeQuery($query); 
-      while ($dao->fetch()) {
-        $emailIds[] = $dao->id;
-      }
-    }
-    CRM_Mailchimp_Utils::deleteMCEmail($emailIds); 
-  }
+  );
 }
