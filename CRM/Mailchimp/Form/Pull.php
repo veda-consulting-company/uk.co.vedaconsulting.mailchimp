@@ -165,8 +165,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   static function syncPullUpdates(CRM_Queue_TaskContext $ctx, $listID) {
     // Prepare the groups that we need to update
 
-    // We need to know what groupings we have maps to.
-    // We only care about CiviCRM groups that are mapped to this MC List:
+    // We need the membership group and any groups mapped to interest groupings with the allow MC updates option set.
     $membership_group_id = FALSE;
     $updatable_grouping_groups = array();
     foreach (CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID) as $groupID=>$details) {

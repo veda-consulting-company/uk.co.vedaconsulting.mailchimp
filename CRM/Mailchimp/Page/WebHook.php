@@ -1,5 +1,4 @@
 <?php
-// @todo I don't think this handles remove from smart groups.
 class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
   const
@@ -131,35 +130,14 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       }
     }
 
-    // Make changes.
-    if ($groupContactAdditions) {
-      // We have some contacts to add into groups...
-      foreach($groupContactAdditions as $groupID => $contactIDs ) {
-        CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIDs, $groupID, 'Admin', 'Added');
-      }
+    // Remove contacts from groups, if anything to do.
+    foreach($groupContactAdditions as $groupID => $contactIDs ) {
+      CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIDs, $groupID, 'Admin', 'Added');
     }
 
-    if ($groupContactRemoves) {
-      // We have some contacts to add into groups...
-      foreach($groupContactRemoves as $groupID => $contactIDs ) {
-        CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Removed');
-      }
+    // Add contacts to groups, if anything to do.
+    foreach($groupContactRemoves as $groupID => $contactIDs ) {
+      CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Removed');
     }
-
-    /*
-      // Remove the contact from CiviCRM group
-      if ($action == 'unsubscribe') {
-        CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactID, $groupID, 'Admin', 'Removed');
-        $group           = new CRM_Contact_DAO_Group();
-        $group->id       = $groupID;
-        $group->find();
-        if($group->fetch()){
-        //Check smart groups
-          if($group->saved_search_id){
-            CRM_Contact_BAO_GroupContactCache::remove($groupID);
-          }
-        }
-      }
-     */
   }
 }
