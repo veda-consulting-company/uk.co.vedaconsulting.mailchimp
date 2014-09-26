@@ -149,10 +149,8 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
-  
-  $groupIds = explode(',', $params['ids']);    
+  $groupIds = empty($params['ids']) ? array() : explode(',', $params['ids']);
   $groups  = CRM_Mailchimp_Utils::getGroupsToSync($groupIds);
-  
   return civicrm_api3_create_success($groups);
 }
 
