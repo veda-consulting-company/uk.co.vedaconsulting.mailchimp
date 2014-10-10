@@ -45,7 +45,10 @@ Before the extension can be used you must set up your API keys...
 
 ## Basic Use
 
-In Mailchimp: Set up an empty list, lets call it Newsletter.
+In Mailchimp: Set up an empty list, lets call it Newsletter. You'll also need
+to set up this list's **Webhooks**.
+
+**todo veda** pls add in this detail for webhook set up.
 
 In CiviCRM: you need a group to track subscribers to your Mailchimp Newsletter
 List. You can create a new blank group, or choose an existing group (or smart
@@ -55,3 +58,84 @@ Mailchimp.
 Choose the integration option, called "Sync membership of this group with membership of a Mailchimp List" then choose your list name.
 ![Screenshot of integration options](images/group-config-form-1.png)
 
+Save your group's settings.
+
+The next step is to get CiviCRM and Mailchimp in sync. **Which way you do this
+is important**. In our example we have assumed a new, blank Mailchimp list and
+a populated CiviCRM Group. So we want to do a **CiviCRM to Mailchimp** Sync.
+However, if we had set up an empty group in CiviCRM for a pre-existing
+Mailchimp list, we would want to do a **Mailchimp to CiviCRM** sync. If you get
+it wrong you'll end up removing/unsubscribing everyone!
+
+So for our example, with an empty Mailchimp list and a CiviCRM newsletter group
+with contacts in, you'll find the **CiviCRM to Mailchimp Sync** function in the
+**Mailings** menu.
+
+Push the Sync button and after a while (it can take a while for a large
+list/group) you should see a summary screen.
+
+### From here on...
+
+Any un/subscribes from the Mailchimp end will be handled (almost) instantly
+using the webhook. However changes at the CiviCRM end must be manually sync
+(sunk?) up to Mailchimp, e.g. before you do a new mailing campaign. There are
+several good reasons why this manual button pressing is necessary, not least
+that it is how Mailchimp request it be done. Basically there are many ways
+that CiviCRM group membership can be changed, including bulk updates, and
+sending a request to Mailchimp for every affected contact would be very slow.
+
+### Important note about unsubscribed contacts
+
+Note: currently, removals are processed as unsubscribes from Mailchimp. This is
+so that Mailchimp's reporting and subscriber history is not affected by
+removals. However, Mailchimp treats unsubscribed people in a bit of a permanent
+way; you cannot ever re-subscribe them! This is caution on Mailchimp's part, as
+they have to ensure their service is not used by spammers. However it's an awkward
+feature for the general integration case. The only way to re-subscribe someone
+who previously unsubscribed is to first delete them from the Mailchimp list.
+
+We have a "coming soon" feature that will give you the option to force
+a CiviCRM to Mailchimp sync which will automatically do the necessary deletions,
+but this is not included in the current version. Watch this space.
+
+## Interest groupings
+
+For this example we'll set up two interest groupings in Mailchimp, one called
+Interests that publically viewable, and one called Private that is hidden from
+subscribers. Within "Interests" add Mailchimp Groups such as "bananas",
+"organic farming", "climate change activism". Within the "Private" Mailchimp
+Interest Grouping, you might add Mailchimp Groups called "major donor", "VIPs"
+etc.
+
+Please take care and follow Mailchimp's help pages for how to restrict the
+visibility of the Private interest grouping.
+
+Now back in CiviCRM, setup groups to map to these Mailchimp Groups. When you
+look at the CiviCRM group's settings page, choose "Sync membership with a
+Mailchimp interest grouping" you'll then see something like:
+
+![Screenshot of integration options](images/group-config-form-2.png)
+
+Here you can see the two options about whether Mailchimp subscribers are supposed
+to be able to edit their membership of this interest grouping.
+
+So for the Private interest grouping, choose the first, No option, for the
+public "Interests" one, choose the second option.
+
+**Please note** that while it's possible to configure one Mailchimp Group to be
+updatable and another to be non-updatable within the same mailchimp interest
+grouping, this will lead to unpredictable results. Stick to the rule: if it's
+public, it should be updateable, if it's hidden/private, it should be not
+updatable.
+
+When you run the sync, these grouping will be updated accordingly. Nb. a webhook
+immediately processes changes made from the Mailchimp end.
+
+## Sync - which way?
+
+Most Mailchimp changes are handled immediately via webhook. So it is now rare
+to need the Mailchimp to CiviCRM sync operation, whereas the CiviCRM to Mailchimp
+sync should become part of your pre-campaign sending preparation.
+
+(**todo** consider a cron job for this? but users should be aware of possible
+implications)
