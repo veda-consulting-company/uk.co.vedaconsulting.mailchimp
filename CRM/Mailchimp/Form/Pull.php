@@ -164,6 +164,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
    */
   static function syncPullUpdates(CRM_Queue_TaskContext $ctx, $listID) {
     // Prepare the groups that we need to update
+    $stats[$listID]['added'] = $stats[$listID]['removed'] = 0;
 
     // We need the membership group and any groups mapped to interest groupings with the allow MC updates option set.
     $membership_group_id = FALSE;
@@ -260,6 +261,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       }
     }
 
+    static::updatePullStats($stats);
     // Finally, finish up by removing the two temporary tables
     CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
     CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");

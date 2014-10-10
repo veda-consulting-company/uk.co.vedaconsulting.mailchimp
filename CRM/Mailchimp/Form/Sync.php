@@ -138,29 +138,29 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Add the Mailchimp collect data task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushCollectMailchimp'),
-      array($listID, $listDelta),
-      "$identifier: Fetching data from Mailchimp (can take a mo)"
+      array($listID),
+      "$identifier: Fetched data from Mailchimp"
     ));
 
     // Add the CiviCRM collect data task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushCollectCiviCRM'),
-      array($listID, $listDelta),
-      "$identifier: Fetching data from CiviCRM"
+      array($listID),
+      "$identifier: Fetched data from CiviCRM"
     ));
 
     // Add the removals task to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushRemove'),
-      array($listID, $listDelta),
-      "$identifier: Removing those who should no longer be subscribed"
+      array($listID),
+      "$identifier: Removed those who should no longer be subscribed"
     ));
 
     // Add the batchUpdate to the queue
     $ctx->queue->createItem( new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushAdd'),
-      array($listID, $listDelta),
-      "$identifier: Adding new subscribers and updating existing data changes"
+      array($listID),
+      "$identifier: Added new subscribers and updating existing data changes"
     ));
 
     return CRM_Queue_Task::TASK_SUCCESS;
@@ -169,7 +169,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   /**
    * Collect Mailchimp data into temporary working table.
    */
-  static function syncPushCollectMailchimp(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
+  static function syncPushCollectMailchimp(CRM_Queue_TaskContext $ctx, $listID) {
 
     $stats[$listID]['mc_count'] = static::syncCollectMailchimp($listID);
     static::updatePushStats($stats);
@@ -180,7 +180,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   /**
    * Collect CiviCRM data into temporary working table.
    */
-  static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
+  static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $listID) {
 
     $stats[$listID]['c_count'] = static::syncCollectCiviCRM($listID);
     static::updatePushStats($stats);
@@ -190,9 +190,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   /**
    * Unsubscribe contacts that are subscribed at Mailchimp but not in our list.
    */
-  static function syncPushRemove(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
+  static function syncPushRemove(CRM_Queue_TaskContext $ctx, $listID) {
     // Delete records have the same hash - these do not need an update.
-    $stats[$listID]['in_sync'] = static::syncIdentical();
+    static::updatePushStats(array($listID=>array('in_sync'=> static::syncIdentical())));
 
     // Now identify those that need removing from Mailchimp.
     // @todo implement the delete option, here just the unsubscribe is implemented.
@@ -206,6 +206,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Loop the $dao object to make a list of emails to unsubscribe|delete from MC
     // http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
     $batch = array();
+    $stats[$listID]['removed'] = 0;
     while ($dao->fetch()) {
       $batch[] = array('email' => $dao->email, 'euid' => $dao->euid, 'leid' => $dao->leid);
       $stats[$listID]['removed']++;
@@ -237,7 +238,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    *
    * This also does the clean-up tasks of removing the temporary tables.
    */
-  static function syncPushAdd(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
+  static function syncPushAdd(CRM_Queue_TaskContext $ctx, $listID) {
 
     // @todo take the remaining details from tmp_mailchimp_push_c
     // and construct a batchUpdate (do they need to be batched into 1000s? I can't recal).
@@ -279,6 +280,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // http://apidocs.mailchimp.com/api/2.0/lists/batch-subscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
     $result = $list->batchSubscribe( $listID, $batch, $double_optin=FALSE, $update=TRUE, $replace_interests=TRUE);
+    // debug: file_put_contents(DRUPAL_ROOT . '/logs/' . date('Y-m-d-His') . '-MC-push.log', print_r($result,1));
 
     // @todo check result (keys: error_count, add_count, update_count)
 
@@ -482,28 +484,31 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
       // Normal groups.
       if ($grouping_group_ids['normal']) {
-        $groupContact = new CRM_Contact_BAO_GroupContact();
-        $groupContact->whereAdd("status = 'Added'");
-        $groupContact->whereAdd("group_id IN ($grouping_group_ids[normal])");
-        $groupContact->find();
-        while ($groupContact->fetch()) {
+        $groupContact2 = new CRM_Contact_BAO_GroupContact();
+        $groupContact2->contact_id = $groupContact->contact_id;
+        $groupContact2->whereAdd("status = 'Added'");
+        $groupContact2->whereAdd("group_id IN ($grouping_group_ids[normal])");
+        $groupContact2->find();
+        while ($groupContact2->fetch()) {
           // need MC grouping_id and group_id
-          $details = $mapped_groups[ $groupContact->group_id ];
+          $details = $mapped_groups[ $groupContact2->group_id ];
           $info[ $details['grouping_id'] ][ $details['group_id'] ] = TRUE;
         }
+        unset($groupContact2);
       }
 
       // Smart groups
       if ($grouping_group_ids['smart']) {
         $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
-        $groupContactCache->whereAdd("status = 'Added'");
-        $groupContactCache->whereAdd("group_id IN ($grouping_group_ids[normal])");
+        $groupContactCache->contact_id = $groupContact->contact_id;
+        $groupContactCache->whereAdd("group_id IN ($grouping_group_ids[smart])");
         $groupContactCache->find();
         while ($groupContactCache->fetch()) {
           // need MC grouping_id and group_id
-          $details = $mapped_gropus[ $groupContactCache->group_id ];
+          $details = $mapped_groups[ $groupContactCache->group_id ];
           $info[ $details['grouping_id'] ][ $details['group_id'] ] = TRUE;
         }
+        unset($groupContactCache);
       }
 
       // OK we should now have all the info we need.
