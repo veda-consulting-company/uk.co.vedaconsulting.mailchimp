@@ -52,4 +52,6 @@ List. You can create a new blank group, or choose an existing group (or smart
 group). The CiviCRM Group's settings page has an additional fieldset called
 Mailchimp.
 
-Choose the integration option, then choose your list name.
+Choose the integration option, called "Sync membership of this group with membership of a Mailchimp List" then choose your list name.
+![Screenshot of integration options](images/group-config-form-1.png)
+
