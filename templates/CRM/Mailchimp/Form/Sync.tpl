@@ -10,7 +10,7 @@
       <tr><td>{ts}Contacts on CiviCRM{/ts}:</td><td>{$group.stats.c_count}</td></tr>
       <tr><td>{ts}Contacts on Mailchimp (originally){/ts}:</td><td>{$group.stats.mc_count}</td></tr>
       <tr><td>{ts}Contacts that were in sync already{/ts}:</td><td>{$group.stats.in_sync}</td></tr>
-      <tr><td>{ts}Contacts Subscribed at Mailchimp{/ts}:</td><td>{$group.stats.added}</td></tr>
+      <tr><td>{ts}Contacts Subscribed or updated at Mailchimp{/ts}:</td><td>{$group.stats.added}</td></tr>
       <tr><td>{ts}Contacts Unsubscribed from Mailchimp{/ts}:</td><td>{$group.stats.removed}</td></tr>
       </table>
       {/foreach}
