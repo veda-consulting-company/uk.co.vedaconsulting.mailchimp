@@ -6,13 +6,20 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
   function run() {
 
+
     $my_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
       'security_key', NULL, FALSE
     );
 
-    // Useful for debugging: file_put_contents('/tmp/mc-dump-' . time(), serialize($_POST) . "\n\n" . print_r($_POST,1));
-    //$_GET['key']=$my_key;
-    //$_POST=unserialize();
+    /* hacks for debugging
+    if (!empty($_GET['x'])) {
+      $_GET['key'] = $my_key;
+      $_POST = unserialize('');
+    }
+
+    $_ = empty($_POST['type']) ? '' : preg_replace('/[^a-zA-Z90-9]/','',$_POST['type']);
+    file_put_contents("/tmp/mc-dump-$_" . date('Y-m-d-H:i:s'), serialize($_POST) . "\n\n" . print_r($_POST,1));
+     */
 
     // Check the key
     // @todo is this a DOS attack vector? seems a lot of work for saying 403, go away, to a robot!
@@ -96,7 +103,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       $groupContactAdditions[$membershipGroupID][] = $contactID;
     }
     elseif ($action == 'unsubscribe') {
-      $groupContactAdditions[$membershipGroupID][] = $contactID;
+      $groupContactRemoves[$membershipGroupID][] = $contactID;
     }
 
     // Now deal with all the groupings that are mapped to CiviCRM groups for this list
@@ -130,12 +137,12 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       }
     }
 
-    // Remove contacts from groups, if anything to do.
+    // Add contacts to groups, if anything to do.
     foreach($groupContactAdditions as $groupID => $contactIDs ) {
       CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIDs, $groupID, 'Admin', 'Added');
     }
 
-    // Add contacts to groups, if anything to do.
+    // Remove contacts from groups, if anything to do.
     foreach($groupContactRemoves as $groupID => $contactIDs ) {
       CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Removed');
     }
