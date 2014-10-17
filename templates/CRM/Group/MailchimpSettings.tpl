@@ -40,7 +40,7 @@ cj( document ).ready(function() {
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Grouping']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").parent().parent().hide();
 
-    cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").closest('tr').next('tr').hide();
+    cj("input[data-crm-custom='Mailchimp_Settings:is_mc_update_grouping']").parent().parent().hide();
     cj("#mailchimp_list_tr").hide();
     cj("#mailchimp_group_tr").hide();
     cj("#is_mc_update_grouping_tr").hide();
@@ -53,7 +53,7 @@ cj( document ).ready(function() {
         cj("#mailchimp_list_tr").show();
         cj("#mailchimp_group_tr").hide();
         cj("#is_mc_update_grouping_tr").hide();
-        cj("#mailchimp_group").val('');
+        cj("#mailchimp_group").val('').trigger('change');
         cj("input:radio[name=is_mc_update_grouping][value=0]").prop('checked', true);
       } else if (intopt == 2) {
         cj("#mailchimp_list_tr").insertAfter(cj("#mc_integration_option_2"));
@@ -65,8 +65,8 @@ cj( document ).ready(function() {
         cj("#mailchimp_group_tr").hide();
         cj("#is_mc_update_grouping_tr").hide();
         cj("input:radio[name=is_mc_update_grouping][value=0]").prop('checked', true);
-        cj("#mailchimp_list").val('');
-        cj("#mailchimp_group").val('');
+        cj("#mailchimp_list").val('').trigger('change');
+        cj("#mailchimp_group").val('').trigger('change');
       }
     }).filter(':checked').trigger('change');
 
