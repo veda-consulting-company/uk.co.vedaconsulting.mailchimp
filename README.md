@@ -41,14 +41,25 @@ differentiate them from CiviCRM groups.
 
 Before the extension can be used you must set up your API keys...
 
-**veda todo**: how do people set up their API keys etc.
+To get your accounts API you should follow these instructions http://kb.mailchimp.com/accounts/management/about-api-keys
+
+Once you’ve setup your Mailchimp API key it can be added to CiviCRM through "Mailings >> Mailchimp Settings" screen, with url https://<<your_site>>/civicrm/mailchimp/settings?reset=1. Using “Save & Test” button will test that a connection can be made to your Mailchimp account, and if your API settings are correct.
 
 ## Basic Use
 
 In Mailchimp: Set up an empty list, lets call it Newsletter. You'll also need
 to set up this list's **Webhooks**.
 
-**todo veda** pls add in this detail for webhook set up.
+Steps to configure Mailchimp Webhook settings with the relevant CiviCRM Url:  
+1. To know the relevant CiviCRM url visit https://<<your_site>>/civicrm/mailchimp/settings?reset=1.  
+2. In the “Security Key” field entering a key would show the complete webhook url. Note down the complete url.  
+3. Make sure webhook url is accessible to public. If not, just make sure anonymous / public user has “allow webhook posts” permission.  
+4. Log in to your MailChimp account.  
+5. Navigate to your Lists.  
+6. Click Webhooks under Settings menu and Click ‘Add a New Webhook’ button.  
+7. Enter the CiviCRM Webhook URL, noted in #2 ( https://<<your_site>>/civicrm/mailchimp/webhook?reset=1&key=ABCD ) in Callback URL field.  
+8. Tick the relevant options for type of updates and when to send an update.  
+9. Click Save.      
 
 In CiviCRM: you need a group to track subscribers to your Mailchimp Newsletter
 List. You can create a new blank group, or choose an existing group (or smart
