@@ -148,5 +148,5 @@ Most Mailchimp changes are handled immediately via webhook. So it is now rare
 to need the Mailchimp to CiviCRM sync operation, whereas the CiviCRM to Mailchimp
 sync should become part of your pre-campaign sending preparation.
 
-(**todo** consider a cron job for this? but users should be aware of possible
-implications)
+In any case CiviCRM to Mailchimp sync process can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs.
+Note: Users should be aware of possible implications.
