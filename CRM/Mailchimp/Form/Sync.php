@@ -442,7 +442,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $membership_group_id = $group_id;
       }
       else {
-        $grouping_group_ids[ ($details['civigroup_is_smart'] ? 'smart' : 'normal') ][] = (int)$group_id;
+        $grouping_group_ids[ ($details['civigroup_uses_cache'] ? 'smart' : 'normal') ][] = (int)$group_id;
         $default_info[ $details['grouping_id'] ][ $details['group_id'] ] = FALSE;
       }
     }
