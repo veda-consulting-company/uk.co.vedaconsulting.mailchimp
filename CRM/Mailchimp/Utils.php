@@ -21,7 +21,7 @@ class CRM_Mailchimp_Utils {
    * - group_name (MC)
    * - grouping_name (MC)
    * - civigroup_title
-   * - civigroup_is_smart boolean
+   * - civigroup_uses_cache boolean
    *
    * @param $groupIDs mixed array of CiviCRM group Ids to fetch data for; or empty to return ALL mapped groups.
    * @param $mc_list_id mixed Fetch for a specific Mailchimp list only, or null.
@@ -64,7 +64,7 @@ class CRM_Mailchimp_Utils {
           'group_name'            => CRM_Mailchimp_Utils::getMCGroupName($dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id),
           'grouping_name'         => CRM_Mailchimp_Utils::getMCGroupingName($dao->mc_list_id, $dao->mc_grouping_id),
           'civigroup_title'       => $dao->civigroup_title,
-          'civigroup_is_smart'    => (bool) ($dao->saved_search_id > 0),
+          'civigroup_uses_cache'    => (bool) (($dao->saved_search_id > 0) || (bool) $dao->children),
         );
     }
     return $groups;
@@ -482,8 +482,8 @@ class CRM_Mailchimp_Utils {
     $group->find();
 
     if($group->fetch()){
-      //Check smart groups
-      if($group->saved_search_id){
+      //Check smart groups (including parent groups, which function as smart groups).
+      if($group->saved_search_id || $group->children){
         $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
         $groupContactCache->group_id = $groupID;
         if ($start !== null) {
