@@ -415,6 +415,18 @@ class CRM_Mailchimp_Utils {
    * Function to delete Mailchimp contact for given CiviCRM email ID
    */
   static function deleteMCEmail($emailId = array() ) {
+  
+    /*
+    modified by mathavan@vedaconsulting.co.uk
+    table name civicrm_mc_sync has no longer exist
+    and dont have leid, euid, list_id informations
+    so returning null to avoid the script
+    */
+
+    return NULL;
+
+    //end
+	
     if (empty($emailId)) {
       return NULL;
     }
@@ -427,7 +439,8 @@ class CRM_Mailchimp_Utils {
       $emailIds = implode(',', $emailId);      
       // @todo I think this code meant to include AND is_latest.
       // Looks very inefficient otherwise?
-      $query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC";
+	  #Mathavan@vedaconsulting.co.uk, commmenting the query, table no longer exist
+      //$query = "SELECT * FROM civicrm_mc_sync WHERE email_id IN ($emailIds) ORDER BY id DESC";
     }
     $dao = CRM_Core_DAO::executeQuery($query);       
         
