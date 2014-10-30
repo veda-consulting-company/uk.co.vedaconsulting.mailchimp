@@ -30,38 +30,6 @@ function mailchimp_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function mailchimp_civicrm_install() {
-  $parentId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailings', 'id', 'name');
-  $weight   = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'From Email Addresses', 'weight', 'name');
-
-  if ($parentId) {
-    $mailchimpMenuTree = 
-      array(
-        array(
-          'label' => ts('Mailchimp Settings'),
-          'name'  => 'Mailchimp_Settings',
-          'url'   => 'civicrm/mailchimp/settings&reset=1',
-        ),
-        array(
-          'label' => ts('Sync Civi Contacts To Mailchimp'),
-          'name'  => 'Mailchimp_Sync',
-          'url'   => 'civicrm/mailchimp/sync&reset=1',
-        ),
-        array(
-          'label' => ts('Sync Mailchimp Contacts To Civi‏'),
-          'name'  => 'Mailchimp_Pull',
-          'url'   => 'civicrm/mailchimp/pull&reset=1',
-        ),
-      );
-
-    foreach ($mailchimpMenuTree as $key => $menuItems) {
-      $menuItems['is_active'] = 1;
-      $menuItems['parent_id'] = $parentId;
-      $menuItems['weight']    = ++$weight;
-      $menuItems['permission'] = 'administer CiviCRM';
-      CRM_Core_BAO_Navigation::add($menuItems);
-    }
-    CRM_Core_BAO_Navigation::resetNavigation();
-  }
 
   // create a sync job
   $params = array(
@@ -84,20 +52,6 @@ function mailchimp_civicrm_install() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
  */
 function mailchimp_civicrm_uninstall() {
-  $mailchimpMenuItems = array(
-    'Mailchimp_Settings', 
-    'Mailchimp_Sync',
-    'Mailchimp_Pull',
-  );
-
-  foreach ($mailchimpMenuItems as $name) {
-    $itemId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', $name, 'id', 'name', TRUE);
-    if ($itemId) {
-      CRM_Core_BAO_Navigation::processDelete($itemId);
-    }
-  }
-  CRM_Core_BAO_Navigation::resetNavigation();
-
   return _mailchimp_civix_civicrm_uninstall();
 }
 
@@ -374,5 +328,59 @@ function mailchimp_civicrm_permission( &$permissions ) {
   $prefix = ts('Mailchimp') . ': '; // name of extension or module
   $permissions = array(
     'allow webhook posts' => $prefix . ts('allow webhook posts'),
+  );
+}
+
+/**
+ * Added by Mathavan@vedaconsulting.co.uk to fix the navigation Menu URL
+ * Implementation of hook_civicrm_navigationMenu
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
+ */
+function mailchimp_civicrm_navigationMenu(&$params){
+  $parentId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailings', 'id', 'name');
+  $mailchimpSettings  = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Settings', 'id', 'name');
+  $mailchimpSync      = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Sync', 'id', 'name');
+  $mailchimpPull      = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Pull', 'id', 'name');
+  $maxId              = max(array_keys($params));
+  $mailChimpMaxId     = empty($mailchimpSettings) ? $maxId+1           : $mailchimpSettings;
+  $mailChimpsyncId    = empty($mailchimpSync)     ? $mailChimpMaxId+1  : $mailchimpSync;
+  $mailChimpPullId    = empty($mailchimpPull)     ? $mailChimpsyncId+1 : $mailchimpPull;
+
+
+  $params[$parentId]['child'][$mailChimpMaxId] = array(
+        'attributes' => array(
+          'label'     => ts('Mailchimp Settings'),
+          'name'      => 'Mailchimp_Settings',
+          'url'       => CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1', TRUE),
+          'active'    => 1,
+          'parentID'  => $parentId,
+          'operator'  => NULL,
+          'navID'     => $mailChimpMaxId,
+          'permission'=> 'administer CiviCRM',
+        ),
+  );
+  $params[$parentId]['child'][$mailChimpsyncId] = array(
+        'attributes' => array(
+          'label'     => ts('Sync Civi Contacts To Mailchimp'),
+          'name'      => 'Mailchimp_Sync',
+          'url'       => CRM_Utils_System::url('civicrm/mailchimp/sync', 'reset=1', TRUE),
+          'active'    => 1,
+          'parentID'  => $parentId,
+          'operator'  => NULL,
+          'navID'     => $mailChimpsyncId,
+          'permission'=> 'administer CiviCRM',
+        ),
+  );
+  $params[$parentId]['child'][$mailChimpPullId] = array(
+        'attributes' => array(
+          'label'     => ts('Sync Mailchimp Contacts To Civi‏'),
+          'name'      => 'Mailchimp_Pull',
+          'url'       => CRM_Utils_System::url('civicrm/mailchimp/pull', 'reset=1', TRUE),
+          'active'    => 1,
+          'parentID'  => $parentId,
+          'operator'  => NULL,
+          'navID'     => $mailChimpPullId,
+          'permission'=> 'administer CiviCRM',
+        ),
   );
 }
