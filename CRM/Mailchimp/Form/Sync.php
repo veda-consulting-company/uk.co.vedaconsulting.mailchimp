@@ -517,8 +517,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
       // we're ready to store this but we need a hash that contains all the info
       // for comparison with the hash created from the CiviCRM data (elsewhere).
-      //          email,           first name,      last name,      groupings
-      $hash = md5($email->email . $contact->first_name . $contact->last_name . $info);
+      //          emailId,          email,           first name,      last name,      groupings
+      $hash = md5($email->id . $email->email . $contact->first_name . $contact->last_name . $info);
       // run insert prepared statement
       $db->execute($insert, array($contact->id, $email->email, $contact->first_name, $contact->last_name, $hash, $info));
     }
