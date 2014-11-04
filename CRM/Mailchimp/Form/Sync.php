@@ -286,8 +286,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     static::updatePushStats($stats);
     // Finally, finish up by removing the two temporary tables
-    CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
-    CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
+   CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
+   CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
 
     return CRM_Queue_Task::TASK_SUCCESS;
   }
@@ -415,16 +415,17 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_c;");
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
+        email_id INT(10) UNSIGNED NOT NULL,
         email VARCHAR(200),
         first_name VARCHAR(100),
         last_name VARCHAR(100),
         hash CHAR(32),
         groupings VARCHAR(4096),
-        PRIMARY KEY (email, hash)
+        PRIMARY KEY (email_id, email, hash)
         );");
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
+    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?, ?)');
 
     // We need to know what groupings we have maps to.
     // We only care about CiviCRM groups that are mapped to this MC List:
@@ -520,7 +521,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       //          email,           first name,      last name,      groupings
       $hash = md5($email->email . $contact->first_name . $contact->last_name . $info);
       // run insert prepared statement
-      $db->execute($insert, array($contact->id, $email->email, $contact->first_name, $contact->last_name, $hash, $info));
+      $db->execute($insert, array($contact->id, $email->id, $email->email, $contact->first_name, $contact->last_name, $hash, $info));
     }
 
     // Tidy up.
