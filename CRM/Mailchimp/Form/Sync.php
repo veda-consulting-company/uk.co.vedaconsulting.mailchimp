@@ -286,8 +286,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     static::updatePushStats($stats);
     // Finally, finish up by removing the two temporary tables
- //   CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
- //   CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
+   CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
+   CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
 
     return CRM_Queue_Task::TASK_SUCCESS;
   }
