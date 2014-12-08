@@ -177,3 +177,18 @@ function civicrm_api3_mailchimp_sync($params) {
     return civicrm_api3_create_error();
   }
 }
+
+function civicrm_api3_mailchimp_pull($params) {
+  $result = array();
+  $runner = CRM_Mailchimp_Form_Pull::getRunner($params);
+  if ($runner) {
+    $result = $runner->runAll();
+  }
+
+  if ($result['is_error'] == 0) {
+    return civicrm_api3_create_success();
+  }
+  else {
+    return civicrm_api3_create_error();
+  }
+}
