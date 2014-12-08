@@ -32,6 +32,8 @@ the word Group, too! Here I will stick to calling the Mailchimp fields
 "Interest Groupings" which each contain a number of "Mailchimp Groups", to
 differentiate them from CiviCRM groups.
 
+**Note: Before you do any sync make sure to backup your mailchimp and civicrm contacts.**  
+
 ## How to Install
 
 1. Download extension from https://github.com/veda-consulting/uk.co.vedaconsulting.mailchimp/releases/latest.
@@ -150,3 +152,5 @@ sync should become part of your pre-campaign sending preparation.
 
 In any case CiviCRM to Mailchimp sync process can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs.
 Note: Users should be aware of possible implications.
+
+**Note: Before you do any sync make sure to backup your mailchimp and civicrm contacts.**  
