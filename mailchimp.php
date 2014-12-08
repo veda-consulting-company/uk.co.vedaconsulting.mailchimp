@@ -47,7 +47,7 @@ function mailchimp_civicrm_install() {
   $params = array(
     'sequential' => 1,
     'name'          => 'Mailchimp Pull',
-    'description'   => 'Sync contacts from mailchimp to civi.',
+    'description'   => 'Pull contacts from mailchimp to civi.',
     'run_frequency' => 'Daily',
     'api_entity'    => 'Mailchimp',
     'api_action'    => 'pull',

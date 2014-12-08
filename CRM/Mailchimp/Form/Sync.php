@@ -216,6 +216,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       return CRM_Queue_Task::TASK_SUCCESS;
     }
 
+    // Log the batch unsubscribe details
+    CRM_Core_Error::debug_var( 'Mailchimp batchUnsubscribe $listID= ', $listID);
+    CRM_Core_Error::debug_var( 'Mailchimp batchUnsubscribe $batch= ', $batch);
+    
     // Send Mailchimp Lists API Call: http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
     $result = $list->batchUnsubscribe( $listID, $batch, $delete=FALSE, $send_bye=FALSE, $send_notify=FALSE);
@@ -276,6 +280,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       return CRM_Queue_Task::TASK_SUCCESS;
     }
 
+    // Log the batch subscribe details
+    CRM_Core_Error::debug_var( 'Mailchimp batchSubscribe $listID= ', $listID);
+    CRM_Core_Error::debug_var( 'Mailchimp batchSubscribe $batch= ', $batch);
+    
     // Send Mailchimp Lists API Call.
     // http://apidocs.mailchimp.com/api/2.0/lists/batch-subscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());

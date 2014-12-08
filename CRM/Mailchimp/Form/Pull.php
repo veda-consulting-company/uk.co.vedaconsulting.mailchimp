@@ -246,7 +246,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       $groupContactRemoves[$membership_group_id][] =$dao->contact_id;
       $stats[$listID]['removed']++;
     }
-
+    // Log group contacts which are going to be added to CiviCRM
+    CRM_Core_Error::debug_var( 'Mailchimp $groupContact= ', $groupContact);
+    
     if ($groupContact) {
       // We have some contacts to add into groups...
       foreach($groupContact as $groupID => $contactIDs ) {
@@ -254,6 +256,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       }
     }
 
+    // Log group contacts which are going to be removed from CiviCRM
+    CRM_Core_Error::debug_var( 'Mailchimp $groupContactRemoves= ', $groupContactRemoves);
+    
     if ($groupContactRemoves) {
       // We have some contacts to add into groups...
       foreach($groupContactRemoves as $groupID => $contactIDs ) {
