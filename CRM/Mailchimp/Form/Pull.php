@@ -195,40 +195,42 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       );
       // Update/create contact.
       $contact_id = CRM_Mailchimp_Utils::updateContactDetails($params);
+      if($contact_id) {
 
-      // Ensure the contact is in the membership group.
-      if (!$dao->c_groupings) {
-        // This contact was not found in the CiviCRM table.
-        // Therefore they are not in the membership group.
-        // (actually they could have an email problem as well, but that's OK).
-        // Add them into the membership group.
-        $groupContact[$membership_group_id][] = $contact_id;
-        $civi_groupings = array();
-        $stats[$listID]['added']++;
-      }
-      else {
-        // This contact is in C and MC, but has differences.
-        // unpack the group membership from CiviCRM.
-        $civi_groupings = unserialize($dao->c_groupings);
-      }
-      // unpack the group membership reported by MC
-      $mc_groupings = unserialize($dao->groupings);
-
-      // Now sort out the grouping_groups for those we are supposed to allow updates for
-      foreach ($updatable_grouping_groups as $groupID=>$details) {
-        // Should this person be in this grouping:group according to MC?
-        if (!empty($mc_groupings[ $details['grouping_id'] ][ $details['group_id'] ])) {
-          // They should be in this group.
-          if (empty($civi_groupings[ $details['grouping_id'] ][ $details['group_id'] ])) {
-            // But they're not! Plan to add them in.
-            $groupContact[$groupID][] = $contact_id;
-          }
+        // Ensure the contact is in the membership group.
+        if (!$dao->c_groupings) {
+          // This contact was not found in the CiviCRM table.
+          // Therefore they are not in the membership group.
+          // (actually they could have an email problem as well, but that's OK).
+          // Add them into the membership group.
+          $groupContact[$membership_group_id][] = $contact_id;
+          $civi_groupings = array();
+          $stats[$listID]['added']++;
         }
         else {
-          // They should NOT be in this group.
-          if (!empty($civi_groupings[ $details['grouping_id'] ][ $details['group_id'] ])) {
-            // But they ARE. Plan to remove them.
-            $groupContactRemoves[$groupID][] = $contact_id;
+          // This contact is in C and MC, but has differences.
+          // unpack the group membership from CiviCRM.
+          $civi_groupings = unserialize($dao->c_groupings);
+        }
+        // unpack the group membership reported by MC
+        $mc_groupings = unserialize($dao->groupings);
+
+        // Now sort out the grouping_groups for those we are supposed to allow updates for
+        foreach ($updatable_grouping_groups as $groupID=>$details) {
+          // Should this person be in this grouping:group according to MC?
+          if (!empty($mc_groupings[ $details['grouping_id'] ][ $details['group_id'] ])) {
+            // They should be in this group.
+            if (empty($civi_groupings[ $details['grouping_id'] ][ $details['group_id'] ])) {
+              // But they're not! Plan to add them in.
+              $groupContact[$groupID][] = $contact_id;
+            }
+          }
+          else {
+            // They should NOT be in this group.
+            if (!empty($civi_groupings[ $details['grouping_id'] ][ $details['group_id'] ])) {
+              // But they ARE. Plan to remove them.
+              $groupContactRemoves[$groupID][] = $contact_id;
+            }
           }
         }
       }
