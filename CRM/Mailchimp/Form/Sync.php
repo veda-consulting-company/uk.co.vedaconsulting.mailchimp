@@ -438,7 +438,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // We need to know what groupings we have maps to.
     // We only care about CiviCRM groups that are mapped to this MC List:
     $mapped_groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID);
-
+    
     // First, get all subscribers from the membership group for this list.
     // ... Find CiviCRM group id for the membership group.
     // ... And while we're at it, build an SQL-safe array of groupIds for groups mapped to groupings.
@@ -447,6 +447,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     $grouping_group_ids = array('normal'=>array(),'smart'=>array());
     $default_info = array();
     foreach ($mapped_groups as $group_id => $details) {
+      CRM_Contact_BAO_GroupContactCache::loadAll($group_id);
       if (!$details['grouping_id']) {
         $membership_group_id = $group_id;
       }
