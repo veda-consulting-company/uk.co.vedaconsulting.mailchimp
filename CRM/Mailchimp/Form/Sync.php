@@ -218,7 +218,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // Send Mailchimp Lists API Call: http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-    $result = $list->batchUnsubscribe( $listID, $batch, $delete=TRUE, $send_bye=FALSE, $send_notify=FALSE);
+    $result = $list->batchUnsubscribe( $listID, $batch, $delete=FALSE, $send_bye=FALSE, $send_notify=FALSE);
 
     // @todo check errors? $result['errors'] $result['success_count']
 
