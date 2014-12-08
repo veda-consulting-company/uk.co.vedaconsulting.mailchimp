@@ -144,9 +144,9 @@ immediately processes changes made from the Mailchimp end.
 
 ## Sync - which way?
 
-Most Mailchimp changes are handled immediately via webhook. So it is now rare
-to need the Mailchimp to CiviCRM sync operation, whereas the CiviCRM to Mailchimp
-sync should become part of your pre-campaign sending preparation.
+If you are integrating Mailchimp account thats been there for a while (lots of contacts), with a relatively new CiviCRM setup (less or no contacts), might want to do mailchimp to civicrm sync first (aka pull). Any updates to Mailchimp after that would immediately be handled via webhooks. And updates to CiviCRM could be passed onto Mailchimp via Civi to Mailchimp Sync.
+
+In other words, most Mailchimp changes are handled immediately via webhook. So it is now rare to need the Mailchimp to CiviCRM sync operation, whereas the CiviCRM to Mailchimp sync should become part of your pre-campaign sending preparation.
 
 In any case CiviCRM to Mailchimp sync process can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs. **Note:** Users should be aware of possible implications. For e.g running a Civi to Mailchimp sync, from an empty civicrm group to a mailchimp list with some data, could unsubscribe / wipe-out all the contacts from mailchimp list. 
 
