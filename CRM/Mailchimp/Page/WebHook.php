@@ -120,8 +120,9 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
      */
     $mcGroupings = array();
     foreach (empty($requestData['merges']['GROUPINGS']) ? array() : $requestData['merges']['GROUPINGS'] as $grouping) {
-      foreach (explode(', ', $grouping['groups']) as $group);
-      $mcGroupings[$grouping['id']][$group] = 1;
+      foreach (explode(', ', $grouping['groups']) as $group){
+        $mcGroupings[$grouping['id']][$group] = 1;
+      }
     }
 
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID, $membership_only=FALSE);
