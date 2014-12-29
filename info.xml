@@ -8,8 +8,8 @@
     <author>Deepak Srivastava, Rajesh Sundararajan, Kajan, Parvez Saleh and Rich Lott (Artful Robot)</author>
     <email>support@vedaconsulting.co.uk</email>
   </maintainer>
-  <releaseDate>2014-12-08</releaseDate>
-  <version>1.5</version>
+  <releaseDate>2014-12-29</releaseDate>
+  <version>1.6</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.4</ver>
