@@ -164,13 +164,21 @@ function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_sync($params) {
-  $result = array();
-  $runner = CRM_Mailchimp_Form_Sync::getRunner($params);
+  $result = $pullResult = array();
+	
+	// Do pull first from mailchimp to CiviCRM
+	$pullRunner = CRM_Mailchimp_Form_Pull::getRunner($skipEndUrl = TRUE);
+	if ($pullRunner) {
+    $pullResult = $pullRunner->runAll();
+  }
+	
+	// Do push from CiviCRM to mailchimp 
+  $runner = CRM_Mailchimp_Form_Sync::getRunner($skipEndUrl = TRUE);
   if ($runner) {
     $result = $runner->runAll();
   }
 
-  if ($result['is_error'] == 0) {
+  if ($pullResult['is_error'] == 0 && $result['is_error'] == 0) {
     return civicrm_api3_create_success();
   }
   else {
@@ -178,7 +186,7 @@ function civicrm_api3_mailchimp_sync($params) {
   }
 }
 
-function civicrm_api3_mailchimp_pull($params) {
+/*function civicrm_api3_mailchimp_pull($params) {
   $result = array();
   $runner = CRM_Mailchimp_Form_Pull::getRunner($params);
   if ($runner) {
@@ -191,4 +199,4 @@ function civicrm_api3_mailchimp_pull($params) {
   else {
     return civicrm_api3_create_error();
   }
-}
+}*/

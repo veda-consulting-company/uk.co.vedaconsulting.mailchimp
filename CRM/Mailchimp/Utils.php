@@ -552,4 +552,83 @@ class CRM_Mailchimp_Utils {
     }
     return FALSE;
   }
+  
+  /*
+   * Function to subscribe/unsubscribe civicrm contact in Mailchimp list
+	 *
+	 * $groupDetails - Array
+	 *	(
+	 *			[list_id] => ec641f8988
+	 *		  [grouping_id] => 14397
+	 *			[group_id] => 35609
+	 *			[is_mc_update_grouping] => 
+	 *			[group_name] => 
+	 *			[grouping_name] => 
+	 *			[civigroup_title] => Easter Newsletter
+	 *			[civigroup_uses_cache] => 
+	 * )
+	 * 
+	 * $action - subscribe/unsubscribe
+   */
+  static function subscribeOrUnsubsribeToMailchimpList($groupDetails, $contactID, $action) {
+	
+    if (empty($groupDetails) || empty($contactID) || empty($action)) {
+      return NULL;
+    }
+    
+    // We need to get contact's email before subscribing in Mailchimp
+		$contactParams = array(
+			'version'       => 3,
+			'id'  					=> $contactID,
+		);
+		$contactResult = civicrm_api('Contact' , 'get' , $contactParams);
+		// This is the primary email address of the contact
+		$email = $contactResult['values'][$contactID]['email'];
+		
+		if (empty($email)) {
+			// Its possible to have contacts in CiviCRM without email address
+			// and add to group offline
+			return;
+		}
+		
+		// Optional merges for the email (FNAME, LNAME)
+		$merge = array(
+			'FNAME' => $contactResult['values'][$contactID]['first_name'],
+			'LNAME' => $contactResult['values'][$contactID]['last_name'],
+		);
+	
+		$listID = $groupDetails['list_id'];
+		$grouping_id = $groupDetails['grouping_id'];
+		$group_id = $groupDetails['group_id'];
+		if (!empty($grouping_id) AND !empty($group_id)) {
+			$merge_groups[$grouping_id] = array('id'=> $groupDetails['grouping_id'], 'groups'=>array());
+			$merge_groups[$grouping_id]['groups'][] = CRM_Mailchimp_Utils::getMCGroupName($listID, $grouping_id, $group_id);
+			
+			// remove the significant array indexes, in case Mailchimp cares.
+			$merge['groupings'] = array_values($merge_groups);
+		}
+		
+		// Send Mailchimp Lists API Call.
+		$list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+		switch ($action) {
+			case "subscribe":
+				// http://apidocs.mailchimp.com/api/2.0/lists/subscribe.php
+				try {
+					$result = $list->subscribe($listID, array('email' => $email), $merge, $email_type='html', $double_optin=FALSE, $update_existing=FALSE, $replace_interests=TRUE, $send_welcome=FALSE);
+				}
+				catch (Exception $e) {
+					CRM_Core_Session::setStatus($e->getMessage());
+				}
+				break;
+			case "unsubscribe":
+				// https://apidocs.mailchimp.com/api/2.0/lists/unsubscribe.php
+				try {
+					$result = $list->unsubscribe($listID, array('email' => $email), $delete_member=false, $send_goodbye=false, $send_notify=false);
+				}
+				catch (Exception $e) {
+					CRM_Core_Session::setStatus($e->getMessage());
+				}
+				break;
+		}
+  }
 }

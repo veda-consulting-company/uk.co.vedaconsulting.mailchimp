@@ -55,6 +55,22 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     }
     return TRUE;
   }
+  
+  /**
+   * Upgrading to version 1.7
+   *
+   * @return TRUE on success
+   * @throws Exception
+   */
+  public function upgrade_17() {
+    $this->ctx->log->info('Applying update v1.7');
+		
+		// Disabled the pull cron job, as we have moved the pull and push to same cron job
+		$query = "DELETE FROM civicrm_job WHERE api_entity = 'Mailchimp' AND api_action = 'pull'";
+    CRM_Core_DAO::executeQuery($query);
+		
+    return TRUE;
+  }
 
   /**
    * Example: Run an external SQL script
