@@ -1,12 +1,12 @@
 uk.co.vedaconsulting.mailchimp
 ==============================
 
-The new extension builds on the existing work done by the science gallery, adding the ability to pick the Mailchimp List the CiviCRM group should be integrated to aswell as making the entire process a much simpler one to setup.
+The new extension builds on the existing work done by the science gallery, adding the ability to pick the Mailchimp List the CiviCRM group should be integrated to as well as making the entire process a much simpler one to setup.
 
 For each Mailchimp list that you want to integrate, you set up a CiviCRM group.
 This will control the subscribers in that list. Add contacts to the group in
 CiviCRM and after pushing the sync button, those will be subscribed to your Mailchimp
-list. Remove contacts from the group in CiviCRM and they sync will unsubscribe
+list. If you remove contacts from the group in CiviCRM, the sync will unsubscribe
 them at Mailchimp. If anyone clicks an unsubscribe link in a Mailchimp email,
 they are automatically removed from your CiviCRM group.
 
@@ -26,7 +26,7 @@ It's up to you to set up your Mailchimp Interest Groupings so that this fieldset
 is hidden from subscribers, but then you can just link a CiviCRM group to
 one of those. These groups will never update from Mailchimp to CiviCRM.
 
-Nb. Mailchimp sometimes calls Interest Groupings just "Groups", which gets
+NB Mailchimp sometimes calls Interest Groupings just "Groups", which gets
 very confusing because you have Groups of Groups, and of course CiviCRM uses
 the word Group, too! Here I will stick to calling the Mailchimp fields
 "Interest Groupings" which each contain a number of "Mailchimp Groups", to
@@ -52,8 +52,8 @@ to set up this list's **Webhooks**.
 
 Steps to configure Mailchimp Webhook settings with the relevant CiviCRM Url:  
 1. To know the relevant CiviCRM url visit https://<<your_site>>/civicrm/mailchimp/settings?reset=1.  
-2. In the “Security Key” field entering a key would show the complete webhook url. Note down the complete url.  
-3. Make sure webhook url is accessible to public. If not, just make sure anonymous / public user has “allow webhook posts” permission.  
+2. In the “Security Key” field entering a key shows the complete webhook url. Note down the complete url.  
+3. Make sure webhook url is accessible to public. If not, just make sure anonymous / public user has “allow webhook posts” permission.
 4. Log in to your MailChimp account.  
 5. Navigate to your Lists.  
 6. Click Webhooks under Settings menu and Click ‘Add a New Webhook’ button.  
@@ -82,14 +82,14 @@ So for our example, with an empty Mailchimp list and a CiviCRM newsletter group
 with contacts in, you'll find the **CiviCRM to Mailchimp Sync** function in the
 **Mailings** menu.
 
-Push the Sync button and after a while (it can take a while for a large
+Push the Sync button and after a while (for a large
 list/group) you should see a summary screen.
 
 ### From here on...
 
 Any un/subscribes from the Mailchimp end will be handled (almost) instantly
-using the webhook. However changes at the CiviCRM end must be manually sync
-(sunk?) up to Mailchimp, e.g. before you do a new mailing campaign. There are
+using the webhook. However changes at the CiviCRM end must be manually sync'd
+up to Mailchimp, e.g. before you do a new mailing campaign. There are
 several good reasons why this manual button pressing is necessary, not least
 that it is how Mailchimp request it be done. Basically there are many ways
 that CiviCRM group membership can be changed, including bulk updates, and
@@ -105,7 +105,7 @@ they have to ensure their service is not used by spammers. However it's an awkwa
 feature for the general integration case. The only way to re-subscribe someone
 who previously unsubscribed is to first delete them from the Mailchimp list.
 
-We have a "coming soon" feature that will give you the option to force
+We have an upcoming feature that will give you the option to force
 a CiviCRM to Mailchimp sync which will automatically do the necessary deletions,
 but this is not included in the current version. Watch this space.
 
@@ -144,13 +144,13 @@ immediately processes changes made from the Mailchimp end.
 
 ## Sync - which way?
 
-If you are integrating Mailchimp account thats been there for a while (lots of contacts), with a relatively new CiviCRM setup (less or no contacts), might want to do mailchimp to civicrm sync first (aka pull). Any updates to Mailchimp after that would immediately be handled via webhooks. And updates to CiviCRM could be passed onto Mailchimp via Civi to Mailchimp Sync.
+If you are integrating Mailchimp account that's been there for a while (lots of contacts), with a relatively new CiviCRM setup (less or no contacts), might want to do mailchimp to civicrm sync first (aka pull). Any updates to Mailchimp after that would immediately be handled via webhooks. And updates to CiviCRM could be passed onto Mailchimp via Civi to Mailchimp Sync.
 
 In other words, most Mailchimp changes are handled immediately via webhook. So it is now rare to need the Mailchimp to CiviCRM sync operation, whereas the CiviCRM to Mailchimp sync should become part of your pre-campaign sending preparation.
 
-In any case CiviCRM to Mailchimp sync process can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs. **Note:** Users should be aware of possible implications. For e.g running a Civi to Mailchimp sync, from an empty civicrm group to a mailchimp list with some data, could unsubscribe / wipe-out all the contacts from mailchimp list. 
+In any case CiviCRM to Mailchimp sync process can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs. **Note:** Users should be aware of possible implications. For example, running a Civi to Mailchimp sync, from an empty civicrm group to a mailchimp list with some data, could unsubscribe / wipe-out all the contacts from mailchimp list. 
 
-Version 1.5 and above also ships a scheduled job for "Mailchimp Pull".  
+Version 1.5 and above also ships a scheduled job for "Mailchimp Pull".
 
 
 **Note: Before you do any sync make sure to backup your mailchimp and civicrm contacts.**  
