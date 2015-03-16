@@ -72,7 +72,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     }
   }
 
-  static function getRunner() {
+  static function getRunner($skipEndUrl = FALSE) {
     // Setup the Queue
     $queue = CRM_Queue_Service::singleton()->create(array(
       'name'  => self::QUEUE_NAME,
@@ -115,12 +115,18 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     }
 
     // Setup the Runner
-    $runner = new CRM_Queue_Runner(array(
+		$runnerParams = array(
       'title' => ts('Mailchimp Sync: CiviCRM to Mailchimp'),
       'queue' => $queue,
       'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
-    ));
+    );
+		// Skip End URL to prevent redirect
+		// if calling from cron job
+		if ($skipEndUrl == TRUE) {
+			unset($runnerParams['onEndUrl']);
+		}
+    $runner = new CRM_Queue_Runner($runnerParams);
 
     static::updatePushStats($stats);
 

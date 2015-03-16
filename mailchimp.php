@@ -31,11 +31,11 @@ function mailchimp_civicrm_xmlMenu(&$files) {
  */
 function mailchimp_civicrm_install() {
 
-  // create a sync job
+  // Create a cron job to do sync data between CiviCRM and MailChimp.
   $params = array(
     'sequential' => 1,
     'name'          => 'Mailchimp Sync',
-    'description'   => 'Sync contacts from civi to mailchimp.',
+    'description'   => 'Sync contacts between CiviCRM and MailChimp. Pull from mailchimp is performed before push.',
     'run_frequency' => 'Daily',
     'api_entity'    => 'Mailchimp',
     'api_action'    => 'sync',
@@ -43,8 +43,8 @@ function mailchimp_civicrm_install() {
   );
   $result = civicrm_api3('job', 'create', $params);
   
-   // create a pull job
-  $params = array(
+  // create a pull job
+  /*$params = array(
     'sequential' => 1,
     'name'          => 'Mailchimp Pull',
     'description'   => 'Pull contacts from mailchimp to civi.',
@@ -53,7 +53,7 @@ function mailchimp_civicrm_install() {
     'api_action'    => 'pull',
     'is_active'     => 0,
   );
-  $result = civicrm_api3('job', 'create', $params);
+  $result = civicrm_api3('job', 'create', $params);*/
 
   return _mailchimp_civix_civicrm_install();
 }
@@ -395,4 +395,73 @@ function mailchimp_civicrm_navigationMenu(&$params){
           'permission'=> 'administer CiviCRM',
         ),
   );
+}
+
+/**
+ * Implementation of hook_civicrm_post
+ *
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
+ */
+function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
+	
+	/***** NO BULK EMAILS (User Opt Out) *****/
+	if ($objectName == 'Individual' || $objectName == 'Organization' || $objectName == 'Household') {
+		// Contact Edited
+		if ($op == 'edit') {
+			if($objectRef->is_opt_out == 1) {
+				$action = 'unsubscribe';
+			} else {
+				$action = 'subscribe';
+			}
+			
+			// Get all groups, the contact is subscribed to
+			$civiGroups = CRM_Contact_BAO_GroupContact::getGroupList($objectId);
+			$civiGroups = array_keys($civiGroups);
+			
+			// Get mailchimp details
+			$groups = CRM_Mailchimp_Utils::getGroupsToSync($civiGroups);
+			
+			if (!empty($groups)) {
+				// Loop through all groups and unsubscribe the email address from mailchimp
+				foreach ($groups as $groupId => $groupDetails) {
+					CRM_Mailchimp_Utils::subscribeOrUnsubsribeToMailchimpList($groupDetails, $objectId, $action);
+				}
+			}
+		}
+	}
+
+	/***** Contacts added/removed/deleted from CiviCRM group *****/
+	if ($objectName == 'GroupContact') {
+		
+    // FIXME: Dirty hack to skip hook
+		require_once 'CRM/Core/Session.php';
+    $session = CRM_Core_Session::singleton();
+    $skipPostHook = $session->get('skipPostHook');
+	
+		// Added/Removed/Deleted - This works for both bulk action and individual add/remove/delete
+		if (($op == 'create' || $op == 'edit' || $op == 'delete') && empty($skipPostHook)) {
+			// Decide mailchimp action based on $op
+			// Add / Rejoin Group
+			if ($op == 'create' || $op == 'edit') {
+				$action = 'subscribe';
+			}
+			// Remove / Delete
+			elseif ($op == 'delete') {
+				$action = 'unsubscribe';
+			}
+		
+			// Get mailchimp details for the group
+			$groups = CRM_Mailchimp_Utils::getGroupsToSync(array($objectId));
+			
+			// Proceed only if the group is configured with mailing list/groups
+			if (!empty($groups[$objectId])) {
+			
+				// Loop through all contacts added/removed from the group
+				foreach ($objectRef as $contactId) {
+					// Subscribe/Unsubscribe in Mailchimp
+					CRM_Mailchimp_Utils::subscribeOrUnsubsribeToMailchimpList($groups[$objectId], $contactId, $action);
+				}
+			}
+		}		
+	}
 }

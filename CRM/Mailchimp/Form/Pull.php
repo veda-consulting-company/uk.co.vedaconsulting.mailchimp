@@ -55,7 +55,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     }
   }
 
-  static function getRunner() {
+  static function getRunner($skipEndUrl = FALSE) {
     // Setup the Queue
     $queue = CRM_Queue_Service::singleton()->create(array(
       'name'  => self::QUEUE_NAME,
@@ -96,12 +96,18 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       $queue->createItem($task);
     }
     // Setup the Runner
-    $runner = new CRM_Queue_Runner(array(
+		$runnerParams = array(
       'title' => ts('Import From Mailchimp'),
       'queue' => $queue,
       'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
-    ));
+    );
+		// Skip End URL to prevent redirect
+		// if calling from cron job
+		if ($skipEndUrl == TRUE) {
+			unset($runnerParams['onEndUrl']);
+		}
+    $runner = new CRM_Queue_Runner($runnerParams);
     static::updatePullStats($stats);
     return $runner;
   }
@@ -250,6 +256,11 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
     }
     // Log group contacts which are going to be added to CiviCRM
     CRM_Core_Error::debug_var( 'Mailchimp $groupContact= ', $groupContact);
+
+    // FIXME: dirty hack setting a variable in session to skip post hook
+		require_once 'CRM/Core/Session.php';
+    $session = CRM_Core_Session::singleton();
+    $session->set('skipPostHook', 'yes');
     
     if ($groupContact) {
       // We have some contacts to add into groups...
@@ -267,6 +278,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Removed');
       }
     }
+    
+    // FIXME: unset variable in session
+		$session->set('skipPostHook', '');
 
     static::updatePullStats($stats);
     // Finally, finish up by removing the two temporary tables
