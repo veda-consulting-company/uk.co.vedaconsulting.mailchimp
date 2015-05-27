@@ -52,6 +52,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       'size' => 24,
     ));
     
+    // Add Enable or Disable Debugging
+    $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
+    $this->addRadio('enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
+    
     // Create the Submit Button.
     $buttons = array(
       array(
@@ -102,8 +106,11 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       CRM_Core_BAO_Setting::setItem($params['security_key'],
         self::MC_SETTING_GROUP,
         'security_key'
-      );  
-      
+      );
+
+      CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging'
+      );
+
       try {
         $mcClient = new Mailchimp($params['api_key']);
         $mcHelper = new Mailchimp_Helper($mcClient);
@@ -127,3 +134,5 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     }
   }
 }
+
+  

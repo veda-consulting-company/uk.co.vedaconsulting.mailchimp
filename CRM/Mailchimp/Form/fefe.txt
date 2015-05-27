@@ -1,0 +1,5550 @@
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Form_Sync getRunner $skipEndUrl=  = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id is not set
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:15  [info] $Middle-CRM_Mailchimp_Form_Sync getRunner $groups=  = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:15  [info] $get group iddd=  = 7
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 7
+        )
+
+)
+
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 7
+        )
+
+)
+
+
+May 25 18:33:15  [info] $updateee=  is not set
+
+May 25 18:33:15  [info] $iddddddddddddddd= = 7
+
+May 25 18:33:15  [info] $iddddddddddddddd= = 7
+
+May 25 18:33:15  [info] $iddddddddddddddd= = 7
+
+May 25 18:33:15  [info] $get group iddd=  = 13
+
+May 25 18:33:15  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 13
+        )
+
+)
+
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 13
+        )
+
+)
+
+
+May 25 18:33:15  [info] $updateee=  is not set
+
+May 25 18:33:15  [info] $iddddddddddddddd= = 13
+
+May 25 18:33:15  [info] $iddddddddddddddd= = 13
+
+May 25 18:33:15  [info] $iddddddddddddddd= = 13
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Form_Sync getRunner $identifier=  = List 2 new friday test group
+
+May 25 18:33:15  [info] $End-CRM_Mailchimp_Form_Sync getRunner $runner=  = CRM_Queue_Runner Object
+(
+    [title] => Mailchimp Sync: CiviCRM to Mailchimp
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [errorMode] => 2
+    [isMinimal] => 
+    [onEnd] => 
+    [onEndUrl] => http://mailchimp.vedaconsulting.co.uk/civicrm/mailchimp/sync?state=done
+    [pathPrefix] => civicrm/queue
+    [qrid] => mc-sync
+    [buttons] => Array
+        (
+            [retry] => 1
+            [skip] => 1
+        )
+
+    [taskCtx] => 
+)
+
+
+May 25 18:33:19  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 0e2511b5240dcd2409344fc0b292f5ce
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:19  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $listID=  = cf31312060
+
+May 25 18:33:19  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 1 mailchim_group
+
+May 25 18:33:19  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #219
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 0e2511b5240dcd2409344fc0b292f5ce
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:19  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $listID=  = cf31312060
+
+May 25 18:33:19  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 1 mailchim_group
+
+May 25 18:33:20  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 153f43d79c13a0a65b4947827248dd59
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:20  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $listID=  = d93d0dd997
+
+May 25 18:33:20  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 2 new friday test group
+
+May 25 18:33:20  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #219
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 153f43d79c13a0a65b4947827248dd59
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:20  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $listID=  = d93d0dd997
+
+May 25 18:33:20  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 2 new friday test group
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 64ead7a8bf4cdf1337902b77debf8313
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = cf31312060
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = cf31312060
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:21  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = cf31312060
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:22  [info] $CRM_Mailchimp_Form_Sync syncCollectMailchimp $mapped_groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+        )
+
+)
+
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+        )
+
+)
+
+
+May 25 18:33:22  [info] $updateee=  is not set
+
+May 25 18:33:22  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #265
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 64ead7a8bf4cdf1337902b77debf8313
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:22  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 85a379eba8c4bba3198b1ce17ff6bf4a
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:22  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = cf31312060
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $groupID = 7
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $start is not set
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:33:23  [info] $updateee=  is not set
+
+May 25 18:33:23  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #281
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 85a379eba8c4bba3198b1ce17ff6bf4a
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $listID=  = cf31312060
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #217
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => b983e6f70f88a8284dba784a9bfb924c
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Form_Sync syncIdentical $count=  = 0
+
+May 25 18:33:23  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [in_sync] => 0
+        )
+
+)
+
+
+May 25 18:33:23  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [in_sync] => 0
+        )
+
+)
+
+
+May 25 18:33:23  [info] $updateee=  is not set
+
+May 25 18:33:23  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:24  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => fe0b70da3ac8607d0980797296ccbc32
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:24  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = cf31312060
+
+May 25 18:33:24  [info] $Mailchimp  syncPushAdd batchUnsubscribe $listID=  = cf31312060
+
+May 25 18:33:24  [info] $Mailchimp syncPushAdd batchSubscribe $batch=  = Array
+(
+    [0] => Array
+        (
+            [email] => Array
+                (
+                    [email] => roberts-smithb63@mymail.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => Bob
+                    [LNAME] => Roberts-Smith
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [email] => Array
+                (
+                    [email] => vajeevan_83@yahoo.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => Jed
+                    [LNAME] => Müller
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [email] => Array
+                (
+                    [email] => sample3@example.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => 
+                    [LNAME] => 
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:25  [info] $get groups listtt=  = Mailchimp_Lists Object
+(
+    [master] => Mailchimp Object
+        (
+            [folders] => Mailchimp_Folders Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [templates] => Mailchimp_Templates Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [users] => Mailchimp_Users Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [helper] => Mailchimp_Helper Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [mobile] => Mailchimp_Mobile Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ecomm] => Mailchimp_Ecomm Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [neapolitan] => Mailchimp_Neapolitan Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [lists] => Mailchimp_Lists Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [campaigns] => Mailchimp_Campaigns Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [vip] => Mailchimp_Vip Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [reports] => Mailchimp_Reports Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [gallery] => Mailchimp_Gallery Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ssl_verifypeer] => 1
+            [ssl_verifyhost] => 2
+            [ssl_cainfo] => 
+            [apikey] => 1f01d353c6f2e0e34085dc445be6e558-us10
+            [ch] => Resource id #223
+            [root] => https://us10.api.mailchimp.com/2.0/
+            [debug] => 
+        )
+
+)
+
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [added] => 3
+            [error_count] => 3
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 212
+                            [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => roberts-smithb63@mymail.com
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [code] => 212
+                            [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => vajeevan_83@yahoo.com
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sample3@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:25  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [added] => 3
+            [error_count] => 3
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 212
+                            [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => roberts-smithb63@mymail.com
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [code] => 212
+                            [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => vajeevan_83@yahoo.com
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sample3@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:25  [info] $updateee=  is not set
+
+May 25 18:33:25  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:25  [info] $get groupsss $grouping_id=  is not set
+
+May 25 18:33:25  [info] $get groupssss $group_id=  is not set
+
+May 25 18:33:25  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $result=  = Array
+(
+    [add_count] => 0
+    [adds] => Array
+        (
+        )
+
+    [update_count] => 0
+    [updates] => Array
+        (
+        )
+
+    [error_count] => 3
+    [errors] => Array
+        (
+            [0] => Array
+                (
+                    [code] => 212
+                    [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                    [email] => Array
+                        (
+                            [email] => roberts-smithb63@mymail.com
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [code] => 212
+                    [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                    [email] => Array
+                        (
+                            [email] => vajeevan_83@yahoo.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [code] => -99
+                    [error] => This email address looks fake or invalid. Please enter a real email address
+                    [email] => Array
+                        (
+                            [email] => sample3@example.com
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:25  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #251
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => fe0b70da3ac8607d0980797296ccbc32
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:25  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = cf31312060
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => df3ff27d08136d78fbb9b57c8c0ff18d
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:25  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = d93d0dd997
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:26  [info] $CRM_Mailchimp_Form_Sync syncCollectMailchimp $mapped_groups = Array
+(
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 2
+        )
+
+)
+
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 2
+        )
+
+)
+
+
+May 25 18:33:26  [info] $updateee=  is not set
+
+May 25 18:33:26  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #265
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => df3ff27d08136d78fbb9b57c8c0ff18d
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:26  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => d27f1f3b935f94fcd8b2729fd5b8b4d8
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:26  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = d93d0dd997
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $groupID = 13
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $start is not set
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:33:27  [info] $updateee=  is not set
+
+May 25 18:33:27  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #281
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => d27f1f3b935f94fcd8b2729fd5b8b4d8
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $listID=  = d93d0dd997
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #217
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 58711acc94c0f0c1eec6e990d75636a6
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Form_Sync syncIdentical $count=  = 2
+
+May 25 18:33:27  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [in_sync] => 2
+        )
+
+)
+
+
+May 25 18:33:27  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [in_sync] => 2
+        )
+
+)
+
+
+May 25 18:33:27  [info] $updateee=  is not set
+
+May 25 18:33:27  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:28  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 832cca35fe59c0af5cca71e2b835fc9e
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:28  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = d93d0dd997
+
+May 25 18:33:28  [info] $Mailchimp  syncPushAdd batchUnsubscribe $listID=  = d93d0dd997
+
+May 25 18:33:28  [info] $Mailchimp syncPushAdd batchSubscribe $batch=  = Array
+(
+    [0] => Array
+        (
+            [email] => Array
+                (
+                    [email] => sampl15@example.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => 
+                    [LNAME] => 
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:29  [info] $get groups listtt=  = Mailchimp_Lists Object
+(
+    [master] => Mailchimp Object
+        (
+            [folders] => Mailchimp_Folders Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [templates] => Mailchimp_Templates Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [users] => Mailchimp_Users Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [helper] => Mailchimp_Helper Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [mobile] => Mailchimp_Mobile Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ecomm] => Mailchimp_Ecomm Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [neapolitan] => Mailchimp_Neapolitan Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [lists] => Mailchimp_Lists Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [campaigns] => Mailchimp_Campaigns Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [vip] => Mailchimp_Vip Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [reports] => Mailchimp_Reports Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [gallery] => Mailchimp_Gallery Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ssl_verifypeer] => 1
+            [ssl_verifyhost] => 2
+            [ssl_cainfo] => 
+            [apikey] => 1f01d353c6f2e0e34085dc445be6e558-us10
+            [ch] => Resource id #223
+            [root] => https://us10.api.mailchimp.com/2.0/
+            [debug] => 
+        )
+
+)
+
+
+May 25 18:33:29  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [added] => 1
+            [error_count] => 1
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sampl15@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:29  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [added] => 1
+            [error_count] => 1
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sampl15@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:29  [info] $updateee=  is not set
+
+May 25 18:33:29  [info] $iddddddddddddddd= is not set
+
+May 25 18:33:29  [info] $get groupsss $grouping_id=  is not set
+
+May 25 18:33:29  [info] $get groupssss $group_id=  is not set
+
+May 25 18:33:29  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $result=  = Array
+(
+    [add_count] => 0
+    [adds] => Array
+        (
+        )
+
+    [update_count] => 0
+    [updates] => Array
+        (
+        )
+
+    [error_count] => 1
+    [errors] => Array
+        (
+            [0] => Array
+                (
+                    [code] => -99
+                    [error] => This email address looks fake or invalid. Please enter a real email address
+                    [email] => Array
+                        (
+                            [email] => sampl15@example.com
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:33:29  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #251
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 832cca35fe59c0af5cca71e2b835fc9e
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:33:29  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = d93d0dd997
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:30  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:33:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:30  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:33:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:33:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id is not set
+
+May 25 18:33:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:33:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Form_Sync getRunner $skipEndUrl=  = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id is not set
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:16  [info] $Middle-CRM_Mailchimp_Form_Sync getRunner $groups=  = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:16  [info] $get group iddd=  = 7
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 7
+        )
+
+)
+
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 7
+        )
+
+)
+
+
+May 25 18:36:16  [info] $updateee=  is not set
+
+May 25 18:36:16  [info] $iddddddddddddddd= = 7
+
+May 25 18:36:16  [info] $iddddddddddddddd= = 7
+
+May 25 18:36:16  [info] $iddddddddddddddd= = 7
+
+May 25 18:36:16  [info] $get group iddd=  = 13
+
+May 25 18:36:16  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 13
+        )
+
+)
+
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 13
+        )
+
+)
+
+
+May 25 18:36:16  [info] $updateee=  is not set
+
+May 25 18:36:16  [info] $iddddddddddddddd= = 13
+
+May 25 18:36:16  [info] $iddddddddddddddd= = 13
+
+May 25 18:36:16  [info] $iddddddddddddddd= = 13
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Form_Sync getRunner $identifier=  = List 2 new friday test group
+
+May 25 18:36:16  [info] $End-CRM_Mailchimp_Form_Sync getRunner $runner=  = CRM_Queue_Runner Object
+(
+    [title] => Mailchimp Sync: CiviCRM to Mailchimp
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [errorMode] => 2
+    [isMinimal] => 
+    [onEnd] => 
+    [onEndUrl] => http://mailchimp.vedaconsulting.co.uk/civicrm/mailchimp/sync?state=done
+    [pathPrefix] => civicrm/queue
+    [qrid] => mc-sync
+    [buttons] => Array
+        (
+            [retry] => 1
+            [skip] => 1
+        )
+
+    [taskCtx] => 
+)
+
+
+May 25 18:36:19  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 35be5a3da811c761a0df73f2a472160a
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:19  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $listID=  = cf31312060
+
+May 25 18:36:19  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 1 mailchim_group
+
+May 25 18:36:19  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #219
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 35be5a3da811c761a0df73f2a472160a
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:19  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $listID=  = cf31312060
+
+May 25 18:36:19  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 1 mailchim_group
+
+May 25 18:36:20  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 25e6d04c51f16358f4d7765a78de577e
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:20  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $listID=  = d93d0dd997
+
+May 25 18:36:20  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 2 new friday test group
+
+May 25 18:36:20  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #219
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 25e6d04c51f16358f4d7765a78de577e
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:20  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $listID=  = d93d0dd997
+
+May 25 18:36:20  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 2 new friday test group
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => fe0162287dbe15d603e0285b1e65f66f
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = cf31312060
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = cf31312060
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:21  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = cf31312060
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:22  [info] $CRM_Mailchimp_Form_Sync syncCollectMailchimp $mapped_groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+        )
+
+)
+
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+        )
+
+)
+
+
+May 25 18:36:22  [info] $updateee=  is not set
+
+May 25 18:36:22  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #265
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => fe0162287dbe15d603e0285b1e65f66f
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:22  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 518c41f083bbacfd33264b10409b6670
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:22  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = cf31312060
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $groupID = 7
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $start is not set
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:36:23  [info] $updateee=  is not set
+
+May 25 18:36:23  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #281
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 518c41f083bbacfd33264b10409b6670
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $listID=  = cf31312060
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #217
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => ae74432809b82175185039727fbccdc3
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Form_Sync syncIdentical $count=  = 0
+
+May 25 18:36:23  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [in_sync] => 0
+        )
+
+)
+
+
+May 25 18:36:23  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [in_sync] => 0
+        )
+
+)
+
+
+May 25 18:36:23  [info] $updateee=  is not set
+
+May 25 18:36:23  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:24  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => a3eca064c4c715b5a4153bf32c4a0908
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:24  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = cf31312060
+
+May 25 18:36:24  [info] $Mailchimp  syncPushAdd batchUnsubscribe $listID=  = cf31312060
+
+May 25 18:36:24  [info] $Mailchimp syncPushAdd batchSubscribe $batch=  = Array
+(
+    [0] => Array
+        (
+            [email] => Array
+                (
+                    [email] => roberts-smithb63@mymail.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => Bob
+                    [LNAME] => Roberts-Smith
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [email] => Array
+                (
+                    [email] => vajeevan_83@yahoo.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => Jed
+                    [LNAME] => Müller
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [email] => Array
+                (
+                    [email] => sample3@example.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => 
+                    [LNAME] => 
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:25  [info] $get groups listtt=  = Mailchimp_Lists Object
+(
+    [master] => Mailchimp Object
+        (
+            [folders] => Mailchimp_Folders Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [templates] => Mailchimp_Templates Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [users] => Mailchimp_Users Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [helper] => Mailchimp_Helper Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [mobile] => Mailchimp_Mobile Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ecomm] => Mailchimp_Ecomm Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [neapolitan] => Mailchimp_Neapolitan Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [lists] => Mailchimp_Lists Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [campaigns] => Mailchimp_Campaigns Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [vip] => Mailchimp_Vip Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [reports] => Mailchimp_Reports Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [gallery] => Mailchimp_Gallery Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ssl_verifypeer] => 1
+            [ssl_verifyhost] => 2
+            [ssl_cainfo] => 
+            [apikey] => 1f01d353c6f2e0e34085dc445be6e558-us10
+            [ch] => Resource id #223
+            [root] => https://us10.api.mailchimp.com/2.0/
+            [debug] => 
+        )
+
+)
+
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [added] => 3
+            [error_count] => 3
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 212
+                            [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => roberts-smithb63@mymail.com
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [code] => 212
+                            [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => vajeevan_83@yahoo.com
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sample3@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:25  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [added] => 3
+            [error_count] => 3
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 212
+                            [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => roberts-smithb63@mymail.com
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [code] => 212
+                            [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => vajeevan_83@yahoo.com
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sample3@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:25  [info] $updateee=  is not set
+
+May 25 18:36:25  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:25  [info] $get groupsss $grouping_id=  is not set
+
+May 25 18:36:25  [info] $get groupssss $group_id=  is not set
+
+May 25 18:36:25  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $result=  = Array
+(
+    [add_count] => 0
+    [adds] => Array
+        (
+        )
+
+    [update_count] => 0
+    [updates] => Array
+        (
+        )
+
+    [error_count] => 3
+    [errors] => Array
+        (
+            [0] => Array
+                (
+                    [code] => 212
+                    [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                    [email] => Array
+                        (
+                            [email] => roberts-smithb63@mymail.com
+                        )
+
+                )
+
+            [1] => Array
+                (
+                    [code] => 212
+                    [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                    [email] => Array
+                        (
+                            [email] => vajeevan_83@yahoo.com
+                        )
+
+                )
+
+            [2] => Array
+                (
+                    [code] => -99
+                    [error] => This email address looks fake or invalid. Please enter a real email address
+                    [email] => Array
+                        (
+                            [email] => sample3@example.com
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:25  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #251
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => a3eca064c4c715b5a4153bf32c4a0908
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:25  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = cf31312060
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 50a1bc6112b348303f74b832d0f1e044
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:25  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = d93d0dd997
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:26  [info] $CRM_Mailchimp_Form_Sync syncCollectMailchimp $mapped_groups = Array
+(
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 2
+        )
+
+)
+
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 2
+        )
+
+)
+
+
+May 25 18:36:26  [info] $updateee=  is not set
+
+May 25 18:36:26  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #265
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 50a1bc6112b348303f74b832d0f1e044
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:26  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 8f9e2e19d1be50629f038f880fa55d48
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:26  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = d93d0dd997
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $groupID = 13
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $start is not set
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:36:27  [info] $updateee=  is not set
+
+May 25 18:36:27  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #281
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 8f9e2e19d1be50629f038f880fa55d48
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = d93d0dd997
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $listID=  = d93d0dd997
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #217
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => f1cd65c3919829222c3a8071e5481158
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Form_Sync syncIdentical $count=  = 2
+
+May 25 18:36:27  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [in_sync] => 2
+        )
+
+)
+
+
+May 25 18:36:27  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [in_sync] => 2
+        )
+
+)
+
+
+May 25 18:36:27  [info] $updateee=  is not set
+
+May 25 18:36:27  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:28  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 70045a859f3827bc5491d954242d27b8
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:28  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = d93d0dd997
+
+May 25 18:36:28  [info] $Mailchimp  syncPushAdd batchUnsubscribe $listID=  = d93d0dd997
+
+May 25 18:36:28  [info] $Mailchimp syncPushAdd batchSubscribe $batch=  = Array
+(
+    [0] => Array
+        (
+            [email] => Array
+                (
+                    [email] => sampl15@example.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => 
+                    [LNAME] => 
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:29  [info] $get groups listtt=  = Mailchimp_Lists Object
+(
+    [master] => Mailchimp Object
+        (
+            [folders] => Mailchimp_Folders Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [templates] => Mailchimp_Templates Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [users] => Mailchimp_Users Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [helper] => Mailchimp_Helper Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [mobile] => Mailchimp_Mobile Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ecomm] => Mailchimp_Ecomm Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [neapolitan] => Mailchimp_Neapolitan Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [lists] => Mailchimp_Lists Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [campaigns] => Mailchimp_Campaigns Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [vip] => Mailchimp_Vip Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [reports] => Mailchimp_Reports Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [gallery] => Mailchimp_Gallery Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ssl_verifypeer] => 1
+            [ssl_verifyhost] => 2
+            [ssl_cainfo] => 
+            [apikey] => 1f01d353c6f2e0e34085dc445be6e558-us10
+            [ch] => Resource id #223
+            [root] => https://us10.api.mailchimp.com/2.0/
+            [debug] => 
+        )
+
+)
+
+
+May 25 18:36:29  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [added] => 1
+            [error_count] => 1
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sampl15@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:29  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [d93d0dd997] => Array
+        (
+            [added] => 1
+            [error_count] => 1
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sampl15@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:29  [info] $updateee=  is not set
+
+May 25 18:36:29  [info] $iddddddddddddddd= is not set
+
+May 25 18:36:29  [info] $get groupsss $grouping_id=  is not set
+
+May 25 18:36:29  [info] $get groupssss $group_id=  is not set
+
+May 25 18:36:29  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $result=  = Array
+(
+    [add_count] => 0
+    [adds] => Array
+        (
+        )
+
+    [update_count] => 0
+    [updates] => Array
+        (
+        )
+
+    [error_count] => 1
+    [errors] => Array
+        (
+            [0] => Array
+                (
+                    [code] => -99
+                    [error] => This email address looks fake or invalid. Please enter a real email address
+                    [email] => Array
+                        (
+                            [email] => sampl15@example.com
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:36:29  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #251
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 70045a859f3827bc5491d954242d27b8
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:36:29  [info] $End-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = d93d0dd997
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:30  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:36:30  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:30  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:36:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:36:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id is not set
+
+May 25 18:36:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:36:30  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Form_Sync getRunner $skipEndUrl=  = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = d93d0dd997
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = d93d0dd997
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = d93d0dd997
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id is not set
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 1
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:41:25  [info] $Middle-CRM_Mailchimp_Form_Sync getRunner $groups=  = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+    [13] => Array
+        (
+            [list_id] => d93d0dd997
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => new friday test group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:41:25  [info] $get group iddd=  = 7
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 7
+        )
+
+)
+
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 7
+        )
+
+)
+
+
+May 25 18:41:25  [info] $updateee=  is not set
+
+May 25 18:41:25  [info] $iddddddddddddddd= = 7
+
+May 25 18:41:25  [info] $iddddddddddddddd= = 7
+
+May 25 18:41:25  [info] $iddddddddddddddd= = 7
+
+May 25 18:41:25  [info] $get group iddd=  = 13
+
+May 25 18:41:25  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 13
+        )
+
+)
+
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [d93d0dd997] => Array
+        (
+            [mc_count] => 0
+            [c_count] => 0
+            [in_sync] => 0
+            [added] => 0
+            [removed] => 0
+        )
+
+    [list_id] => Array
+        (
+            [group_id] => 13
+        )
+
+)
+
+
+May 25 18:41:25  [info] $updateee=  is not set
+
+May 25 18:41:25  [info] $iddddddddddddddd= = 13
+
+May 25 18:41:25  [info] $iddddddddddddddd= = 13
+
+May 25 18:41:25  [info] $iddddddddddddddd= = 13
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Form_Sync getRunner $identifier=  = List 2 new friday test group
+
+May 25 18:41:25  [info] $End-CRM_Mailchimp_Form_Sync getRunner $runner=  = CRM_Queue_Runner Object
+(
+    [title] => Mailchimp Sync: CiviCRM to Mailchimp
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [errorMode] => 2
+    [isMinimal] => 
+    [onEnd] => 
+    [onEndUrl] => http://mailchimp.vedaconsulting.co.uk/civicrm/mailchimp/sync?state=done
+    [pathPrefix] => civicrm/queue
+    [qrid] => mc-sync
+    [buttons] => Array
+        (
+            [retry] => 1
+            [skip] => 1
+        )
+
+    [taskCtx] => 
+)
+
+
+May 25 18:41:30  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 70786acebd38ddb8befbbdf31fd6ae62
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:30  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $listID=  = cf31312060
+
+May 25 18:41:30  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 1 mailchim_group
+
+May 25 18:41:30  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #219
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 70786acebd38ddb8befbbdf31fd6ae62
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:30  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $listID=  = cf31312060
+
+May 25 18:41:30  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 1 mailchim_group
+
+May 25 18:41:30  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => ad5c57233a34be4d6cef698420e27010
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:30  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $listID=  = d93d0dd997
+
+May 25 18:41:30  [info] $Start-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 2 new friday test group
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #219
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => ad5c57233a34be4d6cef698420e27010
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $listID=  = d93d0dd997
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync syncPushList $identifier=  = List 2 new friday test group
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 27a8dbd5dd6fd911792be30518b500fe
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = cf31312060
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = cf31312060
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = cf31312060
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:41:31  [info] $CRM_Mailchimp_Form_Sync syncCollectMailchimp $mapped_groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync syncCollectMailchimp $listID=  = cf31312060
+
+May 25 18:41:31  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+        )
+
+)
+
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [mc_count] => 0
+        )
+
+)
+
+
+May 25 18:41:31  [info] $updateee=  is not set
+
+May 25 18:41:31  [info] $iddddddddddddddd= is not set
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #265
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 27a8dbd5dd6fd911792be30518b500fe
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:31  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 99b8c61d049705d929524406a10b8971
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $listID = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupingID = 
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCGroupName $groupID = 
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $listID = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCGroupingName $groupingID = 
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Utils getMCInterestGroupings $listID = cf31312060
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs = Array
+(
+)
+
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id = cf31312060
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $membership_only = 
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Utils getGroupsToSync $groups = Array
+(
+    [7] => Array
+        (
+            [list_id] => cf31312060
+            [grouping_id] => 
+            [group_id] => 
+            [is_mc_update_grouping] => 
+            [group_name] => 
+            [grouping_name] => 
+            [civigroup_title] => mailchim_group
+            [civigroup_uses_cache] => 
+        )
+
+)
+
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $groupID = 7
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Utils getGroupContactObject $start is not set
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Form_Sync syncCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [c_count] => 3
+        )
+
+)
+
+
+May 25 18:41:32  [info] $updateee=  is not set
+
+May 25 18:41:32  [info] $iddddddddddddddd= is not set
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #281
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 99b8c61d049705d929524406a10b8971
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncPushRemove $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => Resource id #217
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 665fe7772ffc3f0ef9279e6b18573a59
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Form_Sync syncIdentical $count=  = 0
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [in_sync] => 0
+        )
+
+)
+
+
+May 25 18:41:32  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [in_sync] => 0
+        )
+
+)
+
+
+May 25 18:41:32  [info] $updateee=  is not set
+
+May 25 18:41:32  [info] $iddddddddddddddd= is not set
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $ctx=  = CRM_Queue_TaskContext Object
+(
+    [queue] => CRM_Queue_Queue_Sql Object
+        (
+            [_name:CRM_Queue_Queue:private] => mc-sync
+        )
+
+    [log] => Log_file Object
+        (
+            [_filename] => /opt/bitnami/apps/civicrm/htdocs/sites/default/files/civicrm/ConfigAndLog/CiviCRM.ae810c0a11dd55d912ab0110a54eb2fd.log
+            [_fp] => 
+            [_append] => 1
+            [_locking] => 
+            [_mode] => 420
+            [_dirmode] => 493
+            [_lineFormat] => %1$s %2$s [%3$s] %4$s
+            [_timeFormat] => %b %d %H:%M:%S
+            [_eol] => 
+
+            [_opened] => 
+            [_id] => 02c49bce8b4fa54914cdc089081878dd
+            [_ident] => 
+            [_priority] => 6
+            [_mask] => 255
+            [_listeners] => Array
+                (
+                )
+
+            [_formatMap] => Array
+                (
+                    [%{timestamp}] => %1$s
+                    [%{ident}] => %2$s
+                    [%{priority}] => %3$s
+                    [%{message}] => %4$s
+                    [%{file}] => %5$s
+                    [%{line}] => %6$s
+                    [%{function}] => %7$s
+                    [%{class}] => %8$s
+                    [%\{] => %%{
+                )
+
+        )
+
+)
+
+
+May 25 18:41:32  [info] $Start-CRM_Mailchimp_Form_Sync syncPushAdd $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Mailchimp  syncPushAdd batchUnsubscribe $listID=  = cf31312060
+
+May 25 18:41:32  [info] $Mailchimp syncPushAdd batchSubscribe $batch=  = Array
+(
+    [0] => Array
+        (
+            [email] => Array
+                (
+                    [email] => roberts-smithb63@mymail.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => Bob
+                    [LNAME] => Roberts-Smith
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [1] => Array
+        (
+            [email] => Array
+                (
+                    [email] => vajeevan_83@yahoo.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => Jed
+                    [LNAME] => Müller
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+    [2] => Array
+        (
+            [email] => Array
+                (
+                    [email] => sample3@example.com
+                )
+
+            [email_type] => html
+            [merge_vars] => Array
+                (
+                    [FNAME] => 
+                    [LNAME] => 
+                    [groupings] => Array
+                        (
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:41:33  [info] $get groups listtt=  = Mailchimp_Lists Object
+(
+    [master] => Mailchimp Object
+        (
+            [folders] => Mailchimp_Folders Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [templates] => Mailchimp_Templates Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [users] => Mailchimp_Users Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [helper] => Mailchimp_Helper Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [mobile] => Mailchimp_Mobile Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ecomm] => Mailchimp_Ecomm Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [neapolitan] => Mailchimp_Neapolitan Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [lists] => Mailchimp_Lists Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [campaigns] => Mailchimp_Campaigns Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [vip] => Mailchimp_Vip Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [reports] => Mailchimp_Reports Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [gallery] => Mailchimp_Gallery Object
+                (
+                    [master] => Mailchimp Object
+ *RECURSION*
+                )
+
+            [ssl_verifypeer] => 1
+            [ssl_verifyhost] => 2
+            [ssl_cainfo] => 
+            [apikey] => 1f01d353c6f2e0e34085dc445be6e558-us10
+            [ch] => Resource id #223
+            [root] => https://us10.api.mailchimp.com/2.0/
+            [debug] => 
+        )
+
+)
+
+
+May 25 18:41:33  [info] $Start-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [added] => 3
+            [error_count] => 3
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 212
+                            [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => roberts-smithb63@mymail.com
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [code] => 212
+                            [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => vajeevan_83@yahoo.com
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sample3@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:41:33  [info] $End-CRM_Mailchimp_Form_Sync updatePushStats $updates=  = Array
+(
+    [cf31312060] => Array
+        (
+            [added] => 3
+            [error_count] => 3
+            [error_details] => Array
+                (
+                    [0] => Array
+                        (
+                            [code] => 212
+                            [error] => roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => roberts-smithb63@mymail.com
+                                )
+
+                        )
+
+                    [1] => Array
+                        (
+                            [code] => 212
+                            [error] => vajeevan_83@yahoo.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they'll need to resubscribe of their own free will.
+                            [email] => Array
+                                (
+                                    [email] => vajeevan_83@yahoo.com
+                                )
+
+                        )
+
+                    [2] => Array
+                        (
+                            [code] => -99
+                            [error] => This email address looks fake or invalid. Please enter a real email address
+                            [email] => Array
+                                (
+                                    [email] => sample3@example.com
+                                )
+
+                        )
+
+                )
+
+        )
+
+)
+
+
+May 25 18:41:33  [info] $updateee=  is not set
+
+May 25 18:41:33  [info] $iddddddddddddddd= is not set
+
+May 25 18:41:33  [info] $backTrace = #0 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Error.php(894): CRM_Core_Error::backtrace("backTrace", TRUE)
+#1 [internal function](): CRM_Core_Error::exceptionHandler(Object(DB_Error))
+#2 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/PEAR.php(931): call_user_func((Array:2), Object(DB_Error))
+#3 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB.php(976): PEAR_Error->PEAR_Error("DB Error: syntax error", -2, 16, (Array:2), "INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#4 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/PEAR.php(564): DB_Error->DB_Error(-2, 16, (Array:2), "INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#5 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/common.php(1905): PEAR->raiseError(NULL, -2, NULL, NULL, "INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...", "DB_Error", TRUE)
+#6 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/mysql.php(899): DB_common->raiseError(-2, NULL, NULL, NULL, "1064 ** You have an error in your SQL syntax; check the manual that correspon...")
+#7 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/mysql.php(328): DB_mysql->mysqlRaiseError()
+#8 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/common.php(1216): DB_mysql->simpleQuery("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#9 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/DataObject.php(2442): DB_common->query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#10 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/DataObject.php(1634): DB_DataObject->_query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#11 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/DAO.php(325): DB_DataObject->query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#12 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/DAO.php(1179): CRM_Core_DAO->query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...", TRUE)
+#13 /opt/bitnami/apps/civicrm/htdocs/civicrm_extensions/uk.co.vedaconsulting.mailchimp-1.7/CRM/Mailchimp/Form/Sync.php(664): CRM_Core_DAO::executeQuery("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...", (Array:4))
+#14 /opt/bitnami/apps/civicrm/htdocs/civicrm_extensions/uk.co.vedaconsulting.mailchimp-1.7/CRM/Mailchimp/Form/Sync.php(351): CRM_Mailchimp_Form_Sync::updatePushStats((Array:1))
+#15 [internal function](): CRM_Mailchimp_Form_Sync::syncPushAdd(Object(CRM_Queue_TaskContext), "cf31312060")
+#16 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Task.php(88): call_user_func_array((Array:2), (Array:2))
+#17 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Runner.php(213): CRM_Queue_Task->run(Object(CRM_Queue_TaskContext))
+#18 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Page/AJAX.php(52): CRM_Queue_Runner->runNext(TRUE)
+#19 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/ErrorPolicy.php(106): CRM_Queue_Page_AJAX::{closure}()
+#20 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Page/AJAX.php(54): CRM_Queue_ErrorPolicy->call(Object(Closure))
+#21 [internal function](): CRM_Queue_Page_AJAX::runNext()
+#22 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Invoke.php(278): call_user_func((Array:2))
+#23 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Invoke.php(86): CRM_Core_Invoke::runItem((Array:13))
+#24 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Invoke.php(54): CRM_Core_Invoke::_invoke((Array:4))
+#25 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/drupal/civicrm.module(489): CRM_Core_Invoke::invoke((Array:4))
+#26 [internal function](): civicrm_invoke("queue", "ajax", "runNext")
+#27 /opt/bitnami/apps/civicrm/htdocs/includes/menu.inc(519): call_user_func_array("civicrm_invoke", (Array:3))
+#28 /opt/bitnami/apps/civicrm/htdocs/index.php(21): menu_execute_active_handler()
+#29 {main}
+
+
+May 25 18:41:33  [info] $CRM_Queue_Page_AJAX_runNext_error = PEAR_Exception: "DB Error: syntax error"
+ * ERROR TYPE: DB_Error
+ * ERROR CODE: -2
+ * ERROR MESSAGE: DB Error: syntax error
+ * ERROR MODE: 16
+ * ERROR USERINFO: INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `list_id`, `group_id`) VALUES ('roberts-smithb63@mymail.com','roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they\'ll need to resubscribe of their own free will.', 3, 'cf31312060', ) [nativecode=1064 ** You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+ * ERROR DEBUGINFO: INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `list_id`, `group_id`) VALUES ('roberts-smithb63@mymail.com','roberts-smithb63@mymail.com has unsubscribed, and cannot be resubscribed by you. To prevent false spam complaints, they\'ll need to resubscribe of their own free will.', 3, 'cf31312060', ) [nativecode=1064 ** You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near ')' at line 1]
+#0 [internal function](): CRM_Core_Error::exceptionHandler(Object(DB_Error))
+#1 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/PEAR.php(931): call_user_func((Array:2), Object(DB_Error))
+#2 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB.php(976): PEAR_Error->PEAR_Error("DB Error: syntax error", -2, 16, (Array:2), "INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#3 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/PEAR.php(564): DB_Error->DB_Error(-2, 16, (Array:2), "INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#4 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/common.php(1905): PEAR->raiseError(NULL, -2, NULL, NULL, "INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...", "DB_Error", TRUE)
+#5 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/mysql.php(899): DB_common->raiseError(-2, NULL, NULL, NULL, "1064 ** You have an error in your SQL syntax; check the manual that correspon...")
+#6 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/mysql.php(328): DB_mysql->mysqlRaiseError()
+#7 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/common.php(1216): DB_mysql->simpleQuery("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#8 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/DataObject.php(2442): DB_common->query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#9 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/packages/DB/DataObject.php(1634): DB_DataObject->_query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#10 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/DAO.php(325): DB_DataObject->query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...")
+#11 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/DAO.php(1179): CRM_Core_DAO->query("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...", TRUE)
+#12 /opt/bitnami/apps/civicrm/htdocs/civicrm_extensions/uk.co.vedaconsulting.mailchimp-1.7/CRM/Mailchimp/Form/Sync.php(664): CRM_Core_DAO::executeQuery("INSERT INTO `mailchim_civicrm_syn_errors` (`email`, `error`, `error_count`, `...", (Array:4))
+#13 /opt/bitnami/apps/civicrm/htdocs/civicrm_extensions/uk.co.vedaconsulting.mailchimp-1.7/CRM/Mailchimp/Form/Sync.php(351): CRM_Mailchimp_Form_Sync::updatePushStats((Array:1))
+#14 [internal function](): CRM_Mailchimp_Form_Sync::syncPushAdd(Object(CRM_Queue_TaskContext), "cf31312060")
+#15 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Task.php(88): call_user_func_array((Array:2), (Array:2))
+#16 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Runner.php(213): CRM_Queue_Task->run(Object(CRM_Queue_TaskContext))
+#17 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Page/AJAX.php(52): CRM_Queue_Runner->runNext(TRUE)
+#18 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/ErrorPolicy.php(106): CRM_Queue_Page_AJAX::{closure}()
+#19 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Queue/Page/AJAX.php(54): CRM_Queue_ErrorPolicy->call(Object(Closure))
+#20 [internal function](): CRM_Queue_Page_AJAX::runNext()
+#21 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Invoke.php(278): call_user_func((Array:2))
+#22 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Invoke.php(86): CRM_Core_Invoke::runItem((Array:13))
+#23 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/CRM/Core/Invoke.php(54): CRM_Core_Invoke::_invoke((Array:4))
+#24 /opt/bitnami/apps/civicrm/htdocs/sites/all/modules/civicrm/drupal/civicrm.module(489): CRM_Core_Invoke::invoke((Array:4))
+#25 [internal function](): civicrm_invoke("queue", "ajax", "runNext")
+#26 /opt/bitnami/apps/civicrm/htdocs/includes/menu.inc(519): call_user_func_array("civicrm_invoke", (Array:3))
+#27 /opt/bitnami/apps/civicrm/htdocs/index.php(21): menu_execute_active_handler()
+#28 {main}
+
+

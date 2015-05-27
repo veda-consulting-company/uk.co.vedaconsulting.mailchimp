@@ -22,7 +22,12 @@
             <span class="description" id ="webhook_url">{ts}{$webhook_url}{/ts}
                   </span>
           </td>
-        </tr> 
+        </tr>
+        <tr class="crm-mailchimp-setting-enabledebugging-block">
+          <td class="label">{$form.enable_debugging.label}</td>
+          <td>{$form.enable_debugging.html}<br/>
+          </td>
+        </tr>
       </table>
     </div>
     <div class="crm-submit-buttons">
