@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1" ?>
-
+<?xml version="1.0" encoding="iso-8859-1"?>
 <menu>
   <item>
     <path>civicrm/mailchimp/settings</path>
@@ -24,5 +23,11 @@
     <page_callback>CRM_Mailchimp_Form_Pull</page_callback>
     <title>Import From Mailchimp</title>
     <access_arguments>administer CiviCRM</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/errordetails</path>
+    <page_callback>CRM_Mailchimp_Page_Mailchimp</page_callback>
+    <title>Mailchimp syn Error Details</title>
+    <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>
