@@ -34,12 +34,12 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       $requestData = $_POST['data'];
 
       switch ($requestType) {
-        case 'subscribe':
-        case 'unsubscribe':
-        case 'profile':
-          // Create/Update contact details in CiviCRM
-          $delay = ( $requestType == 'profile' );
-          $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges'], $delay);
+      case 'subscribe':
+      case 'unsubscribe':
+      case 'profile':
+        // Create/Update contact details in CiviCRM
+        $delay = ( $requestType == 'profile' );
+        $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges'], $delay);
         $contactArray = array($contactID);
 
           // Subscribe/Unsubscribe to related CiviCRM groups
