@@ -34,12 +34,12 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       $requestData = $_POST['data'];
 
       switch ($requestType) {
-        case 'subscribe':
-        case 'unsubscribe':
-        case 'profile':
-          // Create/Update contact details in CiviCRM
-          $delay = ( $requestType == 'profile' );
-          $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges'], $delay);
+       case 'subscribe':
+       case 'unsubscribe':
+       case 'profile':
+        // Create/Update contact details in CiviCRM
+        $delay = ( $requestType == 'profile' );
+        $contactID = CRM_Mailchimp_Utils::updateContactDetails($requestData['merges'], $delay);
         $contactArray = array($contactID);
 
           // Subscribe/Unsubscribe to related CiviCRM groups
@@ -114,7 +114,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // Deal with subscribe/unsubscribe.
     // We need the CiviCRM membership group for this list.
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID, $membership_only=TRUE);
-    $subGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID, $membership_only = FALSE);
+    $allGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID, $membership_only = FALSE);
     if (!$groups) {
       // This list is not mapped to a group in CiviCRM.
       return NULL;
@@ -126,11 +126,18 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     }
     elseif ($action == 'unsubscribe') {
       $groupContactRemoves[$membershipGroupID][] = $contactID;
-
-      // Now remove mailchimp groups mapped to civi groups
-      foreach ($subGroups as $groupID => $details) {
+	  
+      $mcGroupings = array();
+      foreach (empty($requestData['merges']['GROUPINGS']) ? array() : $requestData['merges']['GROUPINGS'] as $grouping) {
+        foreach (explode(', ', $grouping['groups']) as $group) {
+          $mcGroupings[$grouping['id']][$group] = 1;
+        }
+      }
+      foreach ($allGroups as $groupID => $details) {
         if ($groupID != $membershipGroupID && $details['is_mc_update_grouping']) {
-          $groupContactRemoves[$groupID][] = $contactID;
+          if (!empty($mcGroupings[$details['grouping_id']][$details['group_name']])) {
+            $groupContactRemoves[$groupID][] = $contactID;
+          }
         }
       }
     }
