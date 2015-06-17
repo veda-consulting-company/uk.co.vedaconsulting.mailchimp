@@ -16,6 +16,8 @@
     <path>civicrm/mailchimp/webhook</path>
     <page_callback>CRM_Mailchimp_Page_WebHook</page_callback>
     <title>WebHook</title>
+    <access_callback>1</access_callback>
+    <!--<access_arguments>allow webhook posts</access_arguments>-->
     <is_public>true</is_public>
   </item>
   <item>

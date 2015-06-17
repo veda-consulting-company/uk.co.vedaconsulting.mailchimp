@@ -13,7 +13,8 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Page_WebHook run $my_key= ', $my_key);
 
     if (CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported() && !CRM_Mailchimp_Permission::check('allow webhook posts')) {
-      CRM_Utils_System::permissionDenied();
+      //CRM_Utils_System::permissionDenied();
+      CRM_Core_Error::fatal(ts('You do not have permission to access this page.'));
     }
 
     /* hacks for debugging
@@ -21,8 +22,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       $_GET['key'] = $my_key;
       $_POST = unserialize('');
     }
-
-     *
 
 
     $_ = empty($_POST['type']) ? '' : preg_replace('/[^a-zA-Z90-9]/','',$_POST['type']);
