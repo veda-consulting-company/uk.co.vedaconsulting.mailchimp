@@ -544,13 +544,17 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $contact = new CRM_Contact_BAO_Contact();
       $contact->id = $groupContact->contact_id;
       $contact->is_deleted = 0;
-      $contact->find(TRUE);
+      if( !$contact->find(TRUE)){
+        continue;
+      }  
 
       // Find their primary (bulk) email
       $email = new CRM_Core_BAO_Email();
       $email->contact_id = $groupContact->contact_id;
       $email->is_primary = TRUE;
-      $email->find(TRUE);
+      if($email->find(TRUE)){
+        continue;
+      }
 
       // If no email, it's like they're not there.
       if (!$email->email || $email->on_hold || $contact->is_opt_out || $contact->do_not_email) {
