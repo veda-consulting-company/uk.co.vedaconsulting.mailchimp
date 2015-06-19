@@ -552,7 +552,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $email = new CRM_Core_BAO_Email();
       $email->contact_id = $groupContact->contact_id;
       $email->is_primary = TRUE;
-      if($email->find(TRUE)){
+      if(!$email->find(TRUE)){
         continue;
       }
 
