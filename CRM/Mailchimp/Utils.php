@@ -34,7 +34,15 @@ class CRM_Mailchimp_Utils {
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id', $mc_list_id);
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only', $membership_only);
 
-    $params = $groups = array();
+    $params = $groups = $temp = array();
+	
+	foreach ($groupIDs as $value) {
+        if($value){
+          $temp[] = $value;
+        }
+    }
+	 
+	$groupIDs = $temp;
 
     if (!empty($groupIDs)) {
       $groupIDs = implode(',', $groupIDs);
