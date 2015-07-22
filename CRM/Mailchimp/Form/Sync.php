@@ -326,10 +326,17 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Send Mailchimp Lists API Call.
     // http://apidocs.mailchimp.com/api/2.0/lists/batch-subscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-    $result = $list->batchSubscribe( $listID, $batch, $double_optin=FALSE, $update=TRUE, $replace_interests=TRUE);
+    $batchs = array_chunk($batch, 50, true);
+    $batchResult = array();
+    $result = array('errors' => array());
+    foreach($batchs as $id => $batch) {
+      $batchResult[$id] = $list->batchSubscribe( $listID, $batch, $double_optin=FALSE, $update=TRUE, $replace_interests=TRUE);
+      $result['error_count'] += $batchResult[$id]['error_count'];
+      // @TODO: updating stats for errors, create sql error "Data too long for column 'value'" (for long array)
+      $result['errors'] = array_merge($result['errors'], $batchResult[$id]['errors']);
+      CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushAdd $result= ', $batchResult[$id]);
+    }
     // debug: file_put_contents(DRUPAL_ROOT . '/logs/' . date('Y-m-d-His') . '-MC-push.log', print_r($result,1));
-
-    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushAdd $result= ', $result);
 
     $get_GroupId = CRM_Mailchimp_Utils::getGroupsToSync(array(), $listID);
 
