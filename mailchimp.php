@@ -418,7 +418,11 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
 			// Get all groups, the contact is subscribed to
 			$civiGroups = CRM_Contact_BAO_GroupContact::getGroupList($objectId);
 			$civiGroups = array_keys($civiGroups);
-			
+
+			if (empty($civiGroups)) {
+				return;
+			}
+
 			// Get mailchimp details
 			$groups = CRM_Mailchimp_Utils::getGroupsToSync($civiGroups);
 			
