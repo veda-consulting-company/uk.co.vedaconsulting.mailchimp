@@ -21,10 +21,24 @@
 function civicrm_api3_mailchimp_getlists($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
   
-  $results = $mcLists->getList();
   $lists = array();
+
+  /**
+    * Fix for #155 - Sync limited to 25 MailChimp Lists
+  **/
+  $results = $mcLists->getList(NULL, 0, 100); //get max number of mailing lists i.e. 100
+
   foreach($results['data'] as $list) {
     $lists[$list['id']] = $list['name'];
+  }
+
+  $pages = ceil($results['total']/100); //calculate the number of page requests to be made to fetch all the mailing lists
+
+  for( $i=1; $i< $pages; $i++ ) {
+    $results = $mcLists->getList(NULL, $i, 100); //get 100 results for each page
+    foreach($results['data'] as $list) {
+      $lists[$list['id']] = $list['name'];
+    }
   }
 
   return civicrm_api3_create_success($lists);
