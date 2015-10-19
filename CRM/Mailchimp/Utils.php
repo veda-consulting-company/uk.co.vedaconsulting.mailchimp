@@ -48,8 +48,10 @@ class CRM_Mailchimp_Utils {
       $groupIDs = implode(',', $groupIDs);
       $whereClause = "entity_id IN ($groupIDs)";
     } else {
-      $whereClause = "mc_list_id IS NOT NULL AND mc_list_id <> ''";
+      $whereClause = "1 = 1";
     }
+
+    $whereClause .= " AND mc_list_id IS NOT NULL AND mc_list_id <> ''";
 
     if ($mc_list_id) {
       // just want results for a particular MC list.
