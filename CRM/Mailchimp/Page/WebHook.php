@@ -25,6 +25,13 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     if (!empty($_POST['data']['list_id']) && !empty($_POST['type'])) {
       $requestType = $_POST['type'];
       $requestData = $_POST['data'];
+      // Return if API is set in webhook setting for lists
+      $list	      = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+      $webhookoutput  = $list->webhooks($requestData['list_id']);
+      if($webhookoutput[0]['sources']['api'] == 1) {
+	CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Page_WebHook run API is set in Webhook setting for listID', $requestData['list_id'] );
+	return;      
+      }
 
       switch ($requestType) {
        case 'subscribe':

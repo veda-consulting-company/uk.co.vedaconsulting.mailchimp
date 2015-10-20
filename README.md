@@ -97,13 +97,10 @@ sending a request to Mailchimp for every affected contact would be very slow.
 
 ### Important note about unsubscribed contacts
 
-Note: currently, removals are processed as unsubscribes from Mailchimp. This is
-so that Mailchimp's reporting and subscriber history is not affected by
-removals. However, Mailchimp treats unsubscribed people in a bit of a permanent
-way; you cannot ever re-subscribe them! This is caution on Mailchimp's part, as
-they have to ensure their service is not used by spammers. However it's an awkward
-feature for the general integration case. The only way to re-subscribe someone
-who previously unsubscribed is to first delete them from the Mailchimp list.
+Note: If anybody is added/removed to group in civiCRM, they get subscribed/unsubscribed to Mailchimp immediately.
+If Webhook is set properly in Mailchimp, then subscribe/unsubscribe in Mailchimp is treated back to civiCRM
+immediately as addition/deletion to group
+
 
 We have an upcoming feature that will give you the option to force
 a CiviCRM to Mailchimp sync which will automatically do the necessary deletions,
