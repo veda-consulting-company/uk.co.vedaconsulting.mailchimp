@@ -312,7 +312,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       // remove the significant array indexes, in case Mailchimp cares.
       $merge['groupings'] = array_values($merge_groups);
 
-      $batch[] = array('email' => array('email' => $dao->email), 'email_type' => 'html', 'merge_vars' => $merge);
+      $batch[$dao->email] = array('email' => array('email' => $dao->email), 'email_type' => 'html', 'merge_vars' => $merge);
       $stats[$listID]['added']++;
     }
     if (!$batch) {
@@ -333,7 +333,20 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $batchResult[$id] = $list->batchSubscribe( $listID, $batch, $double_optin=FALSE, $update=TRUE, $replace_interests=TRUE);
       $result['error_count'] += $batchResult[$id]['error_count'];
       // @TODO: updating stats for errors, create sql error "Data too long for column 'value'" (for long array)
-      $result['errors'] = array_merge($result['errors'], $batchResult[$id]['errors']);
+      if ($batchResult[$id]['errors']) {
+        foreach ($batchResult[$id]['errors'] as $errorDetails){
+          // Resubscribe if email address is reported as unsubscribed        
+          // they want to resubscribe.
+          if ($errorDetails['code'] == 212) {
+            $unsubscribedEmail = $errorDetails['email']['email'];
+            $list->subscribe( $listID, $batch[$unsubscribedEmail]['email'], $batch[$unsubscribedEmail]['merge_vars'], $batch[$unsubscribedEmail]['email_type'], FALSE, TRUE, FALSE, FALSE);
+            $result['error_count'] -= 1;
+          }
+          else {
+            $result['errors'][] = $errorDetails;
+          }
+        }
+      }
       CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushAdd $result= ', $batchResult[$id]);
     }
     // debug: file_put_contents(DRUPAL_ROOT . '/logs/' . date('Y-m-d-His') . '-MC-push.log', print_r($result,1));

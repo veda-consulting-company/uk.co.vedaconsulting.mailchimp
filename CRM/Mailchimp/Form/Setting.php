@@ -63,7 +63,17 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         'name' => ts('Save & Test'),
       ),
     );
-
+    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+    foreach ($groups as $group_id => $details) {
+      $list           = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+      $webhookoutput  = $list->webhooks($details['list_id']);
+      if($webhookoutput[0]['sources']['api'] == 1) {
+        CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Setting - API is set in Webhook setting for listID', $details['list_id']);
+        $listID = $details['list_id'];
+        CRM_Core_Session::setStatus(ts('API is set in Webhook setting for listID %1', array(1 => $listID)), ts('Error'), 'error');
+        break;
+      }
+    }
     // Add the Buttons.
     $this->addButtons($buttons);
   }
