@@ -178,6 +178,14 @@ function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_sync($params) {
+  $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+  foreach ($groups as $group_id => $details) {
+    $list           = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+    $webhookoutput  = $list->webhooks($details['list_id']);
+    if($webhookoutput[0]['sources']['api'] == 1) {
+      return civicrm_api3_create_error('civicrm_api3_mailchimp_sync -  API is set in Webhook setting for listID '.$details['list_id'].' Please uncheck API' );
+    }
+  }
   $result = $pullResult = array();
 	
 	// Do pull first from mailchimp to CiviCRM
