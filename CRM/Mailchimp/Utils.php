@@ -728,7 +728,11 @@ class CRM_Mailchimp_Utils {
 					$result = $list->subscribe($listID, array('email' => $email), $merge, $email_type='html', $double_optin=FALSE, $update_existing=FALSE, $replace_interests=TRUE, $send_welcome=FALSE);
 				}
 				catch (Exception $e) {
-					CRM_Core_Session::setStatus($e->getMessage());
+          // Don't display if the error is that we're already subscribed.
+          $message = $e->getMessage();
+          if ($message !== $email . ' is already subscribed to the list.') {
+            CRM_Core_Session::setStatus($message);
+          }
 				}
 				break;
 			case "unsubscribe":
