@@ -89,8 +89,12 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       'security_key', NULL, FALSE
     );
     
+    $enableDebugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
+      'enable_debugging', NULL, FALSE
+    );
     $defaults['api_key'] = $apiKey;
     $defaults['security_key'] = $securityKey;
+    $defaults['enable_debugging'] = $enableDebugging;
     
     return $defaults;
   }
