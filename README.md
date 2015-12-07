@@ -88,12 +88,7 @@ list/group) you should see a summary screen.
 ### From here on...
 
 Any un/subscribes from the Mailchimp end will be handled (almost) instantly
-using the webhook. However changes at the CiviCRM end must be manually sync'd
-up to Mailchimp, e.g. before you do a new mailing campaign. There are
-several good reasons why this manual button pressing is necessary, not least
-that it is how Mailchimp request it be done. Basically there are many ways
-that CiviCRM group membership can be changed, including bulk updates, and
-sending a request to Mailchimp for every affected contact would be very slow.
+using the webhook. Changes at the CiviCRM end will also be handled (almost) instantly using CiviCRM database post hook.
 
 ### Important note about unsubscribed contacts
 
@@ -145,9 +140,9 @@ If you are integrating Mailchimp account that's been there for a while (lots of 
 
 In other words, most Mailchimp changes are handled immediately via webhook. So it is now rare to need the Mailchimp to CiviCRM sync operation, whereas the CiviCRM to Mailchimp sync should become part of your pre-campaign sending preparation.
 
-In any case CiviCRM to Mailchimp sync process can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs. **Note:** Users should be aware of possible implications. For example, running a Civi to Mailchimp sync, from an empty civicrm group to a mailchimp list with some data, could unsubscribe / wipe-out all the contacts from mailchimp list. 
+In any case sync process between CiviCRM and Mailchimp can be automated and run on regular basis using the “Mailchimp Sync” scheduled job shipped by extension. The job can be enabled and configured from the Scheduled Job screen: Administer > System Settings > Scheduled Jobs. 
 
-Version 1.5 and above also ships a scheduled job for "Mailchimp Pull".
+Version 1.5 and above also ships a scheduled job for "Mailchimp Sync".
 
 
 **Note: Before you do any sync make sure to backup your mailchimp and civicrm contacts.**  

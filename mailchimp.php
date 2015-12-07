@@ -408,7 +408,7 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
 	/***** NO BULK EMAILS (User Opt Out) *****/
 	if ($objectName == 'Individual' || $objectName == 'Organization' || $objectName == 'Household') {
 		// Contact Edited
-		if ($op == 'edit') {
+		if ($op == 'edit' || $op == 'create') {
 			if($objectRef->is_opt_out == 1) {
 				$action = 'unsubscribe';
 			} else {
