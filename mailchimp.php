@@ -337,6 +337,7 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
  */
 function mailchimp_civicrm_permission(&$permissions) {
+  require_once 'CRM/Mailchimp/Permission.php';
   //Until the Joomla/Civi integration is fixed, don't declare new perms
   // for Joomla installs
   if (CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported()) {

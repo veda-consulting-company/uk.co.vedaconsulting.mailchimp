@@ -144,6 +144,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
 
     // Shared process.
     $count = CRM_Mailchimp_Form_Sync::syncCollectMailchimp($listID);
+    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Pull syncPullCollectMailchimp = $count', $count);
     static::updatePullStats(array( $listID => array('mc_count'=>$count)));
 
     return CRM_Queue_Task::TASK_SUCCESS;
@@ -156,9 +157,11 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
 
     // Shared process.
     $stats[$listID]['c_count'] =  CRM_Mailchimp_Form_Sync::syncCollectCiviCRM($listID);
+    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Pull syncPullCollectCiviCRM $stats[$listID][c_count]', $stats[$listID]['c_count']);
 
     // Remove identicals
     $stats[$listID]['in_sync'] = CRM_Mailchimp_Form_Sync::syncIdentical();
+    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Pull syncPullCollectCiviCRM $stats[$listID][in_sync]', $stats[$listID]['in_sync']);
 
     static::updatePullStats($stats);
 
