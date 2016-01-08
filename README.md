@@ -54,6 +54,8 @@ Steps to configure Mailchimp Webhook settings with the relevant CiviCRM Url:
 1. To know the relevant CiviCRM url visit https://<<your_site>>/civicrm/mailchimp/settings?reset=1.  
 2. In the “Security Key” field entering a key shows the complete webhook url. Note down the complete url.  
 3. Make sure webhook url is accessible to public. If not, just make sure anonymous / public user has “allow webhook posts” permission.
+   Note: For Wordpress, the following page is mandatory for right behaviour of webhook url.
+   (images/wordpress_civi_default_page.png)
 4. Log in to your MailChimp account.  
 5. Navigate to your Lists.  
 6. Click Webhooks under Settings menu and Click ‘Add a New Webhook’ button.  

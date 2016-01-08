@@ -329,7 +329,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         }
       }
       CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushAdd $batchsubscriberesultinloop= ', $batchResult[$id]);
-      $result['errors'] = array_merge($result['errors'], $batchResult[$id]['errors']);
     }
     // debug: file_put_contents(DRUPAL_ROOT . '/logs/' . date('Y-m-d-His') . '-MC-push.log', print_r($result,1));
 
