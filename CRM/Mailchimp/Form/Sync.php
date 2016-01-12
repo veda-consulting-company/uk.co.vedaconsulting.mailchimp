@@ -73,7 +73,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   }
 
   static function getRunner($skipEndUrl = FALSE) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync getRunner $skipEndUrl= ', $skipEndUrl);
     // Setup the Queue
     $queue = CRM_Queue_Service::singleton()->create(array(
       'name'  => self::QUEUE_NAME,
@@ -87,7 +86,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    
     // We need to process one list at a time.
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
-    CRM_Mailchimp_Utils::checkDebug('Middle-CRM_Mailchimp_Form_Sync getRunner $groups= ', $groups);
+    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync getRunner $groups= ', $groups);
     
     if (!$groups) {
       // Nothing to do.
@@ -136,7 +135,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     static::updatePushStats($stats);
     
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync getRunner $identifier= ', $identifier);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync getRunner $runner= ', $runner);
 
     return $runner;
   }
@@ -145,9 +143,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * Set up (sub)queue for syncing a Mailchimp List.
    */
   static function syncPushList(CRM_Queue_TaskContext $ctx, $listID, $identifier) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushList $ctx= ', $ctx);
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushList $listID= ', $listID);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushList $identifier= ', $identifier);
     // Split the work into parts:
     // @todo 'force' method not implemented here.
 
@@ -179,9 +175,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       "$identifier: Added new subscribers and updating existing data changes"
     ));
 
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushList $ctx= ', $ctx);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushList $listID= ', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushList $identifier= ', $identifier);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 
@@ -189,14 +182,12 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * Collect Mailchimp data into temporary working table.
    */
   static function syncPushCollectMailchimp(CRM_Queue_TaskContext $ctx, $listID) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx= ', $ctx);
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID= ', $listID);
 
     $stats[$listID]['mc_count'] = static::syncCollectMailchimp($listID);
+    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $stats[$listID][mc_count]', $stats[$listID]['mc_count']);
     static::updatePushStats($stats);
 
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $ctx= ', $ctx);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $listID= ', $listID);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 
@@ -204,15 +195,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * Collect CiviCRM data into temporary working table.
    */
   static function syncPushCollectCiviCRM(CRM_Queue_TaskContext $ctx, $listID) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx= ', $ctx);
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID= ', $listID);
 
     $stats[$listID]['c_count'] = static::syncCollectCiviCRM($listID);
+    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $stats[$listID][c_count]= ', $stats[$listID]['c_count']);
  
     static::updatePushStats($stats);
 
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $ctx= ', $ctx);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushCollectCiviCRM $listID= ', $listID);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 
@@ -221,7 +210,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    */
   static function syncPushRemove(CRM_Queue_TaskContext $ctx, $listID) {
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushRemove $listID= ', $listID);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushRemove $ctx= ', $ctx);
     // Delete records have the same hash - these do not need an update.
     static::updatePushStats(array($listID=>array('in_sync'=> static::syncIdentical())));
 
@@ -248,13 +236,12 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     }
 
     // Log the batch unsubscribe details
-    CRM_Core_Error::debug_var('Mailchimp batchUnsubscribe syncPushRemove $listID= ', $listID);
     CRM_Core_Error::debug_var('Mailchimp batchUnsubscribe syncPushRemove $batch= ', $batch);
     // Send Mailchimp Lists API Call: http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
     $result = $list->batchUnsubscribe( $listID, $batch, $delete=FALSE, $send_bye=FALSE, $send_notify=FALSE);
 
-    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushRemove $result= ', $result);
+    CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushRemove $batchUnsubscriberesult= ', $result);
     // @todo check errors? $result['errors'] $result['success_count']
 
     // Finally we can delete the emails that we just processed from the mailchimp temp table.
@@ -265,9 +252,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
        );");
 
     static::updatePushStats($stats);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushRemove $listID= ', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushRemove $ctx= ', $ctx);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushRemove $result= ', $result);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 
@@ -277,7 +261,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * This also does the clean-up tasks of removing the temporary tables.
    */
   static function syncPushAdd(CRM_Queue_TaskContext $ctx, $listID) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushAdd $ctx= ', $ctx);
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushAdd $listID= ', $listID);
 
     // @todo take the remaining details from tmp_mailchimp_push_c
@@ -301,7 +284,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $merge_groups[$grouping_id] = array('id' => $grouping_id, 'groups' => array());
 
 
-        CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync $merge_groups[$grouping_id]', $merge_groups[$grouping_id]);
         foreach ($groups as $group_id => $is_member) {
           if ($is_member) {
             $merge_groups[$grouping_id]['groups'][] = CRM_Mailchimp_Utils::getMCGroupName($listID, $grouping_id, $group_id);
@@ -321,7 +303,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     }
 
     // Log the batch subscribe details
-    CRM_Core_Error::debug_var('Mailchimp  syncPushAdd batchUnsubscribe $listID= ', $listID);
     CRM_Core_Error::debug_var('Mailchimp syncPushAdd batchSubscribe $batch= ', $batch);
     // Send Mailchimp Lists API Call.
     // http://apidocs.mailchimp.com/api/2.0/lists/batch-subscribe.php
@@ -347,7 +328,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
           }
         }
       }
-      CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushAdd $result= ', $batchResult[$id]);
+      CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushAdd $batchsubscriberesultinloop= ', $batchResult[$id]);
     }
     // debug: file_put_contents(DRUPAL_ROOT . '/logs/' . date('Y-m-d-His') . '-MC-push.log', print_r($result,1));
 
@@ -366,11 +347,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_m;");
    CRM_Core_DAO::executeQuery("DROP TABLE tmp_mailchimp_push_c;");
 
-    CRM_Mailchimp_Utils::checkDebug('get groupsss $grouping_id= ', $grouping_id);
-    CRM_Mailchimp_Utils::checkDebug('get groupssss $group_id= ', $group_id);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushAdd $result= ', $result);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushAdd $ctx= ', $ctx);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushAdd $listID= ', $listID);
 
     return CRM_Queue_Task::TASK_SUCCESS;
 

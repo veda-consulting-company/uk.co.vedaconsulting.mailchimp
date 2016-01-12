@@ -30,9 +30,6 @@ class CRM_Mailchimp_Utils {
    *
    */
   static function getGroupsToSync($groupIDs = array(), $mc_list_id = null, $membership_only = FALSE) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getGroupsToSync $groupIDs', $groupIDs);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id', $mc_list_id);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getGroupsToSync $membership_only', $membership_only);
 
     $params = $groups = $temp = array();
 	
@@ -82,9 +79,7 @@ class CRM_Mailchimp_Utils {
           'civigroup_uses_cache'    => (bool) (($dao->saved_search_id > 0) || (bool) $dao->children),
         );
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupsToSync $groupIDs', $groupIDs);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupsToSync $mc_list_id', $mc_list_id);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupsToSync $membership_only', $membership_only);
+
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupsToSync $groups', $groups);
 
     return $groups;
@@ -112,7 +107,11 @@ class CRM_Mailchimp_Utils {
                   SELECT count(*)
                   FROM civicrm_group_contact_cache smartgroup_contact
                   WHERE smartgroup_contact.group_id IN ($groupIDs)";
-      return CRM_Core_DAO::singleValueQuery($smartGroupQuery);
+      $count = CRM_Core_DAO::singleValueQuery($smartGroupQuery);
+      CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMemberCountForGroupsToSync $count', $count);
+      return $count;
+				  
+      
     }
     else if (!empty($groupIDs)) {
       $groupIDs = implode(',', $groupIDs);
@@ -120,9 +119,10 @@ class CRM_Mailchimp_Utils {
         SELECT  count(*)
         FROM    civicrm_group_contact
         WHERE   status = 'Added' AND group_id IN ($groupIDs)";
-      return CRM_Core_DAO::singleValueQuery($query);
+      $count = CRM_Core_DAO::singleValueQuery($query);
+      CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMemberCountForGroupsToSync $count', $count);
+      return $count;
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMemberCountForGroupsToSync $groupIDs', $groupIDs);
     return 0;
   }
 
@@ -141,10 +141,8 @@ class CRM_Mailchimp_Utils {
     if (empty($info[$groupingID]['groups'][$groupID])) {
       return NULL;
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupName $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupName $groupingID', $groupingID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupName $groupID', $groupID);
-
+    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupName $info', $info[$groupingID]['groups'][$groupID]['name']);
+    
     return $info[$groupingID]['groups'][$groupID]['name'];
   }
 
@@ -161,9 +159,8 @@ class CRM_Mailchimp_Utils {
     if (empty($info[$groupingID])) {
       return NULL;
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupingName $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupingName $groupingID', $groupingID);
-
+    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCGroupingName $info ', $info[$groupingID]['name']);
+    
     return $info[$groupingID]['name'];
   }
 
@@ -206,7 +203,7 @@ class CRM_Mailchimp_Utils {
       $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
       try {
         $results = $mcLists->interestGroupings($listID);
-        CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMCInterestGroupings $results', $results);
+        
       }
       catch (Exception $e) {
         return NULL;
@@ -229,21 +226,16 @@ class CRM_Mailchimp_Utils {
        *
        */
       foreach ($results as $grouping) {
-        CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCInterestGroupings $grouping', $grouping);
+        
 
         $mapper[$listID][$grouping['id']] = $grouping;
         unset($mapper[$listID][$grouping['id']]['groups']);
         foreach ($grouping['groups'] as $group) {
-
-          CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCInterestGroupings $grouping', $group);
-
-
           $mapper[$listID][$grouping['id']]['groups'][$group['id']] = $group;
-          CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCInterestGroupings $group', $group);
         }
       }
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCInterestGroupings $listID', $listID);
+    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMCInterestGroupings $mapper', $mapper[$listID]);
     return $mapper[$listID];
   }
 
@@ -269,12 +261,11 @@ class CRM_Mailchimp_Utils {
     foreach ($results as $grouping) {
       foreach ($grouping['groups'] as $group) {
         if ($group['name'] == $groupName) {
+          CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMailchimpGroupIdFromName= ', $group['id']);
           return $group['id'];
         }
       }
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $groupName', $groupName);
   }
   
   static function getGroupIdForMailchimp($listID, $groupingID, $groupID) {
@@ -305,11 +296,10 @@ class CRM_Mailchimp_Utils {
         );
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     if ($dao->fetch()) {
+      CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupIdForMailchimp $dao->entity_id', $dao->entity_id);
       return $dao->entity_id;
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupIdForMailchimp $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupIdForMailchimp $groupingID', $groupingID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupIdForMailchimp $groupID', $groupID);
+    
   }
   
   /*
@@ -367,8 +357,7 @@ class CRM_Mailchimp_Utils {
     // Create/Update Contact details
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);
 
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateContactDetails $params', $params);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateContactDetails $delay', $delay);
+    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateContactDetails $contactID', $contactResult['id']);
 
     return $contactResult['id'];
   }
@@ -390,8 +379,7 @@ class CRM_Mailchimp_Utils {
     while($dao->fetch()) {
       $contactids[] = $dao->contact_id;
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getContactFromEmail $email', $email);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getContactFromEmail $primary', $primary);
+    
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getContactFromEmail $contactids', $contactids);
 
     return $contactids;
@@ -419,9 +407,6 @@ class CRM_Mailchimp_Utils {
         if(empty($params['LNAME']))
           unset ($contactParams['last_name']);
       }
-
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateParamsExactMatch $params', $params);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateParamsExactMatch $contactids', $contactids);
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateParamsExactMatch $contactParams', $contactParams);
 
     return $contactParams;
@@ -464,8 +449,7 @@ class CRM_Mailchimp_Utils {
         }
       }
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getCiviGroupIdsforMcGroupings $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getCiviGroupIdsforMcGroupings $mcGroupings', $mcGroupings);
+ 
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getCiviGroupIdsforMcGroupings $civiGroups', $civiGroups);
     return $civiGroups;
   }
@@ -500,8 +484,7 @@ class CRM_Mailchimp_Utils {
         $civiMcGroups[] = $dao->entity_id;
       }
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupSubscriptionforMailchimpList $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupSubscriptionforMailchimpList $contactID', $contactID);
+  
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupSubscriptionforMailchimpList $civiGroups', $civiGroups);
 
     return $civiMcGroups;
@@ -565,7 +548,7 @@ class CRM_Mailchimp_Utils {
       
       CRM_Mailchimp_BAO_MCSync::create($params);   
     } 
-    
+    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils deleteMCEmail $toDelete', $toDelete);
     foreach ($toDelete as $listID => $vals) {
       // sync contacts using batchunsubscribe
       $mailchimp = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -577,8 +560,7 @@ class CRM_Mailchimp_Utils {
         TRUE
       );  
     }
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils deleteMCEmail $emailId', $emailId);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils deleteMCEmail $toDelete', $toDelete);
+    
     return $toDelete;
   }
   
@@ -604,6 +586,7 @@ class CRM_Mailchimp_Utils {
           $groupContactCache->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
         }
         $groupContactCache->find();
+        CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupContactObject $groupContactCache', $groupContactCache);
         return $groupContactCache;
       }
       else {
@@ -614,11 +597,10 @@ class CRM_Mailchimp_Utils {
           $groupContact->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
         }
         $groupContact->find();
+        CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupContactObject $groupContact', $groupContact);
         return $groupContact;
       }
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupContactObject $groupID', $groupID);
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupContactObject $start', $start);
     return FALSE;
   }
    /**
@@ -643,6 +625,7 @@ class CRM_Mailchimp_Utils {
           $groupContactCache->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
         }
         $groupContactCache->find();
+        CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupMemberships $groupContactCache', $groupContactCache);
         return $groupContactCache;
       }
       else {
@@ -653,11 +636,11 @@ class CRM_Mailchimp_Utils {
           $groupContact->limit($start, CRM_Mailchimp_Form_Sync::BATCH_COUNT);
         }
         $groupContact->find();
+        CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupMemberships $groupContact', $groupContact);
         return $groupContact;
       }
     }
-    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupMemberships $groupIDs', $groupIDs);
-
+    
     return FALSE;
   }
   
