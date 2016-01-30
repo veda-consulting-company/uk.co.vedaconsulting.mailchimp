@@ -536,25 +536,18 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Now we iterate through the subscribers, collecting data about the other mapped groups
     // This is pretty inefficient :-(
     while ($groupContact->fetch()) {
-      // Find the contact, for the name fields
-      $contact = new CRM_Contact_BAO_Contact();
-      $contact->id = $groupContact->contact_id;
-      $contact->is_deleted = 0;
-      if( !$contact->find(TRUE)){
-        continue;
-      }  
-
-      // Find their primary (bulk) email
-      $email = new CRM_Core_BAO_Email();
-      $email->contact_id = $groupContact->contact_id;
-      $email->is_primary = TRUE;
-      if(!$email->find(TRUE)){
-        continue;
-      }
-
-      // If no email, it's like they're not there.
-      if (!$email->email || $email->on_hold || $contact->is_opt_out || $contact->do_not_email) {
-        //@todo update stats.
+      // Find the contact, email
+      $sql = "SELECT c.id, c.first_name, c.last_name, e.id as email_id, e.email
+      FROM civicrm_contact c INNER JOIN civicrm_email e on (c.id = e.contact_id)
+      WHERE e.is_primary = 1
+        AND c.is_deleted = 0 AND e.on_hold = 0
+        AND c.is_opt_out = 0 AND c.do_not_email = 0
+        AND c.id = {$groupContact->contact_id} ";
+      $contactDao = CRM_Core_DAO::executeQuery($sql);
+      $contact = '';
+      if ($contactDao->fetch()) {
+        $contact = $contactDao;
+      } else {
         continue;
       }
 
@@ -599,9 +592,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       // we're ready to store this but we need a hash that contains all the info
       // for comparison with the hash created from the CiviCRM data (elsewhere).
       //          email,           first name,      last name,      groupings
-      $hash = md5($email->email . $contact->first_name . $contact->last_name . $info);
+      $hash = md5($contact->email . $contact->first_name . $contact->last_name . $info);
       // run insert prepared statement
-      $db->execute($insert, array($contact->id, $email->id, $email->email, $contact->first_name, $contact->last_name, $hash, $info));
+      $db->execute($insert, array($contact->id, $contact->email_id, $contact->email, $contact->first_name, $contact->last_name, $hash, $info));
     }
 
     // Tidy up.
@@ -622,6 +615,11 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     
     foreach ($updates as $listId=>$settings) {
       foreach ($settings as $key=>$val) {
+        // avoid error details to store in civicrm_settings table
+        // create sql error "Data too long for column 'value'" (for long array)
+        if ($key == 'error_details') {
+          continue;
+        }
         $stats[$listId][$key] = $val;
       }
     }
