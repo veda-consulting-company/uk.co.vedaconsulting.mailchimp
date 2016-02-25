@@ -188,6 +188,10 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       }
     }
 
+    // First update the first name and last name of the contacts we
+    // already matched. See issue #188.
+    CRM_Mailchimp_Utils::updateGuessedContactDetails();
+
     // all Mailchimp table
     $dao = CRM_Core_DAO::executeQuery( "SELECT m.*, c.groupings c_groupings
       FROM tmp_mailchimp_push_m m
@@ -202,8 +206,14 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
         'LNAME' => $dao->last_name,
         'EMAIL' => $dao->email,
       );
-      // Update/create contact.
-      $contact_id = CRM_Mailchimp_Utils::updateContactDetails($params);
+      if (empty($dao->cid_guess)) {
+        // We don't know yet who this is.
+        // Update/create contact.
+        $contact_id = CRM_Mailchimp_Utils::updateContactDetails($params);
+      }
+      else {
+        $contact_id = $dao->cid_guess;
+      }
       if($contact_id) {
 
         // Ensure the contact is in the membership group.
@@ -247,11 +257,12 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
 
 
     // And now, what if a contact is not in the Mailchimp list? We must remove them from the membership group.
+    // I changed the query below; I replaced a 'WHERE NOT EXISTS' construct
+    // by an outer join, in the hope that it will be faster (#188).
     $dao = CRM_Core_DAO::executeQuery( "SELECT c.contact_id
       FROM tmp_mailchimp_push_c c
-      WHERE NOT EXISTS (
-        SELECT m.email FROM tmp_mailchimp_push_m m WHERE m.email=c.email
-      );");
+      LEFT OUTER JOIN tmp_mailchimp_push_m m ON m.email = c.email
+      WHERE m.email IS NULL;");
     // Loop the $dao object creating/finding contacts in CiviCRM.
     while ($dao->fetch()) {
       $groupContactRemoves[$membership_group_id][] =$dao->contact_id;

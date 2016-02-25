@@ -302,6 +302,46 @@ class CRM_Mailchimp_Utils {
     
   }
   
+  /**
+   * If an e-mail address is unique in CiviCRM, or unique as primary e-mail
+   * address, store a contact id in tmp_mailchimp_push_m. This way we can
+   * speed up pulling the contacts. (See issue #188.)
+   */
+  static function guessCidsMailchimpContacts() {
+    CRM_Core_DAO::executeQuery(
+        "UPDATE tmp_mailchimp_push_m m
+          JOIN civicrm_email e1 ON m.email = e1.email
+          LEFT OUTER JOIN civicrm_email e2 ON m.email = e2.email AND e1.id <> e2.id
+          SET m.cid_guess = e1.contact_id
+          WHERE e2.id IS NULL")->free();
+  }
+
+  /**
+   * Update first name and last name of the contacts of which we already
+   * know the contact id.
+   */
+  static function updateGuessedContactDetails() {
+    // In theory I could do this with one SQL join statement, but this way
+    // we would bypass user defined hooks. So I will use the API, but only
+    // in the case that the names are really different. This will save
+    // some expensive API calls. See issue #188.
+
+    $dao = CRM_Core_DAO::executeQuery(
+        "select c.id, m.first_name, m.last_name
+          from tmp_mailchimp_push_m m
+          join civicrm_contact c on m.cid_guess = c.id
+          where m.first_name <> c.first_name or m.last_name <> c.last_name");
+
+    while ($dao->fetch()) {
+      civicrm_api3('Contact', 'create', array(
+        'id' => $dao->id,
+        'first_name' => $dao->first_name,
+        'last_name' => $dao->last_name,
+      ));
+    }
+    $dao->free();
+  }
+
   /*
    * Create/Update contact details in CiviCRM, based on the data from Mailchimp webhook
    */
