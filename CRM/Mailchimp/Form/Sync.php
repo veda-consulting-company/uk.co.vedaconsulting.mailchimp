@@ -363,7 +363,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // needed over multiple sessions because of queue.
 
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
-    $dao = CRM_Core_DAO::executeQuery(
+    CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
         email VARCHAR(200),
         first_name VARCHAR(100),
@@ -372,10 +372,18 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         leid VARCHAR(10),
         hash CHAR(32),
         groupings VARCHAR(4096),
+        cid_guess INT(10),
         PRIMARY KEY (email, hash));");
+    // I'll use the cid_guess column to store the cid when it is
+    // immediately clear. This will speed up pulling updates (see #118).
+    // Create an index so that this cid_guess can be used for fast
+    // searching.
+    $dao = CRM_Core_DAO::executeQuery(
+        "CREATE INDEX index_cid_guess ON tmp_mailchimp_push_m(cid_guess);");
+
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m VALUES(?, ?, ?, ?, ?, ?, ?)');
+    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m(email, first_name, last_name, euid, leid, hash, groupings) VALUES(?, ?, ?, ?, ?, ?, ?)');
 
     // We need to know what grouping data we care about. The rest we completely ignore.
     // We only care about CiviCRM groups that are mapped to this MC List:
@@ -461,6 +469,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Tidy up.
     fclose($handle);
     $db->freePrepared($insert);
+
+    // Guess the contact ID's, to speed up syncPullUpdates (See issue #188).
+    CRM_Mailchimp_Utils::guessCidsMailchimpContacts();
 
     $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(*) c  FROM tmp_mailchimp_push_m");
     $dao->fetch();

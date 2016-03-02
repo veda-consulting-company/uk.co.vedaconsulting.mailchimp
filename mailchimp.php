@@ -300,10 +300,6 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
   );
 
   if($objectName == 'Email') {
-    $email = new CRM_Core_BAO_Email();
-    $email->id = $id;
-    $email->find(TRUE);
-
     // If about to delete an email in CiviCRM, we must delete it from Mailchimp
     // because we won't get chance to delete it once it's gone.
     //
@@ -313,9 +309,15 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     // info, where what they might have wanted was to change their email
     // address.
     if( ($op == 'delete') ||
-        ($op == 'edit' && $params['on_hold'] == 0 && $email->on_hold == 0 && $params['is_bulkmail'] == 0)
+        ($op == 'edit' && $params['on_hold'] == 0 && $params['is_bulkmail'] == 0)
     ) {
-      CRM_Mailchimp_Utils::deleteMCEmail(array($id));
+      $email = new CRM_Core_BAO_Email();
+      $email->id = $id;
+      $email->find(TRUE);
+
+      if ($op == 'delete' || $email->on_hold == 0) {
+        CRM_Mailchimp_Utils::deleteMCEmail(array($id));
+      }
     }
   }
 
