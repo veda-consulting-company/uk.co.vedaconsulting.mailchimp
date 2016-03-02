@@ -373,7 +373,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         hash CHAR(32),
         groupings VARCHAR(4096),
         cid_guess INT(10),
-        PRIMARY KEY (email, hash));");
+        PRIMARY KEY (email, hash))
+        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
     // I'll use the cid_guess column to store the cid when it is
     // immediately clear. This will speed up pulling updates (see #118).
     // Create an index so that this cid_guess can be used for fast
@@ -383,7 +384,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m(email, first_name, last_name, euid, leid, hash, groupings) VALUES(?, ?, ?, ?, ?, ?, ?)');
+	$insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m(email, first_name, last_name, euid, leid, hash, groupings) VALUES(?, ?, ?, ?, ?, ?, ?)');
 
     // We need to know what grouping data we care about. The rest we completely ignore.
     // We only care about CiviCRM groups that are mapped to this MC List:
@@ -495,8 +496,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         last_name VARCHAR(100),
         hash CHAR(32),
         groupings VARCHAR(4096),
-        PRIMARY KEY (email_id, email, hash)
-        );");
+        PRIMARY KEY (email_id, email, hash))
+        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
     $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?, ?)');
