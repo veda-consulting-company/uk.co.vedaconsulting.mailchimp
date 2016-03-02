@@ -365,15 +365,16 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
     CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
-        email VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        first_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        last_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        euid VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        leid VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        hash CHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        groupings VARCHAR(4096) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        email VARCHAR(200),
+        first_name VARCHAR(100),
+        last_name VARCHAR(100),
+        euid VARCHAR(10),
+        leid VARCHAR(10),
+        hash CHAR(32),
+        groupings VARCHAR(4096),
         cid_guess INT(10),
-        PRIMARY KEY (email, hash));");
+        PRIMARY KEY (email, hash))
+        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
     // I'll use the cid_guess column to store the cid when it is
     // immediately clear. This will speed up pulling updates (see #118).
     // Create an index so that this cid_guess can be used for fast
@@ -490,13 +491,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
         email_id INT(10) UNSIGNED NOT NULL,
-        email VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        first_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        last_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        hash CHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        groupings VARCHAR(4096) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
-        PRIMARY KEY (email_id, email, hash)
-        );");
+        email VARCHAR(200),
+        first_name VARCHAR(100),
+        last_name VARCHAR(100),
+        hash CHAR(32),
+        groupings VARCHAR(4096),
+        PRIMARY KEY (email_id, email, hash))
+        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
     $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?, ?)');
