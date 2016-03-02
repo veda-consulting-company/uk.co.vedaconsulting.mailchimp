@@ -365,13 +365,13 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
     CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
-        email VARCHAR(200),
-        first_name VARCHAR(100),
-        last_name VARCHAR(100),
-        euid VARCHAR(10),
-        leid VARCHAR(10),
-        hash CHAR(32),
-        groupings VARCHAR(4096),
+        email VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        first_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        last_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        euid VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        leid VARCHAR(10) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        hash CHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        groupings VARCHAR(4096) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
         cid_guess INT(10),
         PRIMARY KEY (email, hash));");
     // I'll use the cid_guess column to store the cid when it is
@@ -383,7 +383,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // Cheekily access the database directly to obtain a prepared statement.
     $db = $dao->getDatabaseConnection();
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m(email, first_name, last_name, euid, leid, hash, groupings) VALUES(?, ?, ?, ?, ?, ?, ?)');
+	$insert = $db->prepare('INSERT INTO tmp_mailchimp_push_m(email, first_name, last_name, euid, leid, hash, groupings) VALUES(?, ?, ?, ?, ?, ?, ?)');
 
     // We need to know what grouping data we care about. The rest we completely ignore.
     // We only care about CiviCRM groups that are mapped to this MC List:
@@ -490,11 +490,11 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
         email_id INT(10) UNSIGNED NOT NULL,
-        email VARCHAR(200),
-        first_name VARCHAR(100),
-        last_name VARCHAR(100),
-        hash CHAR(32),
-        groupings VARCHAR(4096),
+        email VARCHAR(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        first_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        last_name VARCHAR(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        hash CHAR(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+        groupings VARCHAR(4096) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
         PRIMARY KEY (email_id, email, hash)
         );");
     // Cheekily access the database directly to obtain a prepared statement.
