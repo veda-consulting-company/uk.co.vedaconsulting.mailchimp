@@ -522,79 +522,58 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // ... And while we're at it, build an SQL-safe array of groupIds for groups mapped to groupings.
     //     (we use that later)
     $membership_group_id = FALSE;
-    $grouping_group_ids = array('normal'=>array(),'smart'=>array());
+    // There used to be a distinction between the handling of 'normal' groups
+    // and smart groups. But now the API will take care of this.
+    $grouping_group_ids = array();
     $default_info = array();
+
+    // The CiviCRM Contact API returns group titles instead of group ID's.
+    // Nobody knows why. So let's build this array to convert titles to ID's.
+    $title2gid = array();
+
     foreach ($mapped_groups as $group_id => $details) {
+      $title2gid[$details['civigroup_title']] = $group_id;
       CRM_Contact_BAO_GroupContactCache::loadAll($group_id);
       if (!$details['grouping_id']) {
         $membership_group_id = $group_id;
       }
       else {
-        $grouping_group_ids[ ($details['civigroup_uses_cache'] ? 'smart' : 'normal') ][] = (int)$group_id;
+        $grouping_group_ids[] = (int)$group_id;
         $default_info[ $details['grouping_id'] ][ $details['group_id'] ] = FALSE;
       }
     }
-    $grouping_group_ids['smart']  = implode(',', $grouping_group_ids['smart']);
-    $grouping_group_ids['normal'] = implode(',', $grouping_group_ids['normal']);
     if (!$membership_group_id) {
       throw new Exception("No CiviCRM group is mapped to determine membership of Mailchimp list $listID");
     }
-    // ... Load all subscribers in $groupContact object
-    if (!($groupContact = CRM_Mailchimp_Utils::getGroupContactObject($membership_group_id))) {
-      CRM_Mailchimp_Utils::checkDebug('get group contact= ', $groupContact);
-      throw new Exception("No CiviCRM group is mapped to determine membership of Mailchimp list $listID. CiviCRM group $membership_group_id failed to load");
-    }
+    // Use a nice API call to get the information for tmp_mailchimp_push_c.
+    // The API will take care of smart groups.
+    $result = civicrm_api3('Contact', 'get', array(
+      'is_deleted' => 0,
+      // The email filter below does not work (CRM-18147)
+      // 'email' => array('IS NOT NULL' => 1),
+      // Now I think that on_hold is NULL when there is no e-mail, so if
+      // we are lucky, the filter below implies that an e-mail address
+      // exists ;-)
+      'on_hold' => 0,
+      'is_opt_out' => 0,
+      'do_not_email' => 0,
+      'group' => $membership_group_id,
+      'return' => array('first_name', 'last_name', 'email_id', 'email', 'group'),
+      'options' => array('limit' => 0),
+    ));
 
-    // Now we iterate through the subscribers, collecting data about the other mapped groups
-    // This is pretty inefficient :-(
-    while ($groupContact->fetch()) {
-      // Find the contact, email
-      $sql = "SELECT c.id, c.first_name, c.last_name, e.id as email_id, e.email
-      FROM civicrm_contact c INNER JOIN civicrm_email e on (c.id = e.contact_id)
-      WHERE e.is_primary = 1
-        AND c.is_deleted = 0 AND e.on_hold = 0
-        AND c.is_opt_out = 0 AND c.do_not_email = 0
-        AND c.id = {$groupContact->contact_id} ";
-      $contactDao = CRM_Core_DAO::executeQuery($sql);
-      $contact = '';
-      if ($contactDao->fetch()) {
-        $contact = $contactDao;
-      } else {
-        continue;
-      }
-
-      // Find out if they're in any groups that we care about.
-      // Start off as not in the groups...
+    foreach ($result['values'] as $contact) {
+      // Find out the ID's of the groups the $contact belongs to, and
+      // save in $info.
       $info = $default_info;
-      // We can do this with two queries, one for normal groups, one for smart groups.
 
-      // Normal groups.
-      if ($grouping_group_ids['normal']) {
-        $groupContact2 = new CRM_Contact_BAO_GroupContact();
-        $groupContact2->contact_id = $groupContact->contact_id;
-        $groupContact2->whereAdd("status = 'Added'");
-        $groupContact2->whereAdd("group_id IN ($grouping_group_ids[normal])");
-        $groupContact2->find();
-        while ($groupContact2->fetch()) {
-          // need MC grouping_id and group_id
-          $details = $mapped_groups[ $groupContact2->group_id ];
-          $info[ $details['grouping_id'] ][ $details['group_id'] ] = TRUE;
+      $contact_group_titles = explode(',', $contact['group'] );
+      foreach ($contact_group_titles as $title) {
+        $group_id = $title2gid[$title];
+        if (in_array($group_id, $grouping_group_ids)) {
+          $details = $mapped_groups[$group_id];
+          $info[$details['grouping_id']][$details['group_id']] = TRUE;
         }
-        unset($groupContact2);
-      }
-
-      // Smart groups
-      if ($grouping_group_ids['smart']) {
-        $groupContactCache = new CRM_Contact_BAO_GroupContactCache();
-        $groupContactCache->contact_id = $groupContact->contact_id;
-        $groupContactCache->whereAdd("group_id IN ($grouping_group_ids[smart])");
-        $groupContactCache->find();
-        while ($groupContactCache->fetch()) {
-          // need MC grouping_id and group_id
-          $details = $mapped_groups[ $groupContactCache->group_id ];
-          $info[ $details['grouping_id'] ][ $details['group_id'] ] = TRUE;
-        }
-        unset($groupContactCache);
       }
 
       // OK we should now have all the info we need.
@@ -604,9 +583,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       // we're ready to store this but we need a hash that contains all the info
       // for comparison with the hash created from the CiviCRM data (elsewhere).
       //          email,           first name,      last name,      groupings
-      $hash = md5($contact->email . $contact->first_name . $contact->last_name . $info);
+      $hash = md5($contact['email'] . $contact['first_name'] . $contact['last_name'] . $info);
       // run insert prepared statement
-      $db->execute($insert, array($contact->id, $contact->email_id, $contact->email, $contact->first_name, $contact->last_name, $hash, $info));
+      $db->execute($insert, array($contact['id'], $contact['email_id'], $contact['email'], $contact['first_name'], $contact['last_name'], $hash, $info));
     }
 
     // Tidy up.
