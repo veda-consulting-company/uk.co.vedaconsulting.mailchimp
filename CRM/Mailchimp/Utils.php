@@ -303,17 +303,28 @@ class CRM_Mailchimp_Utils {
   }
   
   /**
-   * If an e-mail address is unique in CiviCRM, or unique as primary e-mail
-   * address, store a contact id in tmp_mailchimp_push_m. This way we can
-   * speed up pulling the contacts. (See issue #188.)
+   * Try to find out already if we can find a unique contact for this e-mail
+   * address.
    */
   static function guessCidsMailchimpContacts() {
+    // If an address is unique, that's the one we need.
     CRM_Core_DAO::executeQuery(
         "UPDATE tmp_mailchimp_push_m m
           JOIN civicrm_email e1 ON m.email = e1.email
           LEFT OUTER JOIN civicrm_email e2 ON m.email = e2.email AND e1.id <> e2.id
           SET m.cid_guess = e1.contact_id
           WHERE e2.id IS NULL")->free();
+    // In the other case, if we find a unique contact with matching
+    // first name, last name and e-mail address, it is probably the one we
+    // are looking for as well.
+    CRM_Core_DAO::executeQuery(
+       "UPDATE tmp_mailchimp_push_m m
+          JOIN civicrm_email e1 ON m.email = e1.email
+          JOIN civicrm_contact c1 ON e1.contact_id = c1.id AND c1.first_name = m.first_name AND c1.last_name = m.last_name 
+          LEFT OUTER JOIN civicrm_email e2 ON m.email = e2.email
+          LEFT OUTER JOIN civicrm_contact c2 on e2.contact_id = c2.id AND c2.first_name = m.first_name AND c2.last_name = m.last_name AND c2.id <> c1.id
+          SET m.cid_guess = e1.contact_id
+          WHERE c2.id IS NULL")->free();
   }
 
   /**
