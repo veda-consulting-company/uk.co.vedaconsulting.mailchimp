@@ -324,7 +324,7 @@ class CRM_Mailchimp_Utils {
           LEFT OUTER JOIN civicrm_email e2 ON m.email = e2.email
           LEFT OUTER JOIN civicrm_contact c2 on e2.contact_id = c2.id AND c2.first_name = m.first_name AND c2.last_name = m.last_name AND c2.id <> c1.id
           SET m.cid_guess = e1.contact_id
-          WHERE c2.id IS NULL")->free();
+          WHERE m.cid_guess IS NULL AND c2.id IS NULL")->free();
   }
 
   /**
