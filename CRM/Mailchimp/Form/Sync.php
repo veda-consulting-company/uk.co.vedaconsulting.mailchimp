@@ -567,7 +567,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       // save in $info.
       $info = $default_info;
 
-      $contact_group_titles = explode(',', $contact['group'] );
+      $contact_group_titles = explode(',', $contact['groups'] );
       foreach ($contact_group_titles as $title) {
         $group_id = $title2gid[$title];
         if (in_array($group_id, $grouping_group_ids)) {
