@@ -336,12 +336,13 @@ class CRM_Mailchimp_Utils {
     // we would bypass user defined hooks. So I will use the API, but only
     // in the case that the names are really different. This will save
     // some expensive API calls. See issue #188.
-
+    // Ignore people without names as well, see #183.
     $dao = CRM_Core_DAO::executeQuery(
         "select c.id, m.first_name, m.last_name
           from tmp_mailchimp_push_m m
           join civicrm_contact c on m.cid_guess = c.id
-          where m.first_name <> c.first_name or m.last_name <> c.last_name");
+          where (m.first_name <> c.first_name or m.last_name <> c.last_name)
+          and (NULLIF(m.first_name, '') IS NOT NULL OR NULLIF(m.last_name, '') IS NOT NULL)");
 
     while ($dao->fetch()) {
       civicrm_api3('Contact', 'create', array(
@@ -406,6 +407,12 @@ class CRM_Mailchimp_Utils {
       
     }
     // Create/Update Contact details
+    if (empty($params['first_name']) && empty($params['last_name'])) {
+      // Avoid removing first name and last name from CiviCRM if no name exists
+      // in mailchimp. (See #183)
+      unset($params['first_name']);
+      unset($params['last_name']);
+    }
     $contactResult = civicrm_api('Contact' , 'create' , $contactParams);
 
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils updateContactDetails $contactID', $contactResult['id']);
