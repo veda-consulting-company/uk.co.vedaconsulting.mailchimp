@@ -172,6 +172,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
    * New contacts from Mailchimp need bringing into CiviCRM.
    */
   static function syncPullUpdates(CRM_Queue_TaskContext $ctx, $listID) {
+    // This can take a long time on a big list.
+    set_time_limit(60*60*15); // Allow 15 minutes(!)
+
     // Prepare the groups that we need to update
     $stats[$listID]['added'] = $stats[$listID]['removed'] = 0;
 
