@@ -341,8 +341,8 @@ class CRM_Mailchimp_Utils {
       "SELECT c.id, m.first_name, m.last_name
        FROM tmp_mailchimp_push_m m
        JOIN civicrm_contact c ON m.cid_guess = c.id
-       WHERE m.first_name NOT IN ('', c.first_name)
-          OR m.last_name  NOT IN ('', c.last_name)");
+       WHERE m.first_name NOT IN ('', COALESCE(c.first_name, ''))
+          OR m.last_name  NOT IN ('', COALESCE(c.last_name,  ''))");
 
     while ($dao->fetch()) {
       $params = array('id' => $dao->id);
