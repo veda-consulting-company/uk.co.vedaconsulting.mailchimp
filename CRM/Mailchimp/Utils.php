@@ -338,17 +338,21 @@ class CRM_Mailchimp_Utils {
     // some expensive API calls. See issue #188.
 
     $dao = CRM_Core_DAO::executeQuery(
-        "select c.id, m.first_name, m.last_name
-          from tmp_mailchimp_push_m m
-          join civicrm_contact c on m.cid_guess = c.id
-          where m.first_name <> c.first_name or m.last_name <> c.last_name");
+      "SELECT c.id, m.first_name, m.last_name
+       FROM tmp_mailchimp_push_m m
+       JOIN civicrm_contact c ON m.cid_guess = c.id
+       WHERE m.first_name NOT IN ('', COALESCE(c.first_name, ''))
+          OR m.last_name  NOT IN ('', COALESCE(c.last_name,  ''))");
 
     while ($dao->fetch()) {
-      civicrm_api3('Contact', 'create', array(
-        'id' => $dao->id,
-        'first_name' => $dao->first_name,
-        'last_name' => $dao->last_name,
-      ));
+      $params = array('id' => $dao->id);
+      if ($dao->first_name) {
+        $params['first_name'] = $dao->first_name;
+      }
+      if ($dao->last_name) {
+        $params['last_name'] = $dao->last_name;
+      }
+      civicrm_api3('Contact', 'create', $params);
     }
     $dao->free();
   }
