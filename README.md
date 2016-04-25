@@ -51,6 +51,7 @@ In Mailchimp: Set up an empty list, lets call it Newsletter. You'll also need
 to set up this list's **Webhooks**.
 
 Steps to configure Mailchimp Webhook settings with the relevant CiviCRM Url:  
+
 1. To know the relevant CiviCRM url visit https://<<your_site>>/civicrm/mailchimp/settings?reset=1.  
 2. In the “Security Key” field entering a key shows the complete webhook url. Note down the complete url.  
 3. Make sure webhook url is accessible to public. If not, just make sure anonymous / public user has “allow webhook posts” permission.
@@ -69,6 +70,7 @@ group). The CiviCRM Group's settings page has an additional fieldset called
 Mailchimp.
 
 Choose the integration option, called "Sync membership of this group with membership of a Mailchimp List" then choose your list name.
+
 ![Screenshot of integration options](images/group-config-form-1.png)
 
 Save your group's settings.
