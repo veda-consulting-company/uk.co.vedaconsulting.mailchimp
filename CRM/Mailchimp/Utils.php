@@ -775,8 +775,9 @@ class CRM_Mailchimp_Utils {
 				break;
 			case "unsubscribe":
 				// https://apidocs.mailchimp.com/api/2.0/lists/unsubscribe.php
+                $delete = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'list_removal', NULL, FALSE);
 				try {
-					$result = $list->unsubscribe($listID, array('email' => $email), $delete_member=false, $send_goodbye=false, $send_notify=false);
+					$result = $list->unsubscribe($listID, array('email' => $email), $delete, $send_goodbye=false, $send_notify=false);
 				}
 				catch (Exception $e) {
 					CRM_Core_Session::setStatus($e->getMessage());
