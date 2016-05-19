@@ -237,9 +237,10 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // Log the batch unsubscribe details
     CRM_Core_Error::debug_var('Mailchimp batchUnsubscribe syncPushRemove $batch= ', $batch);
+    $delete = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'list_removal', NULL, FALSE);
     // Send Mailchimp Lists API Call: http://apidocs.mailchimp.com/api/2.0/lists/batch-unsubscribe.php
     $list = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-    $result = $list->batchUnsubscribe( $listID, $batch, $delete=FALSE, $send_bye=FALSE, $send_notify=FALSE);
+    $result = $list->batchUnsubscribe( $listID, $batch, $delete, $send_bye=FALSE, $send_notify=FALSE);
 
     CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncPushRemove $batchUnsubscriberesult= ', $result);
     // @todo check errors? $result['errors'] $result['success_count']

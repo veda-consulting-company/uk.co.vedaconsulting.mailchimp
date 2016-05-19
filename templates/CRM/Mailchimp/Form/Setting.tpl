@@ -28,6 +28,13 @@
           <td>{$form.enable_debugging.html}<br/>
           </td>
         </tr>
+        <tr class="crm-mailchimp-setting-remove-from-mc-block">
+          <td class="label">{$form.list_removal.label}</td>
+          <td>{$form.list_removal.html}<br/>
+      	    <span class="description">{ts} Delete or Unsubscribe at MailChimp when corresponding CiviCRM contact is removed?{/ts}
+	          </span>
+          </td>
+        </tr>
       </table>
     </div>
     <div class="crm-submit-buttons">

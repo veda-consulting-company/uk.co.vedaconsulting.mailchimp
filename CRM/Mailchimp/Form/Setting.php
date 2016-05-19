@@ -56,6 +56,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
     $this->addRadio('enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
     
+    // Remove or Unsubscribe Preference
+    $removeOptions = array(1 => ts('Delete MailChimp Subscriber'), 0 => ts('Unsubscribe MailChimp Subscriber'));
+    $this->addRadio('list_removal', ts('List Removal'), $removeOptions, NULL);
+
     // Create the Submit Button.
     $buttons = array(
       array(
@@ -92,9 +96,15 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $enableDebugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
       'enable_debugging', NULL, FALSE
     );
+
+    $listRemoval = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
+      'list_removal', NULL, FALSE
+    );
+
     $defaults['api_key'] = $apiKey;
     $defaults['security_key'] = $securityKey;
     $defaults['enable_debugging'] = $enableDebugging;
+    $defaults['list_removal'] = $listRemoval;
     
     return $defaults;
   }
@@ -123,6 +133,9 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       );
 
       CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging'
+      );
+
+      CRM_Core_BAO_Setting::setItem($params['list_removal'], self::MC_SETTING_GROUP, 'list_removal'
       );
 
       try {
