@@ -73,6 +73,133 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
   }
 
   /**
+   * Mailchimp in their wisdom changed all the Ids for interests.
+   *
+   * So we have to map on names and then update our stored Ids.
+   *
+   * Also change cronjobs.
+   */
+  public function upgrade_20() {
+    $this->ctx->log->info('Applying update to v2.0 Updating Mailchimp Interest Ids to fit their new API');
+    // New
+    $api = CRM_Mailchimp_Utils::getMailchimpApi();
+    // Old
+    $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
+
+    // Use new API to get lists. Allow for 10,000 lists so we don't bother
+    // batching.
+    $lists = [];
+    foreach ($api->get("/lists", ['fields'=>'lists.id,lists.name','count'=>10000])->data->lists
+      as $list) {
+      $lists[$list->id] = ['name' => $list->name];
+    }
+
+    $queries = [];
+    // Loop lists.
+    foreach (array_keys($lists) as $list_id) {
+      // Fetch Interest categories.
+      $categories = $api->get("/lists/$list_id/interest-categories", ['count' => 10000, 'fields' => 'categories.id,categories.title'])->data->categories;
+      if (!$categories) {
+        continue;
+      }
+
+      // Old: fetch all categories (groupings) and interests (groups) in one go:
+      $old = $mcLists->interestGroupings($list_id);
+      // New: fetch interests for each category.
+      foreach ($categories as $category) {
+        // $lists[$list_id]['categories'][$category->id] = ['name' => $category->title];
+
+        // Match this category by name with the old 'groupings'
+        $matched_old_grouping = FALSE;
+        foreach($old as $old_grouping) {
+          if ($old_grouping['name'] == $category->title) {
+            $matched_old_grouping = $old_grouping;
+            break;
+          }
+        }
+        if ($matched_old_grouping) {
+          // Found a match.
+          $cat_queries []= ['list_id' => $list_id, 'old' => $matched_old_grouping['id'], 'new' => $category->id];
+
+          // Now do interests (old: groups)
+          $interests = $api->get("/lists/$list_id/interest-categories/$category->id/interests", ['fields'=>'interests.id,interests.name','count'=>10000])->data->interests;
+          foreach ($interests as $interest) {
+            // Can we find this interest by name?
+            $matched_old_group = FALSE;
+            foreach($matched_old_grouping['groups'] as $old_group) {
+              if ($old_group['name'] == $interest->name) {
+                $int_queries []= ['list_id' => $list_id, 'old' => $old_group['id'], 'new' => $interest->id];
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    foreach ($cat_queries as $params) {
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_value_mailchimp_settings '
+        . 'SET mc_grouping_id = %1 '
+        . 'WHERE mc_list_id = %2 AND mc_grouping_id = %3;'
+        , [
+          1 => [$params['new'], 'String'],
+          2 => [$params['list_id'], 'String'],
+          3 => [$params['old'], 'String'],
+        ]);
+    }
+
+    foreach ($int_queries as $params) {
+      CRM_Core_DAO::executeQuery('UPDATE civicrm_value_mailchimp_settings '
+        . 'SET mc_group_id = %1 '
+        . 'WHERE mc_list_id = %2 AND mc_group_id = %3;'
+        , [
+          1 => [$params['new'], 'String'],
+          2 => [$params['list_id'], 'String'],
+          3 => [$params['old'], 'String'],
+        ]);
+    }
+
+    // Now cron jobs. Delete all mailchimp ones.
+    $result = civicrm_api3('Job', 'get', array(
+      'sequential' => 1,
+      'api_entity' => "mailchimp",
+    ));
+    if ($result['count']) {
+      // Should only be one, but just in case...
+      foreach ($result['values'] as $old) {
+        // Double check id exists!
+        if (!empty($old['id'])) {
+          civicrm_api3('Job', 'delete', ['id' => $old['id']]);
+        }
+      }
+    }
+
+    // Create Push Sync job.
+    $params = array(
+      'sequential' => 1,
+      'name'          => 'Mailchimp Push Sync',
+      'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
+      'run_frequency' => 'Daily',
+      'api_entity'    => 'Mailchimp',
+      'api_action'    => 'pushsync',
+      'is_active'     => 0,
+    );
+    $result = civicrm_api3('job', 'create', $params);
+    // Create Pull Sync job.
+    $params = array(
+      'sequential' => 1,
+      'name'          => 'Mailchimp Pull Sync',
+      'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
+      'run_frequency' => 'Daily',
+      'api_entity'    => 'Mailchimp',
+      'api_action'    => 'pullsync',
+      'is_active'     => 0,
+    );
+    $result = civicrm_api3('job', 'create', $params);
+
+    return TRUE;
+  }
+  /**
    * Example: Run an external SQL script
    *
    * @return TRUE on success
