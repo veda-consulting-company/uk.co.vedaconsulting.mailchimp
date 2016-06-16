@@ -394,7 +394,7 @@ class CRM_Mailchimp_Utils {
     if (!isset(static::$mailchimp_lists)) {
       static::$mailchimp_lists[$list_id] = [];
       $api = CRM_Mailchimp_Utils::getMailchimpApi();
-      $lists = $api->get('/lists', ['fields' => 'lists.id,lists.name'])->data->lists;
+      $lists = $api->get('/lists', ['fields' => 'lists.id,lists.name','count'=>10000])->data->lists;
       foreach ($lists as $list) {
         static::$mailchimp_lists[$list->id] = $list->name;
       }
