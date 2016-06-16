@@ -67,10 +67,18 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     // Add the Buttons.
     $this->addButtons($buttons);
 
-    // Check for warnings and output them as status messages.
-    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig();
-    foreach ($warnings as $message) {
-      CRM_Core_Session::setStatus($message);
+    try {
+      // Initially we won't be able to do this as we don't have an API key.
+      $api = CRM_Mailchimp_Utils::getMailchimpApi();
+
+      // Check for warnings and output them as status messages.
+      $warnings = CRM_Mailchimp_Utils::checkGroupsConfig();
+      foreach ($warnings as $message) {
+        CRM_Core_Session::setStatus($message);
+      }
+    }
+    catch (Exception $e){
+      CRM_Core_Session::setStatus('Could not use the Mailchimp API - ' . $e->getMessage() . ' You will see this message If you have not yet configured your Mailchimp acccount.');
     }
   }
 

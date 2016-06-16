@@ -235,7 +235,7 @@ class CRM_Mailchimp_Api3 {
       'completed' => NULL,
       'method' => $method,
       'url' => $this->server . $url,
-      'headers' => "Content-Type: Application/json;charset=UTF-8",
+      'headers' => ["Content-Type: Application/json;charset=UTF-8"],
       'userpwd' => "dummy:$this->api_key",
       // Set ZLS for default data.
       'data' => '',
@@ -258,7 +258,7 @@ class CRM_Mailchimp_Api3 {
       else {
         // Other requests have it added as JSON
         $this->request->data = json_encode($data);
-        $this->request->headers .= "\r\nContent-Length: " . strlen($this->request->data);
+        $this->request->headers []= "Content-Length: " . strlen($this->request->data);
       }
     }
 
