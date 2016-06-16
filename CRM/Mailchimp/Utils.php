@@ -392,7 +392,7 @@ class CRM_Mailchimp_Utils {
    */
   public static function getMCListName($list_id) {
     if (!isset(static::$mailchimp_lists)) {
-      static::$mailchimp_lists[$list['id']] = [];
+      static::$mailchimp_lists[$list_id] = [];
       $api = CRM_Mailchimp_Utils::getMailchimpApi();
       $lists = $api->get('/lists', ['fields' => 'lists.id,lists.name'])->data->lists;
       foreach ($lists as $list) {
@@ -516,7 +516,7 @@ class CRM_Mailchimp_Utils {
     if (!empty($info[$category_id])) {
       $name = $info[$category_id]['name'];
     }
-    CRM_Mailchimp_Utils::checkDebug("CRM_Mailchimp_Utils::getMCCategoryName for list $listID cat $categories returning $name");
+    CRM_Mailchimp_Utils::checkDebug("CRM_Mailchimp_Utils::getMCCategoryName for list $listID cat $category_id returning $name");
     return $name;
   }
 

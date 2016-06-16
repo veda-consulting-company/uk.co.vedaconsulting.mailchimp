@@ -6,7 +6,6 @@
       {/if}
       {ts}Sync completed with result counts as:{/ts}<br/> 
       {foreach from=$stats item=group}
-      {assign var="groups" value=$group.stats.group_id|@implode:','}
       <h2>{$group.name}</h2>
       <table class="form-layout-compressed">
       <tr><td>{ts}Contacts on CiviCRM{/ts}:</td><td>{$group.stats.c_count}</td></tr>

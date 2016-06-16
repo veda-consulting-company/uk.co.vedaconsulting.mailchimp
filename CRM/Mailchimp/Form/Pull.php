@@ -52,9 +52,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   public function buildQuickForm() {
 
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+    $will = '';
+    $wont = '';
     if (!empty($_GET['reset'])) {
-      $will = '';
-      $wont = '';
       foreach ($groups as $group_id => $details) {
         $description = "<a href='/civicrm/group?reset=1&action=update&id=$group_id' >"
           . "CiviCRM group $group_id: "
@@ -95,7 +95,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   public function postProcess() {
     $setting_url = CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1',  TRUE, NULL, FALSE, TRUE);
     $vals = $this->_submitValues;
-    $runner = self::getRunner(FALSE, $vals['mc_dry_run']);
+    $runner = self::getRunner(FALSE, !empty($vals['mc_dry_run']));
     // Clear out log table.
     CRM_Mailchimp_Sync::dropLogTable();
     if ($runner) {
@@ -285,6 +285,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   public static function updatePullStats($updates) {
     $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
     foreach ($updates as $list_id=>$settings) {
+      if ($list_id == 'dry_run') {
+        continue;
+      }
       foreach ($settings as $key=>$val) {
         if (!empty($stats[$list_id][$key])) {
           $stats[$list_id][$key] += $val;

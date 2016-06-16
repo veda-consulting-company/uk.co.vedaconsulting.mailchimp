@@ -62,9 +62,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   public function buildQuickForm() {
 
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+    $will = '';
+    $wont = '';
     if (!empty($_GET['reset'])) {
-      $will = '';
-      $wont = '';
       foreach ($groups as $group_id => $details) {
         $description = "<a href='/civicrm/group?reset=1&action=update&id=$group_id' >"
           . "CiviCRM group $group_id: "
@@ -109,7 +109,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    */
   public function postProcess() {
     $vals = $this->_submitValues;
-    $runner = self::getRunner(FALSE, $vals['mc_dry_run']);
+    $runner = self::getRunner(FALSE, !empty($vals['mc_dry_run']));
     // Clear out log table.
     CRM_Mailchimp_Sync::dropLogTable();
     if ($runner) {
@@ -140,6 +140,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync getRunner $groups= ', $groups);
 
     // Each list is a task.
+    $listCount = 0;
     foreach ($groups as $group_id => $details) {
       if (empty($details['list_name'])) {
         // This list has been deleted at Mailchimp, or for some other reason we
@@ -324,6 +325,9 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
     foreach ($updates as $listId=>$settings) {
+      if ($listId == 'dry_run') {
+        continue;
+      }
       foreach ($settings as $key=>$val) {
         $stats[$listId][$key] = $val;
       }
