@@ -22,9 +22,9 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     }
     if (!isset($this->api)) {
       $this->api = new CRM_Mailchimp_Api3($settings);
-      // We don't want our api actually talking to Mailchimp.
-      $this->api->setNetworkEnabled(FALSE);
     }
+    // We don't want our api actually talking to Mailchimp.
+    $this->api->setNetworkEnabled(FALSE);
     return $this->api;
   }
 
@@ -96,7 +96,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     $this->assertFalse($request->verifypeer);
     $this->assertEquals(2, $request->verifyhost);
     $this->assertEquals('', $request->data);
-    $this->assertEquals("Content-Type: Application/json;charset=UTF-8", $request->headers);
+    $this->assertEquals(["Content-Type: Application/json;charset=UTF-8"], $request->headers);
   }
   /**
    * Check GET requests are being created properly.
@@ -141,6 +141,76 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
   public function testNetworkError() {
     $api = $this->getApi();
     $request  = $api->curlResultToResponse(['http_code'=>500,'content_type'=>'application/json'],'{"title":"witty error ha ha so funny."}');
+  }
+  /**
+   * Check curl mocking works.
+   *
+   * @expectedException RuntimeException
+   * @expectedExceptionMessage thrown by mock
+   */
+  public function testCurlMockWorks() {
+    $api = $this->getApi();
+    // Network must be enabled for this to work.
+    $api->setNetworkEnabled(TRUE);
+
+    $api->setMockCurl(function($request) {
+      return ['exec' => '{"prop":"val"}'];
+    });
+    $result = $api->get('/');
+    $this->assertEquals(200, $result->http_code);
+    $this->assertEquals((object) ['prop' => 'val'], $result->data);
+
+    // Finally test throwing an exception.
+    $api->setMockCurl(function($request) {
+      throw new RuntimeException("thrown by mock");
+    });
+    // Bland request.
+    $api->get('/');
+  }
+  /**
+   * Tests that calling batch including a request that will fail does not throw
+   * exception.
+   */
+  public function testBatchHandlesFailures() {
+
+    $api = $this->getApi();
+    // Network must be enabled for this to work.
+    $api->setNetworkEnabled(TRUE);
+
+    // first test that the error is thrown.
+    $api->setMockCurl(function($request) {
+      return [
+        'info' => ['http_code' => 400],
+        'exec' => '{"title":"Invalid Resource","status":400,"detail":"looks like a duffer"}',
+      ];
+    });
+    try {
+      $result = $api->get('/');
+      $this->fail("Expected CRM_Mailchimp_RequestErrorException");
+    }
+    catch (CRM_Mailchimp_RequestErrorException $e) {
+      // Good.
+      $this->assertEquals("Mailchimp API said: Invalid Resource", $e->getMessage());
+    }
+
+    // Now test that it's not thrown if in a batch.
+    $api->setMockCurl(function($request) {
+      if ($request->url == 'https://uk1.api.mailchimp.com/3.0/success') {
+        return [];
+      }
+      elseif ($request->url == 'https://uk1.api.mailchimp.com/3.0/invalid/request') {
+        // Reply with a request error.
+        return [
+          'info' => ['http_code' => 400],
+          'exec' => '{"title":"Invalid Resource","status":400,"detail":"looks like a duffer"}',
+        ];
+      }
+      throw new Exception("no mock for request: " . json_encode($request));
+    });
+    $result = $api->batchAndWait([
+      ['get', '/success'],
+      ['put', '/invalid/request'],
+      ]);
   }
 }
 

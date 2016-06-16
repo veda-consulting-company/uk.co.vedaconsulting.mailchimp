@@ -4,7 +4,7 @@
  * Mailchimp API v3.0 service wrapper.
  *
  * ## Errors ##
- * 
+ *
  * According to:
  * http://developer.mailchimp.com/documentation/mailchimp/guides/get-started-with-mailchimp-api-3/#errors
  * Errors are always reported with a 4xx (fault probably ours) or 5xx (probably
@@ -26,7 +26,6 @@
  *
  */
 class CRM_Mailchimp_Api3 {
-  
   /** string Mailchimp API key */
   protected $api_key;
 
@@ -37,6 +36,8 @@ class CRM_Mailchimp_Api3 {
     *  networking. */
   protected $network_enabled=TRUE;
 
+  /** Callback for testing */
+  protected $mock_curl = NULL;
   /** Object that holds details used in the latest request.
    *  Public access just for testing purposes.
    */
@@ -129,7 +130,7 @@ class CRM_Mailchimp_Api3 {
   /**
    * Perform a /batches POST request and sit and wait for the result.
    *
-   * @todo is it quicker to run small ops directly? <10 items?
+   * It quicker to run small ops directly for <15 items.
    *
    */
   public function batchAndWait(Array $batch, $method=NULL) {
@@ -168,6 +169,12 @@ class CRM_Mailchimp_Api3 {
       } while ($result->data->status != 'finished');
 
       // Now complete.
+      // Note: we have no way to check the errors. Mailchimp make a downloadable
+      // .tar.gz file with one file per operation available, however PHP (as of
+      // writing) has a bug (I've reported it
+      // https://bugs.php.net/bug.php?id=72394) in its PharData class that
+      // handles opening of tar files which means there's no way we can access
+      // that info. So we have to ignore errors.
       return $result;
     }
     else {
@@ -176,7 +183,14 @@ class CRM_Mailchimp_Api3 {
         $method = strtolower($item[0]);
         $path = $item[1];
         $data = isset($item[2]) ? $item[2] : [];
-        $this->$method($path, $data);
+        try {
+          $this->$method($path, $data);
+        }
+        catch (CRM_Mailchimp_RequestErrorException $e) {
+          // Here we ignore exceptions from Mailchimp not because we want to,
+          // but because we have no way of handling such errors when done for
+          // 15+ items in a proper batch, so we don't handle them here either.
+        }
       }
     }
   }
@@ -209,6 +223,32 @@ class CRM_Mailchimp_Api3 {
    */
   public function setNetworkEnabled($enable=TRUE) {
     $this->network_enabled = (bool) $enable;
+  }
+  /**
+   * Provide mock for curl.
+   *
+   * The callback will be called with the 
+   * request object in $this->request. It must return an array with optional
+   * keys:
+   *
+   * - exec the mocked output of curl_exec(). Defaults to '{}'.
+   * - info the mocked output of curl_getinfo(), defaults to an array:
+   *   - http_code    => 200
+   *   - content_type => 'application/json'
+   *
+   * Note the object must be operating with network-enabled for this to be
+   * called; it exactly replaces the curl work.
+   *
+   * @param null|callback $callback. If called with anything other than a
+   * callback, this functionality is disabled.
+   */
+  public function setMockCurl($callback) {
+    if (is_callable($callback)) {
+      $this->mock_curl = $callback;
+    }
+    else {
+      $this->mock_curl = NULL;
+    }
   }
   /**
    * All request types handled here.
@@ -252,8 +292,11 @@ class CRM_Mailchimp_Api3 {
       if ($this->request->method == 'GET') {
         // For GET requests, data must be added as query string.
         // Append if there's already a query string.
-        $this->request->url .= ((strpos($this->request->url, '?')===false) ? '?' : '&')
-           .http_build_query($data);
+        $query_string = http_build_query($data);
+        if ($query_string) {
+          $this->request->url .= ((strpos($this->request->url, '?')===false) ? '?' : '&')
+            . $query_string;
+        }
       }
       else {
         // Other requests have it added as JSON
@@ -282,19 +325,36 @@ class CRM_Mailchimp_Api3 {
    * Send the request and prepare the response.
    */
   protected function sendRequest() {
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $this->request->method);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $this->request->data);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $this->request->headers);
-    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($curl, CURLOPT_USERPWD, $this->request->userpwd);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->request->verifypeer);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->request->verifyhost);
-    curl_setopt($curl, CURLOPT_URL, $this->request->url);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $result = curl_exec($curl);
-    $info = curl_getinfo($curl);
-    curl_close($curl);
+    if (!$this->mock_curl) {
+      $curl = curl_init();
+      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $this->request->method);
+      curl_setopt($curl, CURLOPT_POSTFIELDS, $this->request->data);
+      curl_setopt($curl, CURLOPT_HTTPHEADER, $this->request->headers);
+      curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+      curl_setopt($curl, CURLOPT_USERPWD, $this->request->userpwd);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->request->verifypeer);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->request->verifyhost);
+      curl_setopt($curl, CURLOPT_URL, $this->request->url);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+      $result = curl_exec($curl);
+      $info = curl_getinfo($curl);
+      curl_close($curl);
+    }
+    else {
+      $callback = $this->mock_curl;
+      $output = $callback($this->request);
+      // Apply defaults to result.
+      $output += [
+        'exec' => '{}',
+        'info' => [],
+        ];
+      $output['info'] += [
+        'http_code' => 200,
+        'content_type' => 'application/json',
+        ];
+      $result = $output['exec'];
+      $info   = $output['info'];
+    }
 
     return $this->curlResultToResponse($info, $result);
   }

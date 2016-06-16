@@ -1040,7 +1040,15 @@ class CRM_Mailchimp_Sync {
     if (empty($data['interests'])) {
       unset($data['interests']);
     }
-    $result = $api->put("/lists/$this->list_id/members/$subscriber_hash", $data);
+    try {
+      $result = $api->put("/lists/$this->list_id/members/$subscriber_hash", $data);
+    }
+    catch (CRM_Mailchimp_RequestErrorException $e) {
+      CRM_Core_Session::setStatus(ts('There was a problem trying to subscribe this contact at Mailchimp:') . $e->getMessage());
+    }
+    catch (CRM_Mailchimp_NetworkErrorException $e) {
+      CRM_Core_Session::setStatus(ts('There was a network problem trying to unsubscribe this contact at Mailchimp; any differences will remain until a CiviCRM to Mailchimp Sync is done.'));
+    }
   }
   /**
    * Identify a contact who is expected to be subscribed to this list.
