@@ -9,7 +9,7 @@
   <item>
     <path>civicrm/mailchimp/sync</path>
     <page_callback>CRM_Mailchimp_Form_Sync</page_callback>
-    <title>Mailchimp Sync</title>
+    <title>Mailchimp Push Sync: update Mailchimp from CiviCRM</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
   <item>
@@ -23,13 +23,7 @@
   <item>
     <path>civicrm/mailchimp/pull</path>
     <page_callback>CRM_Mailchimp_Form_Pull</page_callback>
-    <title>Import From Mailchimp</title>
+    <title>Mailchimp Pull Sync: update CiviCRM from Mailchimp</title>
     <access_arguments>administer CiviCRM</access_arguments>
-  </item>
-  <item>
-    <path>civicrm/errordetails</path>
-    <page_callback>CRM_Mailchimp_Page_Mailchimp</page_callback>
-    <title>Mailchimp syn Error Details</title>
-    <access_arguments>access CiviCRM</access_arguments>
   </item>
 </menu>

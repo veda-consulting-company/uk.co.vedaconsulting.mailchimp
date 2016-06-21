@@ -26,6 +26,17 @@
     <td class="label">{$form.is_mc_update_grouping.label}</td>
     <td class="html-adjust">{$form.is_mc_update_grouping.html}</td>
 </tr>
+<tr class="custom_field-row mailchimp_fixup" id="mailchimp_fixup_tr">
+    <td colspan=2>{$form.mc_fixup.html}{$form.mc_fixup.label}<br />
+      <span class="description">{ts}If this is ticked when you press Save,
+      CiviCRM will edit the webhook settings of this list at Mailchimp to make
+      sure they're configured correctly. The only time you would want to
+      <em>untick</em> this box is if you are doing some development on a local
+      server because that would result in supplying an invalid webhook URL to a
+      possibly production list at mailchimp. So basically leave this ticked,
+      unless you know what you're doing :-){/ts}</span>
+    </td>
+</tr>
 </table>
 
 {literal}
@@ -40,6 +51,7 @@ cj( document ).ready(function() {
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Grouping']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").parent().parent().hide();
 
+    cj("#mailchimp_fixup_tr").hide();
     cj("input[data-crm-custom='Mailchimp_Settings:is_mc_update_grouping']").parent().parent().hide();
     cj("#mailchimp_list_tr").hide();
     cj("#mailchimp_group_tr").hide();
@@ -52,6 +64,7 @@ cj( document ).ready(function() {
         cj("#mailchimp_list_tr").insertAfter(cj("#mc_integration_option_1"));
         cj("#mailchimp_list_tr").show();
         cj("#mailchimp_group_tr").hide();
+        cj("#mailchimp_fixup_tr").show();
         cj("#is_mc_update_grouping_tr").hide();
         cj("#mailchimp_group").val('').trigger('change');
         cj("input:radio[name=is_mc_update_grouping][value=0]").prop('checked', true);
@@ -59,10 +72,12 @@ cj( document ).ready(function() {
         cj("#mailchimp_list_tr").insertAfter(cj("#mc_integration_option_2"));
         cj("#mailchimp_list_tr").show();
         cj("#mailchimp_group_tr").show();
+        cj("#mailchimp_fixup_tr").hide();
         cj("#is_mc_update_grouping_tr").show();
       } else {
         cj("#mailchimp_list_tr").hide();
         cj("#mailchimp_group_tr").hide();
+        cj("#mailchimp_fixup_tr").hide();
         cj("#is_mc_update_grouping_tr").hide();
         cj("input:radio[name=is_mc_update_grouping][value=0]").prop('checked', true);
         cj("#mailchimp_list").val('').trigger('change');
@@ -117,11 +132,11 @@ function populateGroups(list_id, mailing_group_id) {
     mailing_group_id = typeof mailing_group_id !== 'undefined' ?  mailing_group_id : null;
     if (list_id) {
         cj('#mailchimp_group').find('option').remove().end().append('<option value="0">- select -</option>');
-        CRM.api('Mailchimp', 'getgroups', {'id': list_id},
+        CRM.api('Mailchimp', 'getinterests', {'id': list_id},
         {success: function(data) {
             if (data.values) {
                 cj.each(data.values, function(key, value) {
-                    cj.each(value.groups, function(group_key, group_value) {
+                    cj.each(value.interests, function(group_key, group_value) {
                         if (group_key == mailing_group_id) {
                             cj('#mailchimp_group').append(cj("<option selected='selected'></option>").attr("value", key + '|' + group_key).text(group_value)); 
                         } else {
@@ -129,7 +144,7 @@ function populateGroups(list_id, mailing_group_id) {
                         }
                     });
                 });
-            }
+           ['interests'] }
           }
         }
       );
