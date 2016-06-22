@@ -1,9 +1,8 @@
 <?php
 
 class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
-
-  const 
-    MC_SETTING_GROUP = 'MailChimp Preferences';
+  
+  protected $_id;
   
    /**
    * Function to pre processing
@@ -12,6 +11,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   function preProcess() { 
+    $this->_id = $this->get('id');
     $currentVer = CRM_Core_BAO_Domain::version(TRUE);
     //if current version is less than 4.4 dont save setting
     if (version_compare($currentVer, '4.4') < 0) {
@@ -35,6 +35,21 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $this->addButtons(array(
+          array(
+            'type' => 'next',
+            'name' => ts('Delete'),
+            'isDefault' => TRUE,
+          ),
+          array(
+            'type' => 'cancel',
+            'name' => ts('Cancel'),
+          ),
+        )
+      );
+      return;
+    }
     $this->addFormRule(array('CRM_Mailchimp_Form_Setting', 'formRule'), $this);
     
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
@@ -61,50 +76,34 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $this->addRadio('list_removal', ts('List Removal'), $removeOptions, NULL);
 
     // Create the Submit Button.
-    $buttons = array(
-      array(
-        'type' => 'submit',
-        'name' => ts('Save & Test'),
-      ),
+    $this->addButtons(array(
+        array(
+          'type' => 'upload',
+          'name' => ts('Save'),
+          'isDefault' => TRUE,
+        ),
+        array(
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
+        ),
+      )
     );
-    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
-    foreach ($groups as $group_id => $details) {
-      $list           = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
-      $webhookoutput  = $list->webhooks($details['list_id']);
-      if($webhookoutput[0]['sources']['api'] == 1) {
-        CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Setting - API is set in Webhook setting for listID', $details['list_id']);
-        $listID = $details['list_id'];
-        CRM_Core_Session::setStatus(ts('API is set in Webhook setting for listID %1', array(1 => $listID)), ts('Error'), 'error');
-        break;
-      }
-    }
-    // Add the Buttons.
-    $this->addButtons($buttons);
   }
 
   public function setDefaultValues() {
     $defaults = $details = array();
-
-    $apiKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'api_key', NULL, FALSE
-    );
-    
-    $securityKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'security_key', NULL, FALSE
-    );
-    
-    $enableDebugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'enable_debugging', NULL, FALSE
-    );
-
-    $listRemoval = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'list_removal', NULL, FALSE
-    );
-
-    $defaults['api_key'] = $apiKey;
-    $defaults['security_key'] = $securityKey;
-    $defaults['enable_debugging'] = $enableDebugging;
-    $defaults['list_removal'] = $listRemoval;
+    if ($this->_action & CRM_Core_Action::UPDATE) {
+      if (isset($this->_id)) {
+        $selectQuery = "SELECT api_key, security_key, list_removal FROM mailchimp_civicrm_account WHERE id = %1";
+        $selectQueryParams = array(1=>array($this->_id, 'Int'));
+        $dao = CRM_Core_DAO::executeQuery($selectQuery, $selectQueryParams);
+        if ($dao->fetch()) {
+          $defaults['api_key'] = $dao->api_key;
+          $defaults['security_key'] = $dao->security_key;
+          $defaults['list_removal'] = $dao->list_removal;
+        }
+      }
+    }
     
     return $defaults;
   }
@@ -118,25 +117,15 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    */
   public function postProcess() {
     // Store the submitted values in an array.
-    $params = $this->controller->exportValues($this->_name);    
+    $params = $this->controller->exportValues($this->_name);   
+    
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $deleteQuery = "DELETE FROM mailchimp_civicrm_account WHERE id = %1";
+      $deleteQueryParams = array(1=>array($this->_id, 'Int'));
+      CRM_Core_DAO::executeQuery($deleteQuery, $deleteQueryParams);
+      return;
+    }
       
-    // Save the API Key & Save the Security Key
-    if (CRM_Utils_Array::value('api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
-      CRM_Core_BAO_Setting::setItem($params['api_key'],
-        self::MC_SETTING_GROUP,
-        'api_key'
-      );
-      
-      CRM_Core_BAO_Setting::setItem($params['security_key'],
-        self::MC_SETTING_GROUP,
-        'security_key'
-      );
-
-      CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging'
-      );
-
-      CRM_Core_BAO_Setting::setItem($params['list_removal'], self::MC_SETTING_GROUP, 'list_removal'
-      );
 
       try {
         $mcClient = new Mailchimp($params['api_key']);
@@ -150,6 +139,18 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         return FALSE;
       }
       
+      if ($this->_action & CRM_Core_Action::ADD) {
+        $insertQuery = "INSERT INTO `mailchimp_civicrm_account` (`api_key`, `security_key`, `list_removal`)
+          VALUES (%1, %2, %3) ON DUPLICATE KEY UPDATE `security_key` = %2, `list_removal` = %3";
+        $insertQueryParams = array(1=>array($params['api_key'], 'String'), 2=>array($params['security_key'], 'String'), 3=>array($params['list_removal'], 'Int'));
+        CRM_Core_DAO::executeQuery($insertQuery, $insertQueryParams);
+      }
+      if ($this->_action & CRM_Core_Action::UPDATE) {
+        $updateQuery = "UPDATE mailchimp_civicrm_account SET api_key = %1, security_key = %2, list_removal = %3 WHERE id = %4";
+        $updateQueryParams = array(1=>array($params['api_key'], 'String'), 2=>array($params['security_key'], 'String'), 3=>array($params['list_removal'], 'Int'), 4=>array($this->_id, 'Int'));
+        CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
+      }
+      
          
         $message = "Following is the account information received from API callback:<br/>
         <table class='mailchimp-table'>
@@ -158,7 +159,6 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         <tr><td>Last Name:</td><td>{$details['contact']['lname']}</td></tr>
         </table>";
         CRM_Core_Session::setStatus($message);
-    }
   }
 }
 

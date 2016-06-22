@@ -368,7 +368,7 @@ function mailchimp_civicrm_navigationMenu(&$params){
         'attributes' => array(
           'label'     => ts('Mailchimp Settings'),
           'name'      => 'Mailchimp_Settings',
-          'url'       => CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1', TRUE),
+          'url'       => CRM_Utils_System::url('civicrm/mailchimp/view/account', 'reset=1', TRUE),
           'active'    => 1,
           'parentID'  => $parentId,
           'operator'  => NULL,
