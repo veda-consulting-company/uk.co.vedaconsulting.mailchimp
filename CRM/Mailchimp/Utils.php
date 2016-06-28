@@ -747,6 +747,9 @@ class CRM_Mailchimp_Utils {
 		);
 	
 		$listID = $groupDetails['list_id'];
+    if (!$listID) {
+      return;
+    }
 		$grouping_id = $groupDetails['grouping_id'];
 		$group_id = $groupDetails['group_id'];
 		if (!empty($grouping_id) AND !empty($group_id)) {
