@@ -7,7 +7,7 @@ DELETE FROM `civicrm_custom_group` WHERE table_name = 'civicrm_value_mailchimp_s
 DROP TABLE IF EXISTS mailchimp_civicrm_account;
 
 CREATE TABLE `mailchimp_civicrm_account` (
- `id` int(11) NOT NULL AUTO_INCREMENT,
+ `id` int(10) NOT NULL AUTO_INCREMENT,
  `api_key` varchar(255) DEFAULT NULL,
  `security_key` varchar(255) DEFAULT NULL,
  `account_name` varchar(255) DEFAULT NULL,

@@ -200,13 +200,24 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
   
    public function upgrade_30() {
     $this->ctx->log->info('Applying update to v3.0 Updating Mailchimp to support multiple accounts');
-    $upgradeCustomXmlFile = $this->extensionDir . '/xml/custominstall.xml';
-    $this->executeCustomDataFileByAbsPath($upgradeCustomXmlFile);
-    
-    $upgradeCustomSqlFile = glob($this->extensionDir . '/sql/custominstall.sql');
+    // Add account_id custom field
+    $cgId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_CustomGroup', 'Mailchimp_Settings', 'id', 'name');
+    if ($cgId) {
+      $query = "INSERT INTO `civicrm_custom_field` (`custom_group_id`, `name`, `label`, `data_type`, `html_type`, `default_value`, `is_required`, `is_searchable`, `is_search_range`, `weight`, `is_active`, `is_view`, `options_per_line`, `text_length`, `start_date_years`, `end_date_years`, `date_format`, `time_format`, `note_columns`, `note_rows`, `column_name`) VALUES ($cgId, 'Account_Id', 'Mailchimp Account Id', 'Int', 'Text', NULL, 0, 0, 0, 5, 1, 0, NULL, 255, NULL, NULL, NULL, NULL, 60, 4, 'account_id')";
+      CRM_Core_DAO::executeQuery($query);
+
+      $query = "Alter table civicrm_value_mailchimp_settings add column account_id int(10) DEFAULT NULL COMMENT 'Linked to Api Key'";
+      CRM_Core_DAO::executeQuery($query);
+    }
+    // Add new table mailchimp_civicrm_account and add foreign key constraint
+    $upgradeCustomSqlFile = $this->extensionDir . '/sql/custominstall.sql';
     CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $upgradeCustomSqlFile);
+    
+    // Get api key and security key from single account
     $apiKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
     $securityKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
+    
+    // Get mailchimp account name as we did not save in db, this is required for new table mailchimp_civicrm_account
     try {
        $mcClient = CRM_Mailchimp_Utils::getMailchimpApi($apiKey, TRUE);
        $response  = $mcClient->get('/');
@@ -219,14 +230,18 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
        return FALSE;
     }
     $accountName = htmlspecialchars($response->data->account_name);
+    
+    // Insert single account details to our new table 'mailchimp_civicrm_account'
     $insertQuery = "INSERT INTO `mailchimp_civicrm_account` (`api_key`, `security_key`, `account_name`)
           VALUES (%1, %2, %3) ON DUPLICATE KEY UPDATE `security_key` = %2, `account_name` = %3";
-        $insertQueryParams = array(1=>array($apiKey, 'String'), 2=>array($securityKey, 'String'), 3=>array($accountName, 'String'));
+    $insertQueryParams = array(1=>array($apiKey, 'String'), 2=>array($securityKey, 'String'), 3=>array($accountName, 'String'));
     CRM_Core_DAO::executeQuery($insertQuery, $insertQueryParams);
     
-    $AccountId = CRM_Core_DAO::executeQuery('SELECT id FROM mailchimp_civicrm_account WHERE api_key = %1', array(1=>array($apiKey, 'String')));
+    $accountId = CRM_Core_DAO::singleValueQuery('SELECT id FROM mailchimp_civicrm_account WHERE api_key = %1', array(1=>array($apiKey, 'String')));
+    
+    // Update table civicrm_value_mailchimp_settings acount_id column
     $updateQuery = "UPDATE civicrm_value_mailchimp_settings SET account_id = %1";
-    $updateQueryParams = array(1=>array($AccountId, 'Int'));
+    $updateQueryParams = array(1=>array($accountId, 'Int'));
     CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
     return TRUE;
    }
