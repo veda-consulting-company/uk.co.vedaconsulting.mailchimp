@@ -61,7 +61,7 @@ class CRM_Mailchimp_Page_Setting extends CRM_Core_Page {
    * called when action is browse.
    */
   public function browse() {
-    $dao = CRM_Core_DAO::executeQuery("SELECT id, api_key, security_key, list_removal, account_name FROM mailchimp_civicrm_account");
+    $dao = CRM_Core_DAO::executeQuery("SELECT id, api_key, security_key, account_name FROM mailchimp_civicrm_account");
     $values = array();
     $links = self::links();
     $action = array_sum(array_keys($links));

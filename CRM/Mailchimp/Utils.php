@@ -355,10 +355,10 @@ class CRM_Mailchimp_Utils {
     }
 
     $query  = "
-      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title, cg.saved_search_id, cg.children, mcs.account_id_32 as account_id, mca.api_key
+      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title, cg.saved_search_id, cg.children, mcs.account_id as account_id, mca.api_key
  FROM    civicrm_value_mailchimp_settings mcs
       INNER JOIN civicrm_group cg ON mcs.entity_id = cg.id
-      INNER JOIN mailchimp_civicrm_account mca ON mca.id = mcs.account_id_32
+      INNER JOIN mailchimp_civicrm_account mca ON mca.id = mcs.account_id
       WHERE $whereClause";
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {

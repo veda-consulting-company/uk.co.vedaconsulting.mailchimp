@@ -8,11 +8,9 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
 
-  /**
-   * Example: Run an external SQL script when the module is installed
-   *
+ 
   public function install() {
-    $this->executeSqlFile('sql/myinstall.sql');
+    $this->executeSqlFile('sql/custominstall.sql');
   }
 
   /**
@@ -199,6 +197,39 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
 
     return TRUE;
   }
+  
+   public function upgrade_30() {
+    $this->ctx->log->info('Applying update to v3.0 Updating Mailchimp to support multiple accounts');
+    $upgradeCustomXmlFile = $this->extensionDir . '/xml/custominstall.xml';
+    $this->executeCustomDataFileByAbsPath($upgradeCustomXmlFile);
+    
+    $upgradeCustomSqlFile = glob($this->extensionDir . '/sql/custominstall.sql');
+    CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $upgradeCustomSqlFile);
+    $apiKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
+    $securityKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
+    try {
+       $mcClient = CRM_Mailchimp_Utils::getMailchimpApi($apiKey, TRUE);
+       $response  = $mcClient->get('/');
+       if (empty($response->data->account_name)) {
+         throw new Exception("Could not retrieve account details, although a response was received. Somthing's not right.");
+       }
+
+    } catch (Exception $e) {
+       CRM_Core_Session::setStatus($e->getMessage());
+       return FALSE;
+    }
+    $accountName = htmlspecialchars($response->data->account_name);
+    $insertQuery = "INSERT INTO `mailchimp_civicrm_account` (`api_key`, `security_key`, `account_name`)
+          VALUES (%1, %2, %3) ON DUPLICATE KEY UPDATE `security_key` = %2, `account_name` = %3";
+        $insertQueryParams = array(1=>array($apiKey, 'String'), 2=>array($securityKey, 'String'), 3=>array($accountName, 'String'));
+    CRM_Core_DAO::executeQuery($insertQuery, $insertQueryParams);
+    
+    $AccountId = CRM_Core_DAO::executeQuery('SELECT id FROM mailchimp_civicrm_account WHERE api_key = %1', array(1=>array($apiKey, 'String')));
+    $updateQuery = "UPDATE civicrm_value_mailchimp_settings SET account_id = %1";
+    $updateQueryParams = array(1=>array($AccountId, 'Int'));
+    CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
+    return TRUE;
+   }
   /**
    * Example: Run an external SQL script
    *
