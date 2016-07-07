@@ -146,15 +146,21 @@ function mailchimp_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
 function mailchimp_civicrm_buildForm($formName, &$form) {
   if ($formName == 'CRM_Group_Form_Edit' AND ($form->getAction() == CRM_Core_Action::ADD OR $form->getAction() == CRM_Core_Action::UPDATE)) {
     // Get all the Mailchimp lists
-    $lists = array();
+    $listDetails = array();
     $params = array(
       'version' => 3,
       'sequential' => 1,
     );
     $lists = civicrm_api('Mailchimp', 'getlists', $params);
     if(!$lists['is_error']){
+      foreach ($lists['values'] as $apiKey => $list) {
+        foreach ($list as $listId => $listName) {
+          $accountDetails = CRM_Mailchimp_Utils::getAccountDetailsFromApiKey($apiKey);
+          $listDetails[$accountDetails['account_id'].'|'.$listId] = $accountDetails['account_name'].' - '.$listName;
+        }
+      }
       // Add form elements
-      $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
+      $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $listDetails , FALSE );
       $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
 
       $options = array(
@@ -181,7 +187,8 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
 
         $defaults['mc_fixup'] = 1;
         if (!empty($mcDetails)) {
-          $defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
+          //$defaults['mailchimp_list'] = $mcDetails[$groupId]['list_id'];
+          $defaults['mailchimp_list'] = $mcDetails[$groupId]['account_id'].'|'.$mcDetails[$groupId]['list_id'];
           $defaults['is_mc_update_grouping'] = $mcDetails[$groupId]['is_mc_update_grouping'];
           if ($defaults['is_mc_update_grouping'] == NULL) {
             $defaults['is_mc_update_grouping'] = 0;
@@ -219,13 +226,14 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
     return;
   }
   if ($fields['mc_integration_option'] == 1) {
+    $accountIdAndListIdArray = explode('|', $fields['mailchimp_list']);
     // Setting up a membership group.
     if (empty($fields['mailchimp_list'])) {
       $errors['mailchimp_list'] = ts('Please specify the mailchimp list');
     }
     else {
       // We need to make sure that this is the only membership tracking group for this list.
-      $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE);
+      $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $accountIdAndListIdArray[1], TRUE);
       $thisGroup = $form->getVar('_group');
       if ($thisGroup) {
         unset($otherGroups[$thisGroup->id]);
@@ -245,7 +253,8 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
     else {
       // First we have to ensure that there is a pre-existing membership group
       // set up for this list.
-      if (! CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE)) {
+       $accountIdAndListIdArray = explode('|', $fields['mailchimp_list']);
+      if (! CRM_Mailchimp_Utils::getGroupsToSync(array(), $accountIdAndListIdArray[1], TRUE)) {
         $errors['mailchimp_list'] = ts('The list you selected does not have a membership group set up. You must set up a group to track membership of the Mailchimp list before you set up group(s) for the lists\'s interest groupings.');
       }
       else {
@@ -256,7 +265,7 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
         }
         else {
           // OK, we have a group, let's check we're not duplicating work.
-          $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list']);
+          $otherGroups = CRM_Mailchimp_Utils::getGroupsToSync(array(), $accountIdAndListIdArray[1]);
           $thisGroup = $form->getVar('_group');
           if ($thisGroup) {
             unset($otherGroups[$thisGroup->id]);
@@ -288,9 +297,14 @@ function mailchimp_civicrm_postProcess($formName, &$form) {
       && !empty($vals['mc_integration_option']) && $vals['mc_integration_option'] == 1) {
       // This group is supposed to have Mailchimp integration and the user wants
       // us to check the Mailchimp list is properly configured.
-      $messages = CRM_Mailchimp_Utils::configureList($vals['mailchimp_list']);
-      foreach ($messages as $message) {
-        CRM_Core_Session::setStatus($message);
+      $accountIdAndListId = explode('|', $vals['mailchimp_list']);
+      if (!empty($accountIdAndListId)) {
+        $apiKey = CRM_Mailchimp_Utils::getApiKeyFromAccountId($accountIdAndListId[0]);
+        $messages = CRM_Mailchimp_Utils::configureList($apiKey, $accountIdAndListId[1]);
+        foreach ($messages as $message) {
+          CRM_Core_Session::setStatus($message);
+        }
+        
       }
     }
   }
@@ -425,7 +439,7 @@ function mailchimp_civicrm_navigationMenu(&$params){
         'attributes' => array(
           'label'     => ts('Mailchimp Settings'),
           'name'      => 'Mailchimp_Settings',
-          'url'       => CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1', TRUE),
+          'url'       => CRM_Utils_System::url('civicrm/mailchimp/view/account', 'reset=1', TRUE),
           'active'    => 1,
           'parentID'  => $parentId,
           'operator'  => NULL,
@@ -565,7 +579,7 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     }
 
     // Trigger mini sync for this person and this list.
-    $sync = new CRM_Mailchimp_Sync($groups[$objectId]['list_id']);
+    $sync = new CRM_Mailchimp_Sync($groups[$objectId]['api_key'], $groups[$objectId]['list_id']);
     $sync->syncSingleContact($objectRef[0]);
 	}
 }

@@ -33,9 +33,10 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     CRM_Mailchimp_Utils::checkDebug("Webhook POST: " . serialize($_POST));
     // Empty response object, default response code.
     try {
-      $expected_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+      //$expected_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+      $expected_keys = CRM_Mailchimp_Utils::getWebhookSecurityKeys();
       $given_key = isset($_GET['key']) ? $_GET['key'] : null;
-      list($response_code, $response_object) = $this->processRequest($expected_key, $given_key, $_POST);
+      list($response_code, $response_object) = $this->processRequest($expected_keys, $given_key, $_POST);
       CRM_Mailchimp_Utils::checkDebug("Webhook response code $response_code (200 = ok)");
     }
     catch (RuntimeException $e) {
@@ -82,15 +83,30 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    *
    * @return array with two values: $response_code, $response_object.
    */
-  public function processRequest($expected_key, $key, $request_data) {
+  public function processRequest($expected_keys, $key, $request_data) {
 
     // Check CMS's permission for (presumably) anonymous users.
     if (CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported() && !CRM_Mailchimp_Permission::check('allow webhook posts')) {
       throw new RuntimeException("Missing allow webhook posts permission.", 500);
     }
-
-    // Check the 2 keys exist and match.
+    /*
+    Check the 2 keys exist and match.
     if (!$key || !$expected_key || $key != $expected_key ) {
+      throw new RuntimeException("Invalid security key.", 500);
+    }
+     * 
+     */
+    $keyMatched = FALSE;
+    foreach ($expected_keys as $expected_key) {
+      if ($key == $expected_key ) {
+        $keyMatched = TRUE;
+         break;
+      }
+    }
+    
+    if ($keyMatched) {
+      $apiKey = CRM_Mailchimp_Utils::getApiKeyFromSecurityKey($key);
+    } else {
       throw new RuntimeException("Invalid security key.", 500);
     }
 
@@ -106,9 +122,9 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
     // Check list config at Mailchimp.
     $list_id = $request_data['data']['list_id'];
-    $api = CRM_Mailchimp_Utils::getMailchimpApi();
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($apiKey);
     $result = $api->get("/lists/$list_id/webhooks")->data->webhooks;
-    $url = CRM_Mailchimp_Utils::getWebhookUrl();
+    $url = CRM_Mailchimp_Utils::getWebhookUrl($apiKey);
     // Find our webhook and check for a particularly silly configuration.
     foreach ($result as $webhook) {
       if ($webhook->url == $url) {
@@ -124,7 +140,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     CRM_Mailchimp_Utils::$post_hook_enabled = FALSE;
 
     // Pretty much all the request methods use these:
-    $this->sync = new CRM_Mailchimp_Sync($request_data['data']['list_id']);
+    $this->sync = new CRM_Mailchimp_Sync($apiKey, $request_data['data']['list_id']);
     $this->request_data = $request_data['data'];
     // Call the appropriate handler method.
     CRM_Mailchimp_Utils::checkDebug("Webhook: $method with request data: " . json_encode($request_data));

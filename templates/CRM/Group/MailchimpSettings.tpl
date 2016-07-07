@@ -47,6 +47,7 @@ cj( document ).ready(function() {
     mailchimp_settings = mailchimp_settings.replace("</tbody>", "");
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List']").parent().parent().after(mailchimp_settings);
 
+    cj("input[data-crm-custom='Mailchimp_Settings:Account_Id']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Grouping']").parent().parent().hide();
     cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").parent().parent().hide();
@@ -91,17 +92,27 @@ cj( document ).ready(function() {
     });
 
     cj("#mailchimp_list").change(function() {
-        var list_id = cj("#mailchimp_list :selected").val();
-        if (list_id  == 0) {
-            list_id = '';
+        var listIdAndAccountId = cj("#mailchimp_list :selected").val();
+        if (listIdAndAccountId  == 0) {
+            var list_id = '';
         }
+	if (listIdAndAccountId != 0) {
+	  var list_id = listIdAndAccountId.split('|')[1];
+	  var account_id = listIdAndAccountId.split('|')[0];
+	}
         cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List']").val(list_id);
+	cj("input[data-crm-custom='Mailchimp_Settings:Account_Id']").val(account_id);
         cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Grouping']").val('');
         cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").val('');
-        populateGroups(list_id);
+        populateGroups(account_id, list_id);
     });
 
     cj("#mailchimp_group").change(function() {
+	var listIdAndAccountId = cj("#mailchimp_list :selected").val();
+	if (listIdAndAccountId != 0) {
+	  var list_id = listIdAndAccountId.split('|')[1];
+	  var account_id = listIdAndAccountId.split('|')[0];
+	}
         var group_id = cj("#mailchimp_group :selected").val();
         if (group_id == 0) {
             grouping_id = '';
@@ -111,28 +122,34 @@ cj( document ).ready(function() {
             grouping_id = grouping[0];
             group_id = grouping[1];
         }
+	cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_List']").val(list_id);
+	cj("input[data-crm-custom='Mailchimp_Settings:Account_Id']").val(account_id);
         cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Grouping']").val(grouping_id);
         cj("input[data-crm-custom='Mailchimp_Settings:Mailchimp_Group']").val(group_id);
     });
 
     {/literal}{if $action eq 2}{literal}
         //var mailchimp_list_id = {/literal}{$mailchimp_list_id}{literal};
-        var list_id = cj("#mailchimp_list :selected").val();
+        var listIdAndAccountId = cj("#mailchimp_list :selected").val();
+	var list_id = listIdAndAccountId.split('|')[1];
+	var account_id = listIdAndAccountId.split('|')[0];
+	console.log('before printing list id');
+	console.log(list_id);
         var mailing_group_id
         {/literal}{if $mailchimp_group_id}{literal}
             var mailing_group_id = '{/literal}{$mailchimp_group_id}{literal}';
         {/literal}{/if}{literal}
-        populateGroups(list_id , mailing_group_id);
+        populateGroups(account_id, list_id , mailing_group_id);
         //cj("#mailchimp_group").val(mailing_group_id);
     {/literal}{/if}{literal}
 
 });
 
-function populateGroups(list_id, mailing_group_id) {
+function populateGroups(account_id, list_id, mailing_group_id) {
     mailing_group_id = typeof mailing_group_id !== 'undefined' ?  mailing_group_id : null;
     if (list_id) {
         cj('#mailchimp_group').find('option').remove().end().append('<option value="0">- select -</option>');
-        CRM.api('Mailchimp', 'getinterests', {'id': list_id},
+        CRM.api('Mailchimp', 'getinterests', {'id': list_id, 'account_id': account_id},
         {success: function(data) {
             if (data.values) {
                 cj.each(data.values, function(key, value) {
