@@ -243,6 +243,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     $updateQuery = "UPDATE civicrm_value_mailchimp_settings SET account_id = %1";
     $updateQueryParams = array(1=>array($accountId, 'Int'));
     CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
+    CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
     return TRUE;
    }
   /**

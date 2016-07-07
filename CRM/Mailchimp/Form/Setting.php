@@ -114,6 +114,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         $selectQueryParams = array(1=>array($this->_id, 'Int'));
         $dao = CRM_Core_DAO::executeQuery($selectQuery, $selectQueryParams);
         if ($dao->fetch()) {
+          $defaults['enable_debugging'] = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
           $defaults['api_key'] = $dao->api_key;
           $defaults['security_key'] = $dao->security_key;
         }
@@ -154,6 +155,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       }
       
     if ($this->_action & CRM_Core_Action::ADD) {
+        CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging');
         $accountName = htmlspecialchars($response->data->account_name);
         $insertQuery = "INSERT INTO `mailchimp_civicrm_account` (`api_key`, `security_key`, `account_name`)
           VALUES (%1, %2, %3) ON DUPLICATE KEY UPDATE `security_key` = %2, `account_name` = %3";
@@ -164,6 +166,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         $updateQuery = "UPDATE mailchimp_civicrm_account SET api_key = %1, security_key = %2 WHERE id = %3";
         $updateQueryParams = array(1=>array($params['api_key'], 'String'), 2=>array($params['security_key'], 'String'), 3=>array($this->_id, 'Int'));
         CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
+        CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging');
     }
 
       $message = "Following is the account information received from API callback:<br/>
