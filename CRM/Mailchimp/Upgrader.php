@@ -217,6 +217,11 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     $apiKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
     $securityKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
     
+    CRM_Core_BAO_Navigation::resetNavigation();
+    if (!$apiKey) {
+      return TRUE;
+    }
+    
     // Get mailchimp account name as we did not save in db, this is required for new table mailchimp_civicrm_account
     try {
        $mcClient = CRM_Mailchimp_Utils::getMailchimpApi($apiKey, TRUE);
@@ -243,7 +248,6 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     $updateQuery = "UPDATE civicrm_value_mailchimp_settings SET account_id = %1";
     $updateQueryParams = array(1=>array($accountId, 'Int'));
     CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
-    CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
     return TRUE;
    }
   /**
