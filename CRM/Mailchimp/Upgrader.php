@@ -217,7 +217,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     $apiKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
     $securityKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
     
-    CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+    CRM_Core_BAO_Navigation::buildNavigation();
     if (!$apiKey) {
       return TRUE;
     }
