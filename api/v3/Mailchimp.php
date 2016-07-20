@@ -19,17 +19,17 @@
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_getlists($params) {
-  $apiKeys = CRM_Mailchimp_Utils::getAllApiKeys();
+  $accountIds = CRM_Mailchimp_Utils::getAllAccountIds();
   $lists = [];
-  foreach ($apiKeys as $apiKey) {
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($apiKey, TRUE);
+  foreach ($accountIds as $accountId) {
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
 
     $query = ['offset' => 0, 'count' => 100, 'fields'=>'lists.id,lists.name,total_items'];
 
     do {
       $data = $api->get('/lists', $query)->data;
       foreach ($data->lists as $list) {
-        $lists[$apiKey][$list->id] = $list->name;
+        $lists[$accountId][$list->id] = $list->name;
       }
       $query['offset'] += 100;
     } while ($query['offset'] * 100 < $data->total_items);
@@ -57,8 +57,7 @@ function civicrm_api3_mailchimp_getinterests($params) {
   try {
     $list_id = $params['id'];
     $accountId = $params['account_id'];
-    $apiKey = CRM_Mailchimp_Utils::getApiKeyFromAccountId($accountId);
-    $results = CRM_Mailchimp_Utils::getMCInterestGroupings($apiKey, $list_id);
+    $results = CRM_Mailchimp_Utils::getMCInterestGroupings($accountId, $list_id);
   } 
   catch (Exception $e) {
     return array();

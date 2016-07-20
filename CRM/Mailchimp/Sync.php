@@ -11,6 +11,7 @@ class CRM_Mailchimp_Sync {
    */
   protected $list_id;
   protected $api_key;
+  protected $account_id;
   /**
    * Cache of details from CRM_Mailchimp_Utils::getGroupsToSync.
    ▾ $this->group_details['61'] = (array [12])
@@ -39,9 +40,10 @@ class CRM_Mailchimp_Sync {
 
   /** If true no changes will be made to Mailchimp or CiviCRM. */
   protected $dry_run = FALSE;
-  public function __construct($apiKey, $list_id) {
+  public function __construct($accountId, $list_id) {
     $this->list_id = $list_id;
-    $this->api_key = $apiKey;
+    $this->api_key = CRM_Mailchimp_Utils::getApiKeyFromAccountId($accountId);
+    $this->account_id = $accountId;
     $this->group_details = CRM_Mailchimp_Utils::getGroupsToSync($groupIDs=[], $list_id, $membership_only=FALSE);
     foreach ($this->group_details as $group_id => $group_details) {
       if (empty($group_details['category_id'])) {
@@ -115,7 +117,7 @@ class CRM_Mailchimp_Sync {
 
     CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncCollectMailchimp: ', $this->interest_group_details);
 
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->api_key);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id, TRUE);
     $offset = 0;
     $batch_size = 1000;
     $total = null;
@@ -498,7 +500,7 @@ class CRM_Mailchimp_Sync {
   public function updateMailchimpFromCivi() {
     CRM_Mailchimp_Utils::checkDebug("updateMailchimpFromCivi for group #$this->membership_group_id");
     $operations = [];
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->api_key);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id, TRUE);
     $dao = CRM_Core_DAO::executeQuery(
       "SELECT
       c.interests c_interests, c.first_name c_first_name, c.last_name c_last_name,
@@ -997,7 +999,7 @@ class CRM_Mailchimp_Sync {
       return;
     }
     $subscriber_hash = md5(strtolower($contact['email']));
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->api_key);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id, TRUE);
 
     if (!$currently_a_member) {
       // They are not currently a member.

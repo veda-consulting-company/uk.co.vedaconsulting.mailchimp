@@ -153,10 +153,10 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
     );
     $lists = civicrm_api('Mailchimp', 'getlists', $params);
     if(!$lists['is_error']){
-      foreach ($lists['values'] as $apiKey => $list) {
+      foreach ($lists['values'] as $accountId => $list) {
         foreach ($list as $listId => $listName) {
-          $accountDetails = CRM_Mailchimp_Utils::getAccountDetailsFromApiKey($apiKey);
-          $listDetails[$accountDetails['account_id'].'|'.$listId] = $accountDetails['account_name'].' - '.$listName;
+          $accountName = CRM_Mailchimp_Utils::getAccountNameFromAccountId($accountId);
+          $listDetails[$accountId.'|'.$listId] = $accountName.' - '.$listName;
         }
       }
       // Add form elements
@@ -299,8 +299,7 @@ function mailchimp_civicrm_postProcess($formName, &$form) {
       // us to check the Mailchimp list is properly configured.
       $accountIdAndListId = explode('|', $vals['mailchimp_list']);
       if (!empty($accountIdAndListId)) {
-        $apiKey = CRM_Mailchimp_Utils::getApiKeyFromAccountId($accountIdAndListId[0]);
-        $messages = CRM_Mailchimp_Utils::configureList($apiKey, $accountIdAndListId[1]);
+        $messages = CRM_Mailchimp_Utils::configureList($accountIdAndListId[0], $accountIdAndListId[1]);
         foreach ($messages as $message) {
           CRM_Core_Session::setStatus($message);
         }
@@ -579,7 +578,7 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     }
 
     // Trigger mini sync for this person and this list.
-    $sync = new CRM_Mailchimp_Sync($groups[$objectId]['api_key'], $groups[$objectId]['list_id']);
+    $sync = new CRM_Mailchimp_Sync($groups[$objectId]['account_id'], $groups[$objectId]['list_id']);
     $sync->syncSingleContact($objectRef[0]);
 	}
 }

@@ -143,7 +143,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     }
 
       try {
-        $mcClient = CRM_Mailchimp_Utils::getMailchimpApi($params['api_key'], TRUE);
+        $mcClient = CRM_Mailchimp_Utils::getMailchimpApi(NULL, TRUE, $params['api_key']);
         $response  = $mcClient->get('/');
         if (empty($response->data->account_name)) {
           throw new Exception("Could not retrieve account details, although a response was received. Somthing's not right.");
