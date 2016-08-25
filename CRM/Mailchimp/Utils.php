@@ -106,11 +106,11 @@ class CRM_Mailchimp_Utils {
    */
   public static function getMailchimpApi($accountId, $reset=FALSE, $apiKey = FALSE) {
     if ($reset) {
-      static::$mailchimp_api = NULL;
+      static::$mailchimp_api[$accountId] = NULL;
     }
 
     // Singleton pattern.
-    if (!isset(static::$mailchimp_api)) {
+    if (!isset(static::$mailchimp_api[$accountId])) {
       if ($accountId) {
         $params = ['api_key' => CRM_Mailchimp_Utils::getApiKeyFromAccountId($accountId)];
       } elseif ($apiKey) {
@@ -124,10 +124,10 @@ class CRM_Mailchimp_Utils {
         };
       }
       $api = new CRM_Mailchimp_Api3($params);
-      static::setMailchimpApi($api);
+      static::setMailchimpApi($api, $accountId);
     }
     
-    return static::$mailchimp_api;
+    return static::$mailchimp_api[$accountId];
   }
   
   // Test purpose
@@ -210,8 +210,8 @@ class CRM_Mailchimp_Utils {
    *
    * This is for testing purposes only.
    */
-  public static function setMailchimpApi(CRM_Mailchimp_Api3 $api) {
-    static::$mailchimp_api = $api;
+  public static function setMailchimpApi(CRM_Mailchimp_Api3 $api, $accountId) {
+    static::$mailchimp_api[$accountId] = $api;
   }
 
   /**
@@ -242,7 +242,7 @@ class CRM_Mailchimp_Utils {
     if (!is_array($groups)) {
       throw new InvalidArgumentException("expected array argument, if provided");
     }
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
 
     $warnings = [];
     // Check all our groups do not have the sources:API set in the webhook, and
@@ -294,7 +294,7 @@ class CRM_Mailchimp_Utils {
    * @return array
    */
   public static function configureList($accountId, $list_id, $dry_run = FALSE) {
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
     $expected = [
       'url' => CRM_Mailchimp_Utils::getWebhookUrl($accountId),
       'events' => [
@@ -476,20 +476,20 @@ class CRM_Mailchimp_Utils {
    * @return string.
    */
   public static function getMCListName($accountId, $list_id) {
-   // if (!isset(static::$mailchimp_lists)) {
-     // static::$mailchimp_lists[$list_id] = [];
-      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+    if (!isset(static::$mailchimp_lists[$accountId])) {
+      static::$mailchimp_lists[$accountId][$list_id] = [];
+      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
       $lists = $api->get('/lists', ['fields' => 'lists.id,lists.name','count'=>10000])->data->lists;
       foreach ($lists as $list) {
-        static::$mailchimp_lists[$list->id] = $list->name;
+        static::$mailchimp_lists[$accountId][$list->id] = $list->name;
       }
-  //  }
+    }
 
-    if (!isset(static::$mailchimp_lists[$list_id])) {
+    if (!isset(static::$mailchimp_lists[$accountId][$list_id])) {
       // Return ZLS if not found.
       return '';
     }
-    return static::$mailchimp_lists[$list_id];
+    return static::$mailchimp_lists[$accountId][$list_id];
   }
 
   /**
@@ -525,7 +525,7 @@ class CRM_Mailchimp_Utils {
 
       try {
         // Get list name.
-        $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+        $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
         $categories = $api->get("/lists/$listID/interest-categories",
             ['fields' => 'categories.id,categories.title','count'=>10000])
           ->data->categories;
@@ -692,6 +692,7 @@ class CRM_Mailchimp_Utils {
     if (!$securityKey) {
       return;
     }
+    $accountId = NULL;
     $query = "SELECT id FROM mailchimp_civicrm_account WHERE security_key = %1";
     $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($securityKey, 'String')));
     if ($dao->fetch()) {
@@ -778,5 +779,14 @@ class CRM_Mailchimp_Utils {
       $apiKey = $dao->api_key;
     }
     return $apiKey;
+  }
+  /*
+   * This function is used when we don't have account id for example upgrading from single account to multiple account v2 to v3
+   * or when we create new account setup in civi
+   */
+  public static function getMailchimpApiFromApiKey($apiKey) {
+    $params = ['api_key' => $apiKey];
+    $api = new CRM_Mailchimp_Api3($params);
+    return $api;
   }
 }

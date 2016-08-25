@@ -181,7 +181,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
   public static function createMailchimpFixturesForSecondAccount($accountId2) {
      try {
       static::$account_id_account_2 = $accountId2;
-      $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2);
       $result = $api->get('/');
       static::$api_contactable_account_2 = $result;
 
@@ -268,7 +268,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
    */
   public static function createInterest($name, $accountId, $multiple) {
     if ($multiple) {
-      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
       $test_list_id = static::$test_list_id_account_2;
       $category_id = static::$test_interest_category_id_account_2;
     } else {
@@ -540,7 +540,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
       // Check that the list exists, is named as we expect and only has max 2
       // contacts.
       if (static::$account_id_account_2 ) {
-        $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id, TRUE);
+        $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id);
       } else {
         $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id);
       }
@@ -570,7 +570,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
       }
 
     if (static::$account_id_account_2 ) {
-        $api2 = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2, TRUE);
+        $api2 = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2);
         $test_list_id_account_2 = static::$test_list_id_account_2;
         $result_account_2 = $api2->get("/lists/$test_list_id_account_2", ['fields' => '']);
         if ($result_account_2->http_code != 200) {

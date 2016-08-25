@@ -22,7 +22,7 @@ function civicrm_api3_mailchimp_getlists($params) {
   $accountIds = CRM_Mailchimp_Utils::getAllAccountIds();
   $lists = [];
   foreach ($accountIds as $accountId) {
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
 
     $query = ['offset' => 0, 'count' => 100, 'fields'=>'lists.id,lists.name,total_items'];
 

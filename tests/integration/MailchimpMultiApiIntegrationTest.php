@@ -25,7 +25,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
 
     static::$account_id = (int) CRM_Mailchimp_Utils::getMailchimpSingleAccountId();//account1
     static::$account_id_account_2 = (int) CRM_Mailchimp_Utils::getMailchimpSecondAccountId();//account2
-    $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id);
     $api->setLogFacility(function($m){print $m;});
     $api->setLogFacility(function($m){CRM_Core_Error::debug_log_message($m, FALSE, 'mailchimp');});
     static::createMailchimpFixtures(static::$account_id, static::$account_id_account_2);
@@ -85,7 +85,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
     
     // Delete all GroupContact records on our test contacts to test groups.
     
-    $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id);
     $contacts = array_filter([static::$civicrm_contact_1, static::$civicrm_contact_2],
       function($_) { return $_['contact_id']>0; });
 
@@ -109,7 +109,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
     $this->assertEquals(0, $api->get("/lists/$list_id", ['fields' => 'stats.member_count'])->data->stats->member_count);
 
     
-    $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2);
     $contacts = array_filter([static::$civicrm_contact_1, static::$civicrm_contact_2],
       function($_) { return $_['contact_id']>0; });
 
@@ -172,7 +172,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
       // Double-check this member is not known at Mailchimp.
       $this->assertContactNotListMemberMultiple(static::$account_id, static::$account_id_account_2, static::$civicrm_contact_1);
       foreach (array(static::$account_id, static::$account_id_account_2) as $accountId) {
-        $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+        $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
         $sync = new CRM_Mailchimp_Sync($accountId, static::$accountId_listId_relationship[$accountId]);
 
         // Now trigger a push for this test list.
@@ -267,7 +267,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertContactIsInGroup(static::$civicrm_contact_1['contact_id'], static::$civicrm_group_id_interest_1);
       // Double-check this member is not known at Mailchimp.
       $this->assertContactNotListMember(static::$account_id_account_2, static::$civicrm_contact_1);
-      $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2);
       $sync = new CRM_Mailchimp_Sync(static::$account_id_account_2, static::$test_list_id_account_2);
 
       // Now trigger a push for this test list.
@@ -356,7 +356,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership_account_2);
       // Check they are definitely in the group.
       $this->assertContactIsInGroup(static::$civicrm_contact_1['contact_id'], static::$civicrm_group_id_membership_account_2);
-      $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id_account_2);
       $sync = new CRM_Mailchimp_Sync(static::$account_id_account_2, static::$test_list_id_account_2);
 
       // Now trigger a push for this test list.
@@ -436,10 +436,10 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
    */
   public function assertContactNotListMemberMultiple($accountId, $accountId2, $contact) {
     try {
-      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
       $subscriber_hash = static::$civicrm_contact_1['subscriber_hash'];
       $result = $api->get("/lists/" . static::$test_list_id . "/members/$contact[subscriber_hash]", ['fields' => 'status']);
-      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId2, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId2);
       $result = $api->get("/lists/" . static::$test_list_id_account_2 . "/members/$contact[subscriber_hash]", ['fields' => 'status']);
     }
     catch (CRM_Mailchimp_RequestErrorException $e) {
@@ -448,7 +448,7 @@ class MailchimpMultiApiIntegrationTest extends MailchimpApiIntegrationBase {
   }
   public function assertContactNotListMember($accountId, $contact) {
     try {
-      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
       $subscriber_hash = static::$civicrm_contact_1['subscriber_hash'];
       $result = $api->get("/lists/" . static::$test_list_id . "/members/$contact[subscriber_hash]", ['fields' => 'status']);
     }

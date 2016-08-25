@@ -21,7 +21,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
      throw new Exception('MailchimpApiIntegrationTest support only one account');
    }
    static::$account_id = (int) CRM_Mailchimp_Utils::getMailchimpSingleAccountId();
-   $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id, TRUE);
+   $api = CRM_Mailchimp_Utils::getMailchimpApi(static::$account_id);
    $api->setLogFacility(function($m){print $m;});
    $api->setLogFacility(function($m){CRM_Core_Error::debug_log_message($m, FALSE, 'mailchimp');});
     static::createMailchimpFixtures(static::$account_id);

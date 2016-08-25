@@ -224,7 +224,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     
     // Get mailchimp account name as we did not save in db, this is required for new table mailchimp_civicrm_account
     try {
-       $mcClient = CRM_Mailchimp_Utils::getMailchimpApi(NULL, TRUE, $apiKey);
+       $mcClient = CRM_Mailchimp_Utils::getMailchimpApiFromApiKey($apiKey);
        $response  = $mcClient->get('/');
        if (empty($response->data->account_name)) {
          throw new Exception("Could not retrieve account details, although a response was received. Somthing's not right.");

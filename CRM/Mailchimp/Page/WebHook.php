@@ -106,6 +106,9 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     
     if ($keyMatched) {
       $accountId = CRM_Mailchimp_Utils::getAccountIdFromSecurityKey($key);
+      if (!$accountId) {//Mock webhook test case. Try finding from data where we pass account id
+        $accountId = $request_data['data']['account_id'];
+      }
     } else {
       throw new RuntimeException("Invalid security key.", 500);
     }
@@ -122,7 +125,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
     // Check list config at Mailchimp.
     $list_id = $request_data['data']['list_id'];
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
     $result = $api->get("/lists/$list_id/webhooks")->data->webhooks;
     $url = CRM_Mailchimp_Utils::getWebhookUrl($accountId);
     // Find our webhook and check for a particularly silly configuration.

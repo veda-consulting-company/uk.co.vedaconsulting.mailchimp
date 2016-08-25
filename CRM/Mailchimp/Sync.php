@@ -117,7 +117,7 @@ class CRM_Mailchimp_Sync {
 
     CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync syncCollectMailchimp: ', $this->interest_group_details);
 
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id);
     $offset = 0;
     $batch_size = 1000;
     $total = null;
@@ -500,7 +500,7 @@ class CRM_Mailchimp_Sync {
   public function updateMailchimpFromCivi() {
     CRM_Mailchimp_Utils::checkDebug("updateMailchimpFromCivi for group #$this->membership_group_id");
     $operations = [];
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id);
     $dao = CRM_Core_DAO::executeQuery(
       "SELECT
       c.interests c_interests, c.first_name c_first_name, c.last_name c_last_name,
@@ -999,7 +999,7 @@ class CRM_Mailchimp_Sync {
       return;
     }
     $subscriber_hash = md5(strtolower($contact['email']));
-    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id, TRUE);
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($this->account_id);
 
     if (!$currently_a_member) {
       // They are not currently a member.
@@ -1113,7 +1113,7 @@ class CRM_Mailchimp_Sync {
               'is_deleted' => 0,
               'return'     => "first_name,last_name"],
     ]);
-
+    
     // Candidates are any emails that belong to a not-deleted contact.
     $email_candidates = array_filter($result['values'], function($_) {
       return ($_['api.Contact.get']['count'] == 1);
