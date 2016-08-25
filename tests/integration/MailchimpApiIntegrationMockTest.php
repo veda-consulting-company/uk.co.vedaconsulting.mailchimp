@@ -40,13 +40,14 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     static::$test_interest_category_id = 'categoryid';
     static::$test_interest_id_1 = 'interestId1';
     static::$test_interest_id_2 = 'interestId2';
+    static::$account_id = CRM_Mailchimp_Utils::getMailchimpSingleAccountId();
   }
   /**
    * Create fixture in CiviCRM.
    */
   public function setUp() {
     if (static::$fixture_should_be_reset) {
-      static::createCiviCrmFixtures();
+      static::createCiviCrmFixtures(static::$account_id);
     }
     static::$fixture_should_be_reset = TRUE;
     // Ensure this is at its default state.
@@ -81,12 +82,12 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Get Mock API.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
 
     // Creating a sync object requires some calls to Mailchimp's API to find out
     // details about the list and interest groupings. These are cached during
     // runtime.
-
+    
     $api_prophecy->get("/lists/dummylistid/interest-categories", Argument::any())
       ->shouldBeCalled()
       ->willReturn(json_decode('{"http_code":200,"data":{"categories":[{"id":"categoryid","title":"'. static::MC_INTEREST_CATEGORY_TITLE . '"}]}}'));
@@ -95,7 +96,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       ->shouldBeCalled()
       ->willReturn(json_decode('{"http_code":200,"data":{"interests":[{"id":"interestId1","name":"' . static::MC_INTEREST_NAME_1 . '"},{"id":"interestId2","name":"' . static::MC_INTEREST_NAME_2 . '"}]}}'));
 
-    $interests = CRM_Mailchimp_Utils::getMCInterestGroupings('dummylistid');
+    $interests = CRM_Mailchimp_Utils::getMCInterestGroupings(static::$account_id, 'dummylistid');
     $this->assertEquals([ 'categoryid' => [
       'id' => 'categoryid',
       'name' => static::MC_INTEREST_CATEGORY_TITLE,
@@ -104,12 +105,13 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         'interestId2' => [ 'id' => 'interestId2', 'name' => static::MC_INTEREST_NAME_2 ],
       ],
     ]], $interests);
-
-    // Also ensure we have this in cache:
+    
+     // Also ensure we have this in cache:
     $api_prophecy->get("/lists", Argument::any())
       ->shouldBeCalled()
-      ->willReturn(json_decode('{"http_code":200,"data":{"lists":[{"id":"dummylistid","title":"'. static::MC_TEST_LIST_NAME . '"}]}}'));
-    CRM_Mailchimp_Utils::getMCListName('dummylistid');
+      ->willReturn(json_decode('{"http_code":200,"data":{"lists":[{"id":"dummylistid","name":"'. static::MC_TEST_LIST_NAME . '"}]}}'));
+    CRM_Mailchimp_Utils::getMCListName(static::$account_id, 'dummylistid');
+    
   }
   /**
    * Tests the mapping of CiviCRM group memberships to an array of Mailchimp
@@ -119,7 +121,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    */
   public function testGetComparableInterestsFromCiviCrmGroups() {
 
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
     $g = static::C_TEST_MEMBERSHIP_GROUP_NAME;
     $i = static::C_TEST_INTEREST_GROUP_NAME_1;
     $j = static::C_TEST_INTEREST_GROUP_NAME_2;
@@ -155,7 +157,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    */
   public function testGetComparableInterestsFromMailchimp() {
 
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
     $cases = [
       // 'Normal' tests
       [ (object) ['interestId1' => TRUE, 'interestId2'=>TRUE], ['interestId1'=>TRUE, 'interestId2'=>TRUE]],
@@ -188,12 +190,12 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Get Mock API.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
 
     // We're not goint to affect the fixture.
     static::$fixture_should_be_reset = FALSE;
 
-    $sync = new CRM_Mailchimp_Sync("invalidlistid");
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, "invalidlistid");
 
   }
   /**
@@ -205,11 +207,11 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Get Mock API.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
 
     // handy copy.
     $subscriber_hash = static::$civicrm_contact_1['subscriber_hash'];
-
+    
     //
     // Test:
     //
@@ -226,7 +228,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
           && count($_['interests']) == 2;
       }))
       ->shouldBeCalled();
-
+     
     $result = civicrm_api3('GroupContact', 'create', [
       'sequential' => 1,
       'group_id' => static::$civicrm_group_id_membership,
@@ -276,7 +278,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Get Mock API.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
 
     $subscriber_hash = static::$civicrm_contact_1['subscriber_hash'];
 
@@ -316,7 +318,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Create a new prophecy since we used the last one to assert something had
     // not been called.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
 
     // Prepare the mock for the syncSingleContact
     // We expect that a PUT request is sent to Mailchimp.
@@ -338,7 +340,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Use new prophecy
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash", Argument::any())->shouldBeCalledTimes(3);
 
     $result = civicrm_api3('GroupContact', 'create', [
@@ -371,7 +373,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Get Mock API.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
 
     $api_prophecy->put()->shouldNotBeCalled();
     $api_prophecy->patch()->shouldNotBeCalled();
@@ -408,10 +410,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Prepare the mock for the subscription the post hook will do.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash", Argument::any());
-    $this->joinMembershipGroup(static::$civicrm_contact_1);
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $this->joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
 
     //
     // Test 1:
@@ -597,7 +599,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Prepare the mock for the subscription the post hook will do.
 
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get("/lists/dummylistid/members", Argument::any())
       ->shouldBeCalled()
       ->willReturn(
@@ -642,7 +644,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
             ]
           ]])));
 
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
     $sync->collectMailchimp('pull');
 
     // Test expected results.
@@ -670,10 +672,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     //
     // The default mock list does not have any webhooks set.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks');
     $groups = CRM_Mailchimp_Utils::getGroupsToSync([static::$civicrm_group_id_membership]);
-    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig($groups);
+    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig(static::$account_id, $groups);
     $this->assertEquals(1, count($warnings));
     $this->assertContains(ts('Need to create a webhook'), $warnings[0]);
 
@@ -682,7 +684,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Test 2
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')
       ->will(function($args) {
         // Need to mock a 404 response.
@@ -691,7 +693,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         throw new CRM_Mailchimp_RequestErrorException($this->reveal(), "Not found");
       });
     $groups = CRM_Mailchimp_Utils::getGroupsToSync([static::$civicrm_group_id_membership]);
-    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig($groups);
+    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig(static::$account_id, $groups);
     $this->assertEquals(1, count($warnings));
     $this->assertContains(ts('The Mailchimp list that this once worked with has been deleted'), $warnings[0]);
 
@@ -699,7 +701,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Test 3
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')
       ->will(function($args) {
         // Need to mock a network error
@@ -707,7 +709,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         throw new CRM_Mailchimp_NetworkErrorException($this->reveal(), "Someone unplugged internet");
       });
     $groups = CRM_Mailchimp_Utils::getGroupsToSync([static::$civicrm_group_id_membership]);
-    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig($groups);
+    $warnings = CRM_Mailchimp_Utils::checkGroupsConfig(static::$account_id, $groups);
     $this->assertEquals(1, count($warnings));
     $this->assertContains(ts('Problems (possibly temporary)'), $warnings[0]);
     $this->assertContains(ts('Someone unplugged internet'), $warnings[0]);
@@ -738,10 +740,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // created.
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled();
     $api_prophecy->post('/lists/dummylistid/webhooks', Argument::any())->shouldBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id);
     $this->assertEquals(1, count($warnings));
     $this->assertContains(ts('Created a webhook at Mailchimp'), $warnings[0]);
 
@@ -751,7 +753,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // If it's all correct, nothing to do.
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled()->willReturn(
       json_decode(json_encode([
         'http_code' => 200,
@@ -759,7 +761,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
           'webhooks' => [
             [
               'id' => 'dummywebhookid',
-              'url' => CRM_Mailchimp_Utils::getWebhookUrl(),
+              'url' => CRM_Mailchimp_Utils::getWebhookUrl(static::$account_id),
               'events' => [
                 'subscribe' => TRUE,
                 'unsubscribe' => TRUE,
@@ -776,7 +778,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
             ]
         ]]])));
     $api_prophecy->post()->shouldNotBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id);
     $this->assertEquals(0, count($warnings));
 
     //
@@ -785,7 +787,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // If something's different, note and change.
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled()->willReturn(
       json_decode(json_encode([
         'http_code' => 200,
@@ -811,7 +813,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         ]]])));
     $api_prophecy->delete('/lists/dummylistid/webhooks/dummywebhookid')->shouldBeCalled();
     $api_prophecy->post('/lists/dummylistid/webhooks', Argument::any())->shouldBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id);
     $this->assertEquals(3, count($warnings));
     $this->assertContains('Changed webhook URL from http://example.com to', $warnings[0]);
     $this->assertContains('Changed webhook source api', $warnings[1]);
@@ -822,7 +824,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     //
     // If multiple webhooks configured, leave it alone.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled()->willReturn(
       json_decode(json_encode([
         'http_code' => 200,
@@ -831,7 +833,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         ]])));
     $api_prophecy->delete()->shouldNotBeCalled();
     $api_prophecy->post()->shouldNotBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id);
     $this->assertEquals(1, count($warnings));
     $this->assertContains('Mailchimp list dummylistid has more than one webhook configured.', $warnings[0]);
 
@@ -842,11 +844,11 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // created.
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled();
     $api_prophecy->delete()->shouldNotBeCalled();
     $api_prophecy->post()->shouldNotBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id, TRUE);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id, TRUE);
     $this->assertEquals(1, count($warnings));
     $this->assertContains(ts('Need to create a webhook at Mailchimp'), $warnings[0]);
 
@@ -856,7 +858,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // If it's all correct, nothing to do.
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled()->willReturn(
       json_decode(json_encode([
         'http_code' => 200,
@@ -864,7 +866,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
           'webhooks' => [
             [
               'id' => 'dummywebhookid',
-              'url' => CRM_Mailchimp_Utils::getWebhookUrl(),
+              'url' => CRM_Mailchimp_Utils::getWebhookUrl(static::$account_id),
               'events' => [
                 'subscribe' => TRUE,
                 'unsubscribe' => TRUE,
@@ -882,7 +884,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         ]]])));
     $api_prophecy->delete()->shouldNotBeCalled();
     $api_prophecy->post()->shouldNotBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id, TRUE);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id, TRUE);
     $this->assertEquals(0, count($warnings));
 
     //
@@ -891,7 +893,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // If something's different, note and change.
     //
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->get('/lists/dummylistid/webhooks')->shouldBeCalled()->willReturn(
       json_decode(json_encode([
         'http_code' => 200,
@@ -917,7 +919,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         ]]])));
     $api_prophecy->delete()->shouldNotBeCalled();
     $api_prophecy->post()->shouldNotBeCalled();
-    $warnings = CRM_Mailchimp_Utils::configureList(static::$test_list_id, TRUE);
+    $warnings = CRM_Mailchimp_Utils::configureList(static::$account_id, static::$test_list_id, TRUE);
     $this->assertEquals(3, count($warnings));
     $this->assertContains('Need to change webhook URL from http://example.com to', $warnings[0]);
     $this->assertContains('Need to change webhook source api', $warnings[1]);
@@ -958,14 +960,14 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Mock the API
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->put();
     $api_prophecy->get();
 
     //
     // 1. unique email match.
     //
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
     $c = $sync->guessContactIdSingle(static::$civicrm_contact_1['email'], static::$civicrm_contact_1['first_name'], static::$civicrm_contact_1['last_name']);
     $this->assertEquals(static::$civicrm_contact_1['contact_id'], $c);
 
@@ -1025,7 +1027,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // 6. email exists multiple times, on multiple contacts with same last name
     // and first name. But only one contact is in the group.
     //
-    $this->joinMembershipGroup($c1);
+    $this->joinMembershipGroup($c1, static::$civicrm_group_id_membership);
     $c = $sync->guessContactIdSingle(static::$civicrm_contact_1['email'], static::$civicrm_contact_1['first_name'], static::$civicrm_contact_1['last_name']);
     $this->assertEquals(static::$civicrm_contact_1['contact_id'], $c);
 
@@ -1033,7 +1035,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // 7. email exists multiple times, on multiple contacts with same last name
     // and first name and both contacts on the group.
     //
-    $this->joinMembershipGroup($c2);
+    $this->joinMembershipGroup($c2, static::$civicrm_group_id_membership);
     $c = $sync->guessContactIdSingle(static::$civicrm_contact_1['email'], static::$civicrm_contact_1['first_name'], static::$civicrm_contact_1['last_name']);
     $this->assertEquals(static::$civicrm_contact_1['contact_id'], $c);
 
@@ -1124,14 +1126,14 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $c2 = static::$civicrm_contact_2;
     // Mock the API
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
     $api_prophecy->put();
     $api_prophecy->get();
 
     //
     // 1. unique email match but contact is not in group.
     //
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
     $c = $sync->guessContactIdSingle(static::$civicrm_contact_1['email'], static::$civicrm_contact_1['first_name'], static::$civicrm_contact_1['last_name'], TRUE);
     $this->assertNull($c);
 
@@ -1139,7 +1141,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // 2. unique email match and contact not in group - should identify
     //
     // Add c1 to the membership group.
-    $this->joinMembershipGroup($c1);
+    $this->joinMembershipGroup($c1, static::$civicrm_group_id_membership);
     $c = $sync->guessContactIdSingle(static::$civicrm_contact_1['email'], static::$civicrm_contact_1['first_name'], static::$civicrm_contact_1['last_name'], TRUE);
     $this->assertEquals($c1['contact_id'], $c);
 
@@ -1181,8 +1183,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     // Prepare the mock for the subscription the post hook will do.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
-    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
+    $sync = new CRM_Mailchimp_Sync(static::$account_id, static::$test_list_id);
 
     // Test 1.
     //
@@ -1296,7 +1298,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We do not change anything on the fixture.
     static::$fixture_should_be_reset = FALSE;
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('wrongkey', []);
+    list($code, $response) = $w->processRequest(array('wrongkey'), ['data' => [
+        'account_id' => static::$account_id]]);
   }
   /**
    * Test the webhook checks the key exists locally.
@@ -1308,7 +1311,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We do not change anything on the fixture.
     static::$fixture_should_be_reset = FALSE;
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest(NULL, 'akey', []);
+    list($code, $response) = $w->processRequest(NULL, 'akey', ['data' => [
+        'account_id' => static::$account_id]]);
   }
   /**
    * Test the webhook checks the key exists in request.
@@ -1320,7 +1324,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We do not change anything on the fixture.
     static::$fixture_should_be_reset = FALSE;
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('akey', NULL, []);
+    list($code, $response) = $w->processRequest(array('akey'), NULL, ['data' => [
+        'account_id' => static::$account_id]]);
   }
   /**
    * Test the webhook checks the key is not empty.
@@ -1332,7 +1337,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We do not change anything on the fixture.
     static::$fixture_should_be_reset = FALSE;
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('', '', []);
+    list($code, $response) = $w->processRequest(NULL, '', ['data' => [
+        'account_id' => static::$account_id]]);
   }
   /**
    * Test the webhook checks the key matches.
@@ -1344,7 +1350,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We do not change anything on the fixture.
     static::$fixture_should_be_reset = FALSE;
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('a', 'b', []);
+    list($code, $response) = $w->processRequest(array('a'), 'b', ['data' => [
+        'account_id' => static::$account_id]]);
   }
   /**
    * Test the webhook configured incorrectly.
@@ -1359,15 +1366,15 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Make mock API that will return a webhook with the sources.API setting
     // set, which is wrong.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
-    $url = CRM_Mailchimp_Utils::getWebhookUrl();
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
+    $url = CRM_Mailchimp_Utils::getWebhookUrl(static::$account_id);
     $api_prophecy->get("/lists/dummylistid/webhooks", Argument::any())
       ->shouldBeCalled()
       ->willReturn(json_decode('{"http_code":200,"data":{"webhooks":[{"url":"' . $url . '","sources":{"api":true}}]}}'));
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('a', 'a', [
+    list($code, $response) = $w->processRequest(array('a'), 'a', [
       'type' => 'subscribe',
-      'data' => ['list_id' => 'dummylistid'],
+      'data' => ['account_id' => static::$account_id, 'list_id' => 'dummylistid'],
     ]);
   }
   /**
@@ -1382,9 +1389,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'cleaned',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id'     => 'dummylistid',
         'email'       => 'different-' . static::$civicrm_contact_1['email'],
         'reason'      => 'hard',
@@ -1403,9 +1411,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'cleaned',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id'     => 'dummylistid',
         'email'       =>  static::$civicrm_contact_1['email'],
         'reason'      => 'abuse',
@@ -1422,9 +1431,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'cleaned',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id'     => 'dummylistid',
         'email'       => static::$civicrm_contact_1['email'],
         'reason'      => 'hard',
@@ -1444,11 +1454,12 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
   public function testWebhookCleanedAbusePutsOnHold() {
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
-    $this->joinMembershipGroup(static::$civicrm_contact_1, TRUE);
+    $this->joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership, TRUE);
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'cleaned',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id'     => 'dummylistid',
         'email'       => static::$civicrm_contact_1['email'],
         'reason'      => 'abuse',
@@ -1477,9 +1488,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       'on_hold' => 0,
     ]);
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'cleaned',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id'     => 'dummylistid',
         'email'       => static::$civicrm_contact_1['email'],
         'reason'      => 'hard',
@@ -1506,9 +1518,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'subscribe',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
@@ -1536,9 +1549,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'subscribe',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
@@ -1569,15 +1583,16 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    */
   public function testWebhookSubscribeExistingChangesData() {
 
-    static::joinMembershipGroup(static::$civicrm_contact_1, TRUE);
+    static::joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership, TRUE);
     // Give contact interest 1 but not 2.
     static::joinGroup(static::$civicrm_contact_1, static::$civicrm_group_id_interest_1, TRUE);
 
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'subscribe',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'merges' => [
           // Replace first name
@@ -1620,9 +1635,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
     $start = microtime(TRUE);
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'profile',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
@@ -1649,9 +1665,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
     $new_email = 'new-' . static::$civicrm_contact_1['email'];
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'upemail',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'new_email' => $new_email,
         'old_email' => static::$civicrm_contact_1['email'],
@@ -1675,7 +1692,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    * @depends testGetMCInterestGroupings
    */
   public function testWebhookUpemailCreatesBulk() {
-    $this->joinMembershipGroup(static::$civicrm_contact_1, TRUE);
+    $this->joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership, TRUE);
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
     $new_email = 'new-' . static::$civicrm_contact_1['email'];
@@ -1691,9 +1708,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       'is_bulkmail' => FALSE
     ]);
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'upemail',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'new_email' => $new_email,
         'old_email' => static::$civicrm_contact_1['email'],
@@ -1719,7 +1737,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    * @depends testGetMCInterestGroupings
    */
   public function testWebhookUpemailChangesBulk() {
-    $this->joinMembershipGroup(static::$civicrm_contact_1, TRUE);
+    $this->joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership, TRUE);
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
     $new_email = 'new-' . static::$civicrm_contact_1['email'];
@@ -1738,9 +1756,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $this->assertEquals(0, $bulk_email_record['is_primary']);
     $this->assertEquals(1, $bulk_email_record['is_bulkmail']);
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'upemail',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'new_email' => $new_email,
         'old_email' => $bulk_email_record['email'],
@@ -1772,9 +1791,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $w = new CRM_Mailchimp_Page_WebHook();
 
     $new_email = 'new-' . static::$civicrm_contact_1['email'];
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'upemail',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'new_email' => $new_email,
         'old_email' => static::$civicrm_contact_1['email'],
@@ -1790,13 +1810,14 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    * @depends testGetMCInterestGroupings
    */
   public function testWebhookUpemailFailsIfEmailNotFound() {
-    $this->joinMembershipGroup(static::$civicrm_contact_1, TRUE);
+    $this->joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership, TRUE);
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
 
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'upemail',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'new_email' => static::$civicrm_contact_1['email'],
         'old_email' => 'different-' . static::$civicrm_contact_1['email'],
@@ -1809,13 +1830,14 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    */
   public function testWebhookUnsubscribeExistingContact() {
 
-    static::joinMembershipGroup(static::$civicrm_contact_1, TRUE);
+    static::joinMembershipGroup(static::$civicrm_contact_1, static::$civicrm_group_id_membership, TRUE);
 
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'unsubscribe',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
@@ -1841,9 +1863,10 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
     $api_prophecy = $this->prepMockForWebhookConfig();
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('key', 'key', [
+    list($code, $response) = $w->processRequest(array('key'), 'key', [
       'type' => 'unsubscribe',
       'data' => [
+        'account_id' => static::$account_id,
         'list_id' => 'dummylistid',
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
@@ -1866,8 +1889,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Make mock API that will return a webhook with the sources.API setting
     // set, which is wrong.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
-    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
-    $url = CRM_Mailchimp_Utils::getWebhookUrl();
+    CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal(), static::$account_id);
+    $url = CRM_Mailchimp_Utils::getWebhookUrl(static::$account_id);
     $api_prophecy->get("/lists/dummylistid/webhooks", Argument::any())
       ->shouldBeCalled()
       ->willReturn(json_decode('{"http_code":200,"data":{"webhooks":[{"url":"' . $url . '","sources":{"api":false}}]}}'));

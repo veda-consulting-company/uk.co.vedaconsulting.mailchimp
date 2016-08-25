@@ -4,6 +4,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
 
   const 
     MC_SETTING_GROUP = 'MailChimp Preferences';
+  protected $_id;
 
    /**
    * Function to pre processing
@@ -12,6 +13,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   function preProcess() { 
+    $this->_id = $this->get('id');
     $currentVer = CRM_Core_BAO_Domain::version(TRUE);
     //if current version is less than 4.4 dont save setting
     if (version_compare($currentVer, '4.4') < 0) {
@@ -35,6 +37,21 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $this->addButtons(array(
+          array(
+            'type' => 'next',
+            'name' => ts('Delete'),
+            'isDefault' => TRUE,
+          ),
+          array(
+            'type' => 'cancel',
+            'name' => ts('Cancel'),
+          ),
+        )
+      );
+      return;
+    }
     $this->addFormRule(array('CRM_Mailchimp_Form_Setting', 'formRule'), $this);
 
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
@@ -56,17 +73,21 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
     $this->addRadio('enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
 
-    // Create the Submit Button.
-    $buttons = array(
-      array(
-        'type' => 'submit',
-        'name' => ts('Save & Test'),
-      ),
+       // Create the Submit Button.
+    $this->addButtons(array(
+        array(
+          'type' => 'upload',
+          'name' => ts('Save'),
+          'isDefault' => TRUE,
+        ),
+        array(
+          'type' => 'cancel',
+          'name' => ts('Cancel'),
+        ),
+      )
     );
 
-    // Add the Buttons.
-    $this->addButtons($buttons);
-
+    /*
     try {
       // Initially we won't be able to do this as we don't have an API key.
       $api = CRM_Mailchimp_Utils::getMailchimpApi();
@@ -80,25 +101,25 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     catch (Exception $e){
       CRM_Core_Session::setStatus('Could not use the Mailchimp API - ' . $e->getMessage() . ' You will see this message If you have not yet configured your Mailchimp acccount.');
     }
+     * 
+     */
   }
 
   public function setDefaultValues() {
     $defaults = $details = array();
 
-    $apiKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'api_key', NULL, FALSE
-    );
-
-    $securityKey = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'security_key', NULL, FALSE
-    );
-
-    $enableDebugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP,
-      'enable_debugging', NULL, FALSE
-    );
-    $defaults['api_key'] = $apiKey;
-    $defaults['security_key'] = $securityKey;
-    $defaults['enable_debugging'] = $enableDebugging;
+    if ($this->_action & CRM_Core_Action::UPDATE) {
+      if (isset($this->_id)) {
+        $selectQuery = "SELECT api_key, security_key FROM mailchimp_civicrm_account WHERE id = %1";
+        $selectQueryParams = array(1=>array($this->_id, 'Int'));
+        $dao = CRM_Core_DAO::executeQuery($selectQuery, $selectQueryParams);
+        if ($dao->fetch()) {
+          $defaults['enable_debugging'] = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
+          $defaults['api_key'] = $dao->api_key;
+          $defaults['security_key'] = $dao->security_key;
+        }
+      }
+    }
 
     return $defaults;
   }
@@ -114,22 +135,15 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     // Store the submitted values in an array.
     $params = $this->controller->exportValues($this->_name);
 
-    // Save the API Key & Save the Security Key
-    if (CRM_Utils_Array::value('api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
-      CRM_Core_BAO_Setting::setItem($params['api_key'],
-        self::MC_SETTING_GROUP,
-        'api_key'
-      );
-
-      CRM_Core_BAO_Setting::setItem($params['security_key'],
-        self::MC_SETTING_GROUP,
-        'security_key'
-      );
-
-      CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging');
+    if ($this->_action & CRM_Core_Action::DELETE) {
+      $deleteQuery = "DELETE FROM mailchimp_civicrm_account WHERE id = %1";
+      $deleteQueryParams = array(1=>array($this->_id, 'Int'));
+      CRM_Core_DAO::executeQuery($deleteQuery, $deleteQueryParams);
+      return;
+    }
 
       try {
-        $mcClient = CRM_Mailchimp_Utils::getMailchimpApi(TRUE);
+        $mcClient = CRM_Mailchimp_Utils::getMailchimpApiFromApiKey($params['api_key']);
         $response  = $mcClient->get('/');
         if (empty($response->data->account_name)) {
           throw new Exception("Could not retrieve account details, although a response was received. Somthing's not right.");
@@ -139,6 +153,21 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         CRM_Core_Session::setStatus($e->getMessage());
         return FALSE;
       }
+      
+    if ($this->_action & CRM_Core_Action::ADD) {
+        CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging');
+        $accountName = htmlspecialchars($response->data->account_name);
+        $insertQuery = "INSERT INTO `mailchimp_civicrm_account` (`api_key`, `security_key`, `account_name`)
+          VALUES (%1, %2, %3) ON DUPLICATE KEY UPDATE `security_key` = %2, `account_name` = %3";
+        $insertQueryParams = array(1=>array($params['api_key'], 'String'), 2=>array($params['security_key'], 'String'), 3=>array($accountName, 'String'));
+        CRM_Core_DAO::executeQuery($insertQuery, $insertQueryParams);
+    }
+    if ($this->_action & CRM_Core_Action::UPDATE) {
+        $updateQuery = "UPDATE mailchimp_civicrm_account SET api_key = %1, security_key = %2 WHERE id = %3";
+        $updateQueryParams = array(1=>array($params['api_key'], 'String'), 2=>array($params['security_key'], 'String'), 3=>array($this->_id, 'Int'));
+        CRM_Core_DAO::executeQuery($updateQuery, $updateQueryParams);
+        CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging');
+    }
 
       $message = "Following is the account information received from API callback:<br/>
       <table class='mailchimp-table'>
@@ -147,7 +176,6 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       </table>";
 
       CRM_Core_Session::setStatus($message);
-    }
   }
 }
 

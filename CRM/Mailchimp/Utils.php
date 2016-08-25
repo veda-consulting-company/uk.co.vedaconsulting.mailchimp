@@ -75,8 +75,11 @@ class CRM_Mailchimp_Utils {
   /**
    * Returns the webhook URL.
    */
-  public static function getWebhookUrl() {
+  public static function getWebhookUrl($accountId) {
     $security_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+    if ($accountId) {
+      $security_key = CRM_Mailchimp_Utils::getSecurityKeyFromAccountId($accountId);
+    }
     if (empty($security_key)) {
       // @Todo what exception should this throw?
       throw new InvalidArgumentException("You have not set a security key for your Mailchimp integration. Please do this on the settings page at civicrm/mailchimp/settings");
@@ -101,14 +104,18 @@ class CRM_Mailchimp_Utils {
    * @param bool $reset If set it will replace the API object with a default.
    * Only useful after changing stored credentials.
    */
-  public static function getMailchimpApi($reset=FALSE) {
+  public static function getMailchimpApi($accountId, $reset=FALSE, $apiKey = FALSE) {
     if ($reset) {
-      static::$mailchimp_api = NULL;
+      static::$mailchimp_api[$accountId] = NULL;
     }
 
     // Singleton pattern.
-    if (!isset(static::$mailchimp_api)) {
-      $params = ['api_key' => CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key')];
+    if (!isset(static::$mailchimp_api[$accountId])) {
+      if ($accountId) {
+        $params = ['api_key' => CRM_Mailchimp_Utils::getApiKeyFromAccountId($accountId)];
+      } elseif ($apiKey) {
+        $params = ['api_key' => $apiKey];
+      }
       $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
       if ($debugging == 1) {
         // We want debugging. Inject a logging callback.
@@ -117,10 +124,85 @@ class CRM_Mailchimp_Utils {
         };
       }
       $api = new CRM_Mailchimp_Api3($params);
-      static::setMailchimpApi($api);
+      static::setMailchimpApi($api, $accountId);
     }
+    
+    return static::$mailchimp_api[$accountId];
+  }
+  
+  // Test purpose
+  public static function getMailchimpSingleAccountId() {
+    $query = "SELECT id FROM mailchimp_civicrm_account ORDER BY id ASC LIMIT 1";
+    $accountId = CRM_Core_DAO::singleValueQuery($query);
+    return $accountId;
+  }
+  // Test purpose
+   public static function getMailchimpSecondAccountId() {
+    $query = "SELECT id FROM mailchimp_civicrm_account ORDER BY id ASC LIMIT 2";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    $accountIds = array();
+    while ($dao->fetch()) {
+      $accountIds[] = $dao->id;
+    }
+    return $accountIds[1]; 
+  }
+  // Test purpose
+  public static function getMailchimpSingleApiKey() {
+    $query = "SELECT api_key FROM mailchimp_civicrm_account ORDER BY id ASC LIMIT 1";
+    $apiKey = CRM_Core_DAO::singleValueQuery($query);
+    return $apiKey;
+  }
+  // Test purpose
+  public static function getMailchimpSecondApiKey() {
+    $query = "SELECT api_key FROM mailchimp_civicrm_account ORDER BY id ASC LIMIT 2";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    $apiKeys = array();
+    while ($dao->fetch()) {
+      $apiKeys[] = $dao->api_key;
+    }
+    return $apiKeys[1];
+  }
+  // Test purpose
+  public static function getCountMailchimpAccounts() {
+    $query = "SELECT count(id) FROM mailchimp_civicrm_account";
+    $noOfAccounts = CRM_Core_DAO::singleValueQuery($query);
+    return $noOfAccounts;
+  }
+  // Test purpose
+  public static function keepFirstTwoDeleteRest() {
+    $query = "DELETE FROM mailchimp_civicrm_account WHERE id NOT IN (
+              SELECT id FROM mailchimp_civicrm_account ORDER BY id ASC LIMIT 2)";
+    CRM_Core_DAO::executeQuery($query);
+  }
 
-    return static::$mailchimp_api;
+  // For php unit test 
+  public static function insertApiDetailsToDb($file) {
+    list ($xml, $error) = CRM_Utils_XML::parseFile($file);
+    if ($xml === FALSE) {
+      throw new Exception("Failed to parse info XML: $error");
+    }
+    $apiDetails = array();
+    $xmlArray = CRM_Utils_XML::xmlObjToArray($xml);
+    if (isset($xmlArray['ApiDetails']['@attributes'])) {
+      $apiDetails[] = $xmlArray['ApiDetails']['@attributes'];
+    }else {
+      foreach ($xmlArray['ApiDetails'] as $key => $value) {
+        $apiDetails[] = $value['@attributes'];
+      }
+    }    
+    
+    if (empty($apiDetails)) {
+      throw new Exception("Failed to get api key. api key required to test");
+    }
+    
+    foreach ($apiDetails as $apiDetail) {
+      $accountName = htmlspecialchars($apiDetail['account_name']);
+      $insertQuery = "INSERT INTO `mailchimp_civicrm_account` (`api_key`, `security_key`, `account_name`)
+        VALUES (%1, %2, %3) ON DUPLICATE KEY UPDATE `security_key` = %2, `account_name` = %3";
+      $insertQueryParams = array(1=>array($apiDetail['api_key'], 'String'), 2=>array($apiDetail['security_key'], 'String'), 3=>array($accountName, 'String'));
+      CRM_Core_DAO::executeQuery($insertQuery, $insertQueryParams);
+    }
+    
   }
 
   /**
@@ -128,8 +210,8 @@ class CRM_Mailchimp_Utils {
    *
    * This is for testing purposes only.
    */
-  public static function setMailchimpApi(CRM_Mailchimp_Api3 $api) {
-    static::$mailchimp_api = $api;
+  public static function setMailchimpApi(CRM_Mailchimp_Api3 $api, $accountId) {
+    static::$mailchimp_api[$accountId] = $api;
   }
 
   /**
@@ -153,14 +235,14 @@ class CRM_Mailchimp_Utils {
    * or such.
    *
    */
-  public static function checkGroupsConfig($groups=NULL) {
+  public static function checkGroupsConfig($accountId, $groups=NULL) {
     if ($groups === NULL) {
       $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
     }
     if (!is_array($groups)) {
       throw new InvalidArgumentException("expected array argument, if provided");
     }
-    $api = CRM_Mailchimp_Utils::getMailchimpApi();
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
 
     $warnings = [];
     // Check all our groups do not have the sources:API set in the webhook, and
@@ -174,7 +256,7 @@ class CRM_Mailchimp_Utils {
         [1 => $group_settings_link, 2 => $details['list_id']]);
 
       try {
-        $test_warnings = CRM_Mailchimp_Utils::configureList($details['list_id'], $dry_run=TRUE);
+        $test_warnings = CRM_Mailchimp_Utils::configureList($accountId, $details['list_id'], $dry_run=TRUE);
         foreach ($test_warnings as $_) {
           $warnings []= $message_prefix . $_;
         }
@@ -211,10 +293,10 @@ class CRM_Mailchimp_Utils {
    * @param bool $dry_run   If set no changes are made.
    * @return array
    */
-  public static function configureList($list_id, $dry_run = FALSE) {
-    $api = CRM_Mailchimp_Utils::getMailchimpApi();
+  public static function configureList($accountId, $list_id, $dry_run = FALSE) {
+    $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
     $expected = [
-      'url' => CRM_Mailchimp_Utils::getWebhookUrl(),
+      'url' => CRM_Mailchimp_Utils::getWebhookUrl($accountId),
       'events' => [
         'subscribe' => TRUE,
         'unsubscribe' => TRUE,
@@ -349,18 +431,21 @@ class CRM_Mailchimp_Utils {
     }
 
     $query  = "
-      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title, cg.saved_search_id, cg.children
+      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title, cg.saved_search_id, cg.children, mcs.account_id as account_id, mca.api_key
  FROM    civicrm_value_mailchimp_settings mcs
       INNER JOIN civicrm_group cg ON mcs.entity_id = cg.id
+      INNER JOIN mailchimp_civicrm_account mca ON mca.id = mcs.account_id
       WHERE $whereClause";
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {
-      $list_name = CRM_Mailchimp_Utils::getMCListName($dao->mc_list_id);
-      $interest_name = CRM_Mailchimp_Utils::getMCInterestName($dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id);
-      $category_name = CRM_Mailchimp_Utils::getMCCategoryName($dao->mc_list_id, $dao->mc_grouping_id);
+      $list_name = CRM_Mailchimp_Utils::getMCListName($dao->account_id, $dao->mc_list_id);
+      $interest_name = CRM_Mailchimp_Utils::getMCInterestName($dao->account_id, $dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id);
+      $category_name = CRM_Mailchimp_Utils::getMCCategoryName($dao->account_id, $dao->mc_list_id, $dao->mc_grouping_id);
       $groups[$dao->entity_id] =
         array(
           // Details about Mailchimp
+          'account_id'               => $dao->account_id,
+          'api_key'               => $dao->api_key,
           'list_id'               => $dao->mc_list_id,
           'list_name'             => $list_name,
           'category_id'           => $dao->mc_grouping_id,
@@ -390,21 +475,21 @@ class CRM_Mailchimp_Utils {
    *
    * @return string.
    */
-  public static function getMCListName($list_id) {
-    if (!isset(static::$mailchimp_lists)) {
-      static::$mailchimp_lists[$list_id] = [];
-      $api = CRM_Mailchimp_Utils::getMailchimpApi();
+  public static function getMCListName($accountId, $list_id) {
+    if (!isset(static::$mailchimp_lists[$accountId])) {
+      static::$mailchimp_lists[$accountId][$list_id] = [];
+      $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
       $lists = $api->get('/lists', ['fields' => 'lists.id,lists.name','count'=>10000])->data->lists;
       foreach ($lists as $list) {
-        static::$mailchimp_lists[$list->id] = $list->name;
+        static::$mailchimp_lists[$accountId][$list->id] = $list->name;
       }
     }
 
-    if (!isset(static::$mailchimp_lists[$list_id])) {
+    if (!isset(static::$mailchimp_lists[$accountId][$list_id])) {
       // Return ZLS if not found.
       return '';
     }
-    return static::$mailchimp_lists[$list_id];
+    return static::$mailchimp_lists[$accountId][$list_id];
   }
 
   /**
@@ -427,7 +512,7 @@ class CRM_Mailchimp_Utils {
    *   )
    *
    */
-  public static function getMCInterestGroupings($listID) {
+  public static function getMCInterestGroupings($accountId, $listID) {
 
     if (empty($listID)) {
       CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Utils::getMCInterestGroupings called without list id');
@@ -440,7 +525,7 @@ class CRM_Mailchimp_Utils {
 
       try {
         // Get list name.
-        $api = CRM_Mailchimp_Utils::getMailchimpApi();
+        $api = CRM_Mailchimp_Utils::getMailchimpApi($accountId);
         $categories = $api->get("/lists/$listID/interest-categories",
             ['fields' => 'categories.id,categories.title','count'=>10000])
           ->data->categories;
@@ -467,7 +552,7 @@ class CRM_Mailchimp_Utils {
 
       foreach ($categories as $category) {
         // Need to look up interests for this category.
-        $interests = CRM_Mailchimp_Utils::getMailchimpApi()
+        $interests = CRM_Mailchimp_Utils::getMailchimpApi($accountId)
           ->get("/lists/$listID/interest-categories/$category->id/interests",
             ['fields' => 'interests.id,interests.name','count'=>10000])
           ->data->interests;
@@ -491,8 +576,8 @@ class CRM_Mailchimp_Utils {
    * return the group name for given list, grouping and group
    *
    */
-  public static function getMCInterestName($listID, $category_id, $interest_id) {
-    $info = static::getMCInterestGroupings($listID);
+  public static function getMCInterestName($accountId, $listID, $category_id, $interest_id) {
+    $info = static::getMCInterestGroupings($accountId, $listID);
 
     // Check list, grouping, and group exist
     if (empty($info[$category_id]['interests'][$interest_id])) {
@@ -508,8 +593,8 @@ class CRM_Mailchimp_Utils {
   /**
    * Return the grouping name for given list, grouping MC Ids.
    */
-  public static function getMCCategoryName($listID, $category_id) {
-    $info = static::getMCInterestGroupings($listID);
+  public static function getMCCategoryName($accountId, $listID, $category_id) {
+    $info = static::getMCInterestGroupings($accountId, $listID);
 
     // Check list, grouping, and group exist
     $name = NULL;
@@ -580,5 +665,128 @@ class CRM_Mailchimp_Utils {
     //CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils mailchimp $mcClient', $mcClient);
     return $mcClient;
   }
-
+  
+  public static function getWebhookSecurityKeys() {
+    $webhookSecurityKeys = array();
+    $query = "SELECT security_key FROM mailchimp_civicrm_account";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $webhookSecurityKeys[] = $dao->security_key;
+    }
+    return $webhookSecurityKeys;
+  }
+  
+  public static function getApiKeyFromSecurityKey($securityKey) {
+    if (!$securityKey) {
+      return;
+    }
+    $query = "SELECT api_key FROM mailchimp_civicrm_account WHERE security_key = %1";
+    $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($securityKey, 'String')));
+    if ($dao->fetch()) {
+      $apiKey = $dao->api_key;
+    }
+    return $apiKey;
+  }
+  
+   public static function getAccountIdFromSecurityKey($securityKey) {
+    if (!$securityKey) {
+      return;
+    }
+    $accountId = NULL;
+    $query = "SELECT id FROM mailchimp_civicrm_account WHERE security_key = %1";
+    $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($securityKey, 'String')));
+    if ($dao->fetch()) {
+      $accountId = $dao->id;
+    }
+    return $accountId;
+  }
+  
+  public static function getSecurityKeyFromApiKey($apiKey) {
+    if (!$apiKey) {
+      return;
+    }
+    $query = "SELECT security_key FROM mailchimp_civicrm_account WHERE api_key = %1";
+    $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($apiKey, 'String')));
+    if ($dao->fetch()) {
+      $securityKey = $dao->security_key;
+    }
+    return $securityKey;
+  }
+  
+   public static function getSecurityKeyFromAccountId($accountId) {
+    if (!$accountId) {
+      return;
+    }
+    $query = "SELECT security_key FROM mailchimp_civicrm_account WHERE id = %1";
+    $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($accountId, 'Int')));
+    if ($dao->fetch()) {
+      $securityKey = $dao->security_key;
+    }
+    return $securityKey;
+  }
+  
+  public static function getAllApiKeys() {
+    $apiKeys = array();
+    $query = "SELECT api_key FROM mailchimp_civicrm_account";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $apiKeys[] = $dao->api_key;
+    }
+    return $apiKeys;
+  }
+  
+  public static function getAllAccountIds() {
+    $accountIds = array();
+    $query = "SELECT id FROM mailchimp_civicrm_account";
+    $dao = CRM_Core_DAO::executeQuery($query);
+    while ($dao->fetch()) {
+      $accountIds[] = $dao->id;
+    }
+    return $accountIds;
+  }
+  
+  public static function getAccountDetailsFromApiKey($apiKey) {
+    if (!$apiKey) {
+      return;
+    }
+    $query = "SELECT account_name, id FROM mailchimp_civicrm_account WHERE api_key = %1";
+    $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($apiKey, 'String')));
+    $accountDetails = array();
+    if ($dao->fetch()) {
+      $accountDetails['account_name'] = $dao->account_name;
+      $accountDetails['account_id'] = $dao->id;
+    }
+    return $accountDetails;
+  }
+  
+  public static function getAccountNameFromAccountId($accountId) {
+    if (!$accountId) {
+      return;
+    }
+    $query = "SELECT account_name FROM mailchimp_civicrm_account WHERE id = %1";
+    $accountName = CRM_Core_DAO::singleValueQuery($query, array(1=>array($accountId, 'Int')));
+    return $accountName;
+  }
+  
+  public static function getApiKeyFromAccountId($accountId) {
+    if (!$accountId) {
+      return;
+    }
+    $query = "SELECT api_key FROM mailchimp_civicrm_account WHERE id = %1";
+    $dao = CRM_Core_DAO::executeQuery($query, array(1=>array($accountId, 'Int')));
+    $accountDetails = array();
+    if ($dao->fetch()) {
+      $apiKey = $dao->api_key;
+    }
+    return $apiKey;
+  }
+  /*
+   * This function is used when we don't have account id for example upgrading from single account to multiple account v2 to v3
+   * or when we create new account setup in civi
+   */
+  public static function getMailchimpApiFromApiKey($apiKey) {
+    $params = ['api_key' => $apiKey];
+    $api = new CRM_Mailchimp_Api3($params);
+    return $api;
+  }
 }

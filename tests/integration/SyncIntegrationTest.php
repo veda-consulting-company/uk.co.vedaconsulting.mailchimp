@@ -25,13 +25,14 @@ class SyncIntegrationTest extends MailchimpApiIntegrationBase {
   public static $fixture_should_be_reset = TRUE;
 
   public static function setUpBeforeClass() {
+    static::$account_id = (int) CRM_Mailchimp_Utils::getMailchimpSingleAccountId();
   }
   /**
    * Create fixture in CiviCRM.
    */
   public function setUp() {
     if (static::$fixture_should_be_reset) {
-      static::createCiviCrmFixtures();
+      static::createCiviCrmFixtures(static::$account_id);
     }
     static::$fixture_should_be_reset = TRUE;
   }
@@ -130,7 +131,7 @@ class SyncIntegrationTest extends MailchimpApiIntegrationBase {
     // contacts, we cannot match it.
     //
     static::tearDownCiviCrmFixtureContacts();
-    static::createCiviCrmFixtures();
+    static::createCiviCrmFixtures(static::$account_id);
     civicrm_api3('Email', 'create', [
       'contact_id' => static::$civicrm_contact_2['contact_id'],
       'email' => static::$civicrm_contact_1['email'],

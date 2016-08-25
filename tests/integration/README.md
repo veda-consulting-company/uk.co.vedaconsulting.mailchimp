@@ -27,6 +27,13 @@ Run the simplest connection test. A dot means a successful test pass.
 
     OK (1 test, 3 assertions)
 
+Added multiple mailchimp accounts support test cases in MailchimpMultiApiIntegrationTest.php
+
+You need to include above if you have two/more mailchimp accounts and wants to test
+
+If you have only one mailchimp account, you need to exclude above multiple accounts test cases
+
+you have to include your mailchimp account details in apiconfig.xml
 
 Run all integration tests:
 
