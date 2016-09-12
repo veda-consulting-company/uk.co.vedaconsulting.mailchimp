@@ -43,7 +43,7 @@ function mailchimp_civicrm_install() {
     'is_active'     => 0,
   );
   $result = civicrm_api3('job', 'create', $params);
-  
+
 
   // Create Pull Sync job.
   $params = array(
@@ -194,14 +194,14 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
             $defaults['mc_integration_option'] = 0;
           }
 
-          $form->setDefaults($defaults);  
+          $form->setDefaults($defaults);
           $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
           $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
         } else {
           // defaults for a new group
           $defaults['mc_integration_option'] = 0;
           $defaults['is_mc_update_grouping'] = 0;
-          $form->setDefaults($defaults);  
+          $form->setDefaults($defaults);
         }
       }
     }
@@ -355,7 +355,7 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
   );
 
   if($objectName == 'Email') {
-    return; // @todo 
+    return; // @todo
     // If about to delete an email in CiviCRM, we must delete it from Mailchimp
     // because we won't get chance to delete it once it's gone.
     //
@@ -381,7 +381,7 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
 
   // If deleting an individual, delete their (bulk) email address from Mailchimp.
   if ($op == 'delete' && $objectName == 'Individual') {
-    return; // @todo 
+    return; // @todo
     $result = civicrm_api('Contact', 'get', $params1);
     foreach ($result['values'] as $key => $value) {
       $emailId  = $value['email_id'];
@@ -470,10 +470,10 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     // Post hook is disabled at this point in the running.
     return;
   }
-	
-	/***** NO BULK EMAILS (User Opt Out) *****/
-	if ($objectName == 'Individual' || $objectName == 'Organization' || $objectName == 'Household') {
-		// Contact Edited
+
+  /***** NO BULK EMAILS (User Opt Out) *****/
+  if ($objectName == 'Individual' || $objectName == 'Organization' || $objectName == 'Household') {
+    // Contact Edited
     // @todo artfulrobot: I don't understand the cases this is dealing with.
     //                    Perhaps it was trying to check that if someone's been
     //                    marked as 'opt out' then they're unsubscribed from all
@@ -508,12 +508,12 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
       }
 
     }
-	}
+  }
 
-	/***** Contacts added/removed/deleted from CiviCRM group *****/
-	if ($objectName == 'GroupContact') {
+  /***** Contacts added/removed/deleted from CiviCRM group *****/
+  if ($objectName == 'GroupContact') {
     // Determine if the action being taken needs to affect Mailchimp at all.
-		
+
     if ($op == 'view') {
       // Nothing changed; nothing to do.
       return;
@@ -567,5 +567,5 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     // Trigger mini sync for this person and this list.
     $sync = new CRM_Mailchimp_Sync($groups[$objectId]['list_id']);
     $sync->syncSingleContact($objectRef[0]);
-	}
+  }
 }
