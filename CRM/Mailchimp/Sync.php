@@ -10,6 +10,7 @@ class CRM_Mailchimp_Sync {
    * This is accessible read-only via the __get().
    */
   protected $list_id;
+
   /**
    * Cache of details from CRM_Mailchimp_Utils::getGroupsToSync.
    ▾ $this->group_details['61'] = (array [12])
@@ -208,6 +209,7 @@ class CRM_Mailchimp_Sync {
     if (!in_array($mode, ['pull', 'push'])) {
       throw new InvalidArgumentException(__FUNCTION__ . " expects push/pull but called with '$mode'.");
     }
+
     // Cheekily access the database directly to obtain a prepared statement.
     $dao = static::createTemporaryTableForCiviCRM();
     $db = $dao->getDatabaseConnection();
@@ -256,6 +258,7 @@ class CRM_Mailchimp_Sync {
       'contact_id' => ['IN' => array_keys($result['values'])],
       'options' => ['limit' => 0],
     ]);
+
     // Index emails by contact_id.
     foreach ($emails['values'] as $email) {
       if ($email['is_bulkmail']) {
@@ -268,10 +271,10 @@ class CRM_Mailchimp_Sync {
         $result['values'][$email['contact_id']]['other_email'] = $email['email'];
       }
     }
-    /**
-     * We have a contact that has no other deets.
-     */
 
+    /**
+     * We have a contact that has no other details.
+     */
     $start = microtime(TRUE);
 
     $collected = 0;
@@ -299,13 +302,12 @@ class CRM_Mailchimp_Sync {
       // Serialize the grouping array for SQL storage - this is the fastest way.
       $info = serialize($info);
 
-      // we're ready to store this but we need a hash that contains all the info
+      // We're ready to store this but we need a hash that contains all the info
       // for comparison with the hash created from the CiviCRM data (elsewhere).
       //          email,           first name,      last name,      groupings
       // See note above about why we don't include email in the hash.
       // $hash = md5($email . $contact['first_name'] . $contact['last_name'] . $info);
       $hash = md5($contact['first_name'] . $contact['last_name'] . $info);
-      // run insert prepared statement
       $db->execute($insert, array($contact['id'], $email, $contact['first_name'], $contact['last_name'], $hash, $info));
       $collected++;
     }
@@ -315,6 +317,7 @@ class CRM_Mailchimp_Sync {
 
     return $collected;
   }
+
   /**
    * Match mailchimp records to particular contacts in CiviCRM.
    *
@@ -335,7 +338,6 @@ class CRM_Mailchimp_Sync {
    * - failures (duplicate contacts in CiviCRM)
    */
   public function matchMailchimpMembersToContacts() {
-
     // Ensure we have the mailchimp_log table.
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE IF NOT EXISTS mailchimp_log (
@@ -359,7 +361,8 @@ class CRM_Mailchimp_Sync {
       'totalMatched' => 0,
       'newContacts' => 0,
       'failures' => 0,
-      ];
+    ];
+
     // Do the fast SQL identification against CiviCRM contacts.
     $start = microtime(TRUE);
     $stats['bySubscribers'] = static::guessContactIdsBySubscribers();
@@ -373,7 +376,7 @@ class CRM_Mailchimp_Sync {
     $start = microtime(TRUE);
 
     // Now slow match the rest.
-    $dao = CRM_Core_DAO::executeQuery( "SELECT * FROM tmp_mailchimp_push_m m WHERE cid_guess IS NULL;");
+    $dao = CRM_Core_DAO::executeQuery("SELECT * FROM tmp_mailchimp_push_m m WHERE cid_guess IS NULL");
     $db = $dao->getDatabaseConnection();
     $update = $db->prepare('UPDATE tmp_mailchimp_push_m
       SET cid_guess = ? WHERE email = ? AND hash = ?');
@@ -480,9 +483,9 @@ class CRM_Mailchimp_Sync {
     }
     CRM_Mailchimp_Utils::checkDebug("removeInSync removed $count in-sync contacts.");
 
-
     return $count + $doubles;
   }
+
   /**
    * "Push" sync.
    *
@@ -965,7 +968,7 @@ class CRM_Mailchimp_Sync {
    * table.
    */
   public function countCiviCrmMembers() {
-    $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(*) c  FROM tmp_mailchimp_push_c");
+    $dao = CRM_Core_DAO::executeQuery("SELECT COUNT(*) c FROM tmp_mailchimp_push_c");
     $dao->fetch();
     return $dao->c;
   }
@@ -977,7 +980,6 @@ class CRM_Mailchimp_Sync {
    * @todo rename as push
    */
   public function syncSingleContact($contact_id) {
-
     // Get all the groups related to this list that the contact is currently in.
     // We have to use this dodgy API that concatenates the titles of the groups
     // with a comma (making it unsplittable if a group title has a comma in it).
@@ -1055,7 +1057,7 @@ class CRM_Mailchimp_Sync {
    *
    * This is used in a couple of cases, for finding a contact from incomming
    * data for:
-   * - a possibly new contact, 
+   * - a possibly new contact,
    * - a contact that is expected to be in this membership group.
    *
    * Here's how we match a contact:
@@ -1093,7 +1095,7 @@ class CRM_Mailchimp_Sync {
    * @param string|null $last_name
    * @param bool $must_be_on_list    If TRUE, only return an ID if this contact
    *                                 is known to be on the list. defaults to
-   *                                 FALSE. 
+   *                                 FALSE.
    * @throw CRM_Mailchimp_DuplicateContactsException if the email is known bit
    * it fails to identify one contact.
    * @return int|null Contact Id if found.
@@ -1476,4 +1478,3 @@ class CRM_Mailchimp_Sync {
     return $result;
   }
 }
-

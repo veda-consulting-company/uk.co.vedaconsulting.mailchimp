@@ -56,7 +56,7 @@ class CRM_Mailchimp_Api3 {
    *  Nb. a CiviCRM_Core_Error::debug_log_message facility is injected if you
    *  enable debugging on the Mailchimp settings screen. But you can inject
    *  something different, e.g. for testing.
-   */ 
+   */
   protected $log_facility;
   /**
    * @param array $settings contains key 'api_key', possibly other settings.
@@ -69,10 +69,10 @@ class CRM_Mailchimp_Api3 {
     }
     $this->api_key = $settings['api_key'];
 
-    // Set URL based on datacentre identifier at end of api key.                                       
+    // Set URL based on datacentre identifier at end of api key.
     preg_match('/^.*-([^-]+)$/', $this->api_key, $matches);
     if (empty($matches[1])) {
-      throw new InvalidArgumentException("Invalid API key - could not extract datacentre from given API key.");      
+      throw new InvalidArgumentException("Invalid API key - could not extract datacentre from given API key.");
     }
 
     if (!empty($settings['log_facility'])) {
@@ -87,7 +87,7 @@ class CRM_Mailchimp_Api3 {
    */
   public function setLogFacility($callback) {
     if (!is_callable($callback)) {
-      throw new InvalidArgumentException("Log facility callback is not callable.");      
+      throw new InvalidArgumentException("Log facility callback is not callable.");
     }
     $this->log_facility = $callback;
   }
@@ -227,7 +227,7 @@ class CRM_Mailchimp_Api3 {
   /**
    * Provide mock for curl.
    *
-   * The callback will be called with the 
+   * The callback will be called with the
    * request object in $this->request. It must return an array with optional
    * keys:
    *
@@ -394,19 +394,25 @@ class CRM_Mailchimp_Api3 {
     $callback = $this->log_facility;
     $callback($msg);
   }
+
   /**
    * Prepares the response object from the result of a cURL call.
    *
    * Public to allow testing.
    *
-   * @return Array response object.
-   * @throw CRM_Mailchimp_RequestErrorException
-   * @throw CRM_Mailchimp_NetworkErrorException
-   * @param array $info output of curl_getinfo().
-   * @param string|null $result output of curl_exec().
+   * @param array $info
+   *   Output of curl_getinfo().
+   * @param string|null $result
+   *   Output of curl_exec().
+   *
+   * @return array
+   *   Response object.
+   *
+   * @throws CRM_Mailchimp_RequestErrorException
+   * @throws CRM_Mailchimp_NetworkErrorException
+   *
    */
   public function curlResultToResponse($info, $result) {
-
     // Check response.
     if (empty($info['http_code'])) {
       $this->log();
@@ -441,10 +447,13 @@ class CRM_Mailchimp_Api3 {
 
     // Check for errors and throw appropriate CRM_Mailchimp_ExceptionBase.
     switch (substr((string) $this->response->http_code, 0, 1)) {
-    case '4': // 4xx errors
-      throw new CRM_Mailchimp_RequestErrorException($this);
-    case '5': // 5xx errors
-      throw new CRM_Mailchimp_NetworkErrorException($this);
+      case '4':
+        // 4xx errors.
+        throw new CRM_Mailchimp_RequestErrorException($this);
+
+      case '5':
+        // 5xx errors.
+        throw new CRM_Mailchimp_NetworkErrorException($this);
     }
 
     // All good return response as a convenience.

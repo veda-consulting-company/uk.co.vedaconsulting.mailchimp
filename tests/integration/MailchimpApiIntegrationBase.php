@@ -46,6 +46,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     'first_name' => self::C_CONTACT_1_FIRST_NAME,
     'last_name' => self::C_CONTACT_1_LAST_NAME,
     ];
+
   /**
    * array Test contact 2
    */
@@ -195,6 +196,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     }
     return $interest_id;
   }
+
   /**
    * Creates CiviCRM fixtures.
    *
@@ -270,6 +272,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
       ];
     static::createTestContact(static::$civicrm_contact_2);
   }
+
   /**
    * Create a contact in CiviCRM
    *

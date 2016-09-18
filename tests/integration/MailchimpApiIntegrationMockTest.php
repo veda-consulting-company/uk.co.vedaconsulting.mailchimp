@@ -196,23 +196,19 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $sync = new CRM_Mailchimp_Sync("invalidlistid");
 
   }
+
   /**
    * Check the right calls are made to the Mailchimp API.
    *
    * @depends testGetMCInterestGroupings
    */
   public function testPostHookForMembershipListChanges() {
-
     // Get Mock API.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
     CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
 
-    // handy copy.
     $subscriber_hash = static::$civicrm_contact_1['subscriber_hash'];
 
-    //
-    // Test:
-    //
     // If someone is added to the CiviCRM group, then we should expect them to
     // get subscribed.
 
@@ -231,13 +227,9 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       'sequential' => 1,
       'group_id' => static::$civicrm_group_id_membership,
       'contact_id' => static::$civicrm_contact_1['contact_id'],
-      'status' => "Added",
+      'status' => 'Added',
     ]);
 
-
-    //
-    // Test:
-    //
     // If someone is removed or deleted from the CiviCRM group they should get
     // removed from Mailchimp.
 
@@ -260,10 +252,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       'contact_id' => static::$civicrm_contact_1['contact_id'],
     ]);
 
-
     // If we got here OK, then the fixture is unchanged.
     static::$fixture_should_be_reset = FALSE;
-
   }
   /**
    * Check the right calls are made to the Mailchimp API as result of
