@@ -22,6 +22,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * CiviCRM contact id.
    */
   public $contact_id;
+
   /**
    * Process a webhook request from Mailchimp.
    *
@@ -29,7 +30,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * https://apidocs.mailchimp.com/webhooks/
    */
   public function run() {
-
     CRM_Mailchimp_Utils::checkDebug("Webhook POST: " . serialize($_POST));
     // Empty response object, default response code.
     try {
@@ -83,7 +83,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * @return array with two values: $response_code, $response_object.
    */
   public function processRequest($expected_key, $key, $request_data) {
-
     // Check CMS's permission for (presumably) anonymous users.
     if (CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported() && !CRM_Mailchimp_Permission::check('allow webhook posts')) {
       throw new RuntimeException("Missing allow webhook posts permission.", 500);
@@ -153,6 +152,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // clarity.
     $this->findOrCreateSubscribeAndUpdate();
   }
+
   /**
    * Handle unsubscribe requests.
    *
@@ -165,7 +165,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    *
    */
   public function unsubscribe() {
-
     try {
       $this->contact_id = $this->sync->guessContactIdSingle(
         $this->request_data['email'],
@@ -191,6 +190,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       'status'     => 'Removed',
       ]);
   }
+
   /**
    * Handle profile update requests.
    *
@@ -267,8 +267,8 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       'email' => $this->request_data['new_email'],
       'is_bulkmail' => 1,
     ]);
-
   }
+
   /**
    * Email removed by Mailchimp.
    *
@@ -324,7 +324,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     }
   }
 
-  // Helper functions.
   /**
    * Find/create, and update.
    *
@@ -336,7 +335,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    *
    */
   public function findOrCreateSubscribeAndUpdate() {
-
     $this->findOrCreateContact();
 
     // Check whether names have changed.
@@ -361,6 +359,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
     $this->updateInterestsFromMerges();
   }
+
   /**
    * Finds or creates the contact from email, first and last name.
    *
@@ -423,6 +422,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       throw new RuntimeException("Duplicate contact: " . $e->getMessage(), 500);
     }
   }
+
   /**
    * Mailchimp still sends interests to webhooks in an old school way.
    *
