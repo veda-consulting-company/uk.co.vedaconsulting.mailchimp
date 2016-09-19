@@ -352,17 +352,15 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       // Again, we don't yet call updateMailchimpFromCivi() as we do the final
       // test.
 
-      //
       // Test 3: Change name back to Betty again, add new contact to membership
       // group and check updates work.
-      //
 
       // Change the name again as this is another thing we can test gets updated
       // correctly.
       civicrm_api3('Contact', 'create', [
         'contact_id' => static::$civicrm_contact_1['contact_id'],
         'first_name' => 'Betty',
-        ]);
+      ]);
 
       // Now collect Civi again.
       $sync->collectCiviCrm('push');
@@ -625,13 +623,13 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       civicrm_api3('Contact', 'getsingle', [
         'contact_id' => static::$civicrm_contact_1['contact_id'],
         'first_name' => 'Betty',
-        ]);
+      ]);
 
       // Ensure change was NOT made; contact 2 should still have same surname.
       civicrm_api3('Contact', 'getsingle', [
         'contact_id' => static::$civicrm_contact_2['contact_id'],
         'last_name' => static::$civicrm_contact_2['last_name'],
-        ]);
+      ]);
 
       CRM_Mailchimp_Sync::dropTemporaryTables();
     }

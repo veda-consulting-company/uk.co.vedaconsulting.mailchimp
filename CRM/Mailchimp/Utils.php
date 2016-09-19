@@ -96,6 +96,8 @@ class CRM_Mailchimp_Utils {
 
   /**
    * Returns the webhook URL.
+   *
+   * @TODO Convert to namespaced settings, use Civi::setting()->get().
    */
   public static function getWebhookUrl() {
     $security_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
@@ -125,7 +127,7 @@ class CRM_Mailchimp_Utils {
    * Only useful after changing stored credentials.
    *
    * @TODO Use static::$mailchimp_api instead of local
-   * static for faster / simpler tests.
+   * static for faster / simpler tests?
    */
   public static function getMailchimpApi($reset=FALSE) {
     if ($reset) {
@@ -134,7 +136,8 @@ class CRM_Mailchimp_Utils {
 
     // Singleton pattern.
     if (!isset(static::$mailchimp_api)) {
-      $params = ['api_key' => CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key')];
+      // @TODO Make this not depend on MC_SETTING_GROUP.
+      $params = ['api_key' => Civi::settings()->get('api_key')];
       $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
       if ($debugging == 1) {
         // We want debugging. Inject a logging callback.
@@ -192,7 +195,6 @@ class CRM_Mailchimp_Utils {
     // Check all our groups do not have the sources:API set in the webhook, and
     // that they do have the webhook set.
     foreach ($groups as $group_id => $details) {
-
       $group_settings_link = "<a href='/civicrm/group?reset=1&action=update&id=$group_id' >"
         . htmlspecialchars($details['civigroup_title']) . "</a>";
 
