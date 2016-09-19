@@ -4,7 +4,6 @@ require_once 'mailchimp.civix.php';
 require_once 'vendor/mailchimp/Mailchimp.php';
 require_once 'vendor/mailchimp/Mailchimp/Lists.php';
 
-
 /**
  * Implementation of hook_civicrm_config
  *
@@ -31,29 +30,27 @@ function mailchimp_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function mailchimp_civicrm_install() {
-
   // Create a cron job to do sync data between CiviCRM and MailChimp.
   $params = array(
     'sequential' => 1,
-    'name'          => 'Mailchimp Push Sync',
-    'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
+    'name' => 'Mailchimp Push Sync',
+    'description' => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
     'run_frequency' => 'Daily',
-    'api_entity'    => 'Mailchimp',
-    'api_action'    => 'pushsync',
-    'is_active'     => 0,
+    'api_entity' => 'Mailchimp',
+    'api_action' => 'pushsync',
+    'is_active' => 0,
   );
   $result = civicrm_api3('job', 'create', $params);
-
 
   // Create Pull Sync job.
   $params = array(
     'sequential' => 1,
-    'name'          => 'Mailchimp Pull Sync',
-    'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
+    'name' => 'Mailchimp Pull Sync',
+    'description' => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
     'run_frequency' => 'Daily',
-    'api_entity'    => 'Mailchimp',
-    'api_action'    => 'pullsync',
-    'is_active'     => 0,
+    'api_entity' => 'Mailchimp',
+    'api_action' => 'pullsync',
+    'is_active' => 0,
   );
   $result = civicrm_api3('job', 'create', $params);
 
@@ -152,21 +149,21 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       'sequential' => 1,
     );
     $lists = civicrm_api('Mailchimp', 'getlists', $params);
-    if(!$lists['is_error']){
+    if (!$lists['is_error']) {
       // Add form elements
-      $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'] , FALSE );
-      $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -') , FALSE );
+      $form->add('select', 'mailchimp_list', ts('Mailchimp List'), array('' => '- select -') + $lists['values'], FALSE);
+      $form->add('select', 'mailchimp_group', ts('Mailchimp Group'), array('' => '- select -'), FALSE);
 
       $options = array(
         ts('Subscribers are NOT able to update this grouping using Mailchimp'),
-        ts('Subscribers are able to update this grouping using Mailchimp')
+        ts('Subscribers are able to update this grouping using Mailchimp'),
       );
       $form->addRadio('is_mc_update_grouping', '', $options, NULL, '<br/>');
 
       $options = array(
         ts('No integration'),
         ts('Membership Sync: Contacts in this group should be subscribed to a Mailchimp List'),
-        ts('Interest Sync: Contacts in this group should have an "interest" set at Mailchimp')
+        ts('Interest Sync: Contacts in this group should have an "interest" set at Mailchimp'),
       );
       $form->addRadio('mc_integration_option', '', $options, NULL, '<br/>');
 
@@ -177,7 +174,7 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
       $groupId = $form->getVar('_id');
       if ($form->getAction() == CRM_Core_Action::UPDATE AND !empty($groupId)) {
 
-        $mcDetails  = CRM_Mailchimp_Utils::getGroupsToSync(array($groupId));
+        $mcDetails = CRM_Mailchimp_Utils::getGroupsToSync(array($groupId));
 
         $defaults['mc_fixup'] = 1;
         if (!empty($mcDetails)) {
@@ -188,16 +185,21 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
           }
           if ($mcDetails[$groupId]['list_id'] && $mcDetails[$groupId]['group_id']) {
             $defaults['mc_integration_option'] = 2;
-          } else if ($mcDetails[$groupId]['list_id']) {
-            $defaults['mc_integration_option'] = 1;
-          } else {
-            $defaults['mc_integration_option'] = 0;
+          }
+          else {
+            if ($mcDetails[$groupId]['list_id']) {
+              $defaults['mc_integration_option'] = 1;
+            }
+            else {
+              $defaults['mc_integration_option'] = 0;
+            }
           }
 
           $form->setDefaults($defaults);
-          $form->assign('mailchimp_group_id' , $mcDetails[$groupId]['group_id']);
-          $form->assign('mailchimp_list_id' ,  $mcDetails[$groupId]['list_id']);
-        } else {
+          $form->assign('mailchimp_group_id', $mcDetails[$groupId]['group_id']);
+          $form->assign('mailchimp_list_id', $mcDetails[$groupId]['list_id']);
+        }
+        else {
           // defaults for a new group
           $defaults['mc_integration_option'] = 0;
           $defaults['is_mc_update_grouping'] = 0;
@@ -214,7 +216,7 @@ function mailchimp_civicrm_buildForm($formName, &$form) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_validateForm
  *
  */
-function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &$errors ) {
+function mailchimp_civicrm_validateForm($formName, &$fields, &$files, &$form, &$errors) {
   if ($formName != 'CRM_Group_Form_Edit') {
     return;
   }
@@ -233,7 +235,7 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
       if (!empty($otherGroups)) {
         $otherGroup = reset($otherGroups);
         $errors['mailchimp_list'] = ts('There is already a CiviCRM group tracking this List, called "'
-          . $otherGroup['civigroup_title'].'"');
+          . $otherGroup['civigroup_title'] . '"');
       }
     }
   }
@@ -245,7 +247,7 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
     else {
       // First we have to ensure that there is a pre-existing membership group
       // set up for this list.
-      if (! CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE)) {
+      if (!CRM_Mailchimp_Utils::getGroupsToSync(array(), $fields['mailchimp_list'], TRUE)) {
         $errors['mailchimp_list'] = ts('The list you selected does not have a membership group set up. You must set up a group to track membership of the Mailchimp list before you set up group(s) for the lists\'s interest groupings.');
       }
       else {
@@ -262,10 +264,10 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
             unset($otherGroups[$thisGroup->id]);
           }
           list($mc_grouping_id, $mc_group_id) = explode('|', $fields['mailchimp_group']);
-          foreach($otherGroups as $otherGroup) {
+          foreach ($otherGroups as $otherGroup) {
             if ($otherGroup['group_id'] == $mc_group_id) {
               $errors['mailchimp_group'] = ts('There is already a CiviCRM group tracking this interest grouping, called "'
-                . $otherGroup['civigroup_title'].'"');
+                . $otherGroup['civigroup_title'] . '"');
             }
           }
         }
@@ -273,6 +275,7 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
     }
   }
 }
+
 /**
  * When the group settings form is saved, configure the mailchimp list if
  * appropriate.
@@ -285,7 +288,8 @@ function mailchimp_civicrm_postProcess($formName, &$form) {
   if ($formName == 'CRM_Group_Form_Edit') {
     $vals = $form->_submitValues;
     if (!empty($vals['mc_fixup']) && !empty($vals['mailchimp_list'])
-      && !empty($vals['mc_integration_option']) && $vals['mc_integration_option'] == 1) {
+      && !empty($vals['mc_integration_option']) && $vals['mc_integration_option'] == 1
+    ) {
       // This group is supposed to have Mailchimp integration and the user wants
       // us to check the Mailchimp list is properly configured.
       $messages = CRM_Mailchimp_Utils::configureList($vals['mailchimp_list']);
@@ -295,13 +299,14 @@ function mailchimp_civicrm_postProcess($formName, &$form) {
     }
   }
 }
+
 /**
  * Implementation of hook_civicrm_pageRun.
  *
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pageRun
  */
-function mailchimp_civicrm_pageRun( &$page ) {
+function mailchimp_civicrm_pageRun(&$page) {
   if ($page->getVar('_name') == 'CRM_Group_Page_Group') {
     // Manage Groups page at /civicrm/group?reset=1
 
@@ -319,7 +324,7 @@ function mailchimp_civicrm_pageRun( &$page ) {
           $val = strtr(ts("Interest sync to %interest_name on list %list_name"),
             [
               '%interest_name' => htmlspecialchars($group['interest_name']),
-              '%list_name'     => htmlspecialchars($group['list_name']),
+              '%list_name' => htmlspecialchars($group['list_name']),
             ]);
         }
         else {
@@ -329,7 +334,7 @@ function mailchimp_civicrm_pageRun( &$page ) {
       else {
         if ($group['list_name']) {
           $val = strtr(ts("Membership sync to list %list_name"),
-            [ '%list_name'     => htmlspecialchars($group['list_name']), ]);
+            ['%list_name' => htmlspecialchars($group['list_name']),]);
         }
         else {
           $val = ts("BROKEN membership sync. (perhaps list was deleted?)");
@@ -346,7 +351,7 @@ function mailchimp_civicrm_pageRun( &$page ) {
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_pre
  */
-function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
+function mailchimp_civicrm_pre($op, $objectName, $id, &$params) {
   $params1 = array(
     'version' => 3,
     'sequential' => 1,
@@ -354,7 +359,7 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     'id' => $id,
   );
 
-  if($objectName == 'Email') {
+  if ($objectName == 'Email') {
     return; // @todo
     // If about to delete an email in CiviCRM, we must delete it from Mailchimp
     // because we won't get chance to delete it once it's gone.
@@ -364,10 +369,10 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     // @todo Note: However, this will delete a subscriber and lose reporting
     // info, where what they might have wanted was to change their email
     // address.
-    $on_hold     = CRM_Utils_Array::value('on_hold', $params);
+    $on_hold = CRM_Utils_Array::value('on_hold', $params);
     $is_bulkmail = CRM_Utils_Array::value('is_bulkmail', $params);
-    if( ($op == 'delete') ||
-        ($op == 'edit' && $on_hold == 0 && $is_bulkmail == 0)
+    if (($op == 'delete') ||
+      ($op == 'edit' && $on_hold == 0 && $is_bulkmail == 0)
     ) {
       $email = new CRM_Core_BAO_Email();
       $email->id = $id;
@@ -384,7 +389,7 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     return; // @todo
     $result = civicrm_api('Contact', 'get', $params1);
     foreach ($result['values'] as $key => $value) {
-      $emailId  = $value['email_id'];
+      $emailId = $value['email_id'];
       if ($emailId) {
         CRM_Mailchimp_Utils::deleteMCEmail(array($emailId));
       }
@@ -410,52 +415,51 @@ function mailchimp_civicrm_permission(&$permissions) {
  * Implementation of hook_civicrm_navigationMenu
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_permission
  */
-function mailchimp_civicrm_navigationMenu(&$params){
+function mailchimp_civicrm_navigationMenu(&$params) {
   $parentId = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailings', 'id', 'name');
-  $mailchimpSettings  = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Settings', 'id', 'name');
-  $mailchimpSync      = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Sync', 'id', 'name');
-  $mailchimpPull      = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Pull', 'id', 'name');
-  $maxId              = max(array_keys($params));
-  $mailChimpMaxId     = empty($mailchimpSettings) ? $maxId+1           : $mailchimpSettings;
-  $mailChimpsyncId    = empty($mailchimpSync)     ? $mailChimpMaxId+1  : $mailchimpSync;
-  $mailChimpPullId    = empty($mailchimpPull)     ? $mailChimpsyncId+1 : $mailchimpPull;
-
+  $mailchimpSettings = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Settings', 'id', 'name');
+  $mailchimpSync = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Sync', 'id', 'name');
+  $mailchimpPull = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Pull', 'id', 'name');
+  $maxId = max(array_keys($params));
+  $mailChimpMaxId = empty($mailchimpSettings) ? $maxId + 1 : $mailchimpSettings;
+  $mailChimpsyncId = empty($mailchimpSync) ? $mailChimpMaxId + 1 : $mailchimpSync;
+  $mailChimpPullId = empty($mailchimpPull) ? $mailChimpsyncId + 1 : $mailchimpPull;
 
   $params[$parentId]['child'][$mailChimpMaxId] = array(
-        'attributes' => array(
-          'label'     => ts('Mailchimp Settings'),
-          'name'      => 'Mailchimp_Settings',
-          'url'       => CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1', TRUE),
-          'active'    => 1,
-          'parentID'  => $parentId,
-          'operator'  => NULL,
-          'navID'     => $mailChimpMaxId,
-          'permission'=> 'administer CiviCRM',
-        ),
+    'attributes' => array(
+      'label' => ts('Mailchimp Settings'),
+      'name' => 'Mailchimp_Settings',
+      'url' => CRM_Utils_System::url('civicrm/mailchimp/settings', 'reset=1', TRUE),
+      'active' => 1,
+      'parentID' => $parentId,
+      'operator' => NULL,
+      'navID' => $mailChimpMaxId,
+      'permission' => 'administer CiviCRM',
+    ),
   );
   $params[$parentId]['child'][$mailChimpsyncId] = array(
-        'attributes' => array(
-          'label'     => ts('Sync Civi Contacts To Mailchimp'),
-          'name'      => 'Mailchimp_Sync',
-          'url'       => CRM_Utils_System::url('civicrm/mailchimp/sync', 'reset=1', TRUE),
-          'active'    => 1,
-          'parentID'  => $parentId,
-          'operator'  => NULL,
-          'navID'     => $mailChimpsyncId,
-          'permission'=> 'administer CiviCRM',
-        ),
+    'attributes' => array(
+      'label' => ts('Sync Civi Contacts To Mailchimp'),
+      'name' => 'Mailchimp_Sync',
+      'url' => CRM_Utils_System::url('civicrm/mailchimp/sync', 'reset=1', TRUE),
+      'active' => 1,
+      'parentID' => $parentId,
+      'operator' => NULL,
+      'navID' => $mailChimpsyncId,
+      'permission' => 'administer CiviCRM',
+    ),
   );
   $params[$parentId]['child'][$mailChimpPullId] = array(
-        'attributes' => array(
-          'label'     => ts('Sync Mailchimp Contacts To Civi‏'),
-          'name'      => 'Mailchimp_Pull',
-          'url'       => CRM_Utils_System::url('civicrm/mailchimp/pull', 'reset=1', TRUE),
-          'active'    => 1,
-          'parentID'  => $parentId,
-          'operator'  => NULL,
-          'navID'     => $mailChimpPullId,
-          'permission'=> 'administer CiviCRM',
-        ),
+    'attributes' => array(
+      'label' => ts('Sync Mailchimp Contacts To Civi‏'),
+      'name' => 'Mailchimp_Pull',
+      'url' => CRM_Utils_System::url('civicrm/mailchimp/pull', 'reset=1', TRUE),
+      'active' => 1,
+      'parentID' => $parentId,
+      'operator' => NULL,
+      'navID' => $mailChimpPullId,
+      'permission' => 'administer CiviCRM',
+    ),
   );
 }
 
@@ -464,8 +468,7 @@ function mailchimp_civicrm_navigationMenu(&$params){
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_post
  */
-function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
-
+function mailchimp_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   if (!CRM_Mailchimp_Utils::$post_hook_enabled) {
     // Post hook is disabled at this point in the running.
     return;
@@ -482,9 +485,10 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     //                    disabled.
     if (FALSE) {
       if ($op == 'edit' || $op == 'create') {
-        if($objectRef->is_opt_out == 1) {
+        if ($objectRef->is_opt_out == 1) {
           $action = 'unsubscribe';
-        } else {
+        }
+        else {
           $action = 'subscribe';
         }
 
@@ -556,7 +560,10 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
       $list_id = $groups[$objectId]['list_id'];
       // find membership group, then find out if the contact is in that group.
       $membership_group_details = CRM_Mailchimp_Utils::getGroupsToSync(array(), $list_id, TRUE);
-      $result = civicrm_api3('Contact', 'getsingle', ['return'=>'group','contact_id'=>$objectRef[0]]);
+      $result = civicrm_api3('Contact', 'getsingle', [
+        'return' => 'group',
+        'contact_id' => $objectRef[0],
+      ]);
       if (!CRM_Mailchimp_Utils::splitGroupTitles($result['groups'], $membership_group_details)) {
         // This contact is not in the membership group, so don't bother telling
         // Mailchimp about a change in their interests.
