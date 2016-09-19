@@ -47,6 +47,7 @@ class CRM_Mailchimp_Permission extends CRM_Core_Permission {
         }
       });
     }
+
     return parent::check($permissions);
   }
 

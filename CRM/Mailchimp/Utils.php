@@ -101,27 +101,31 @@ class CRM_Mailchimp_Utils {
    *
    * @param bool $reset If set it will replace the API object with a default.
    * Only useful after changing stored credentials.
+   *
+   * @TODO Use Civi::$statics[__CLASS__]['mailchimp_api'] instead of local
+   * static for faster / simpler tests.
    */
   public static function getMailchimpApi($reset=FALSE) {
     if ($reset) {
-      static::$mailchimp_api = NULL;
+      Civi::$statics[__CLASS__]['mailchimp_api'] = NULL;
     }
 
     // Singleton pattern.
-    if (!isset(static::$mailchimp_api)) {
-      $params = ['api_key' => CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key')];
-      $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
-      if ($debugging == 1) {
+    if (!isset(Civi::$statics[__CLASS__]['mailchimp_api'])) {
+      // @TODO Make this not depend on MC_SETTING_GROUP.
+      $params = ['api_key' => Civi::settings()->get('api_key')];
+      if (Civi::settings()->get('enable_debugging')) {
         // We want debugging. Inject a logging callback.
         $params['log_facility'] = function($message) {
-          CRM_Core_Error::debug_log_message($message, FALSE, 'mailchimp');
+          Civi::log()->info('Mailchimp', array('message' => $message));
         };
       }
       $api = new CRM_Mailchimp_Api3($params);
+      Civi::$statics[__CLASS__]['mailchimp_api'] = $api;
       static::setMailchimpApi($api);
     }
 
-    return static::$mailchimp_api;
+    return Civi::$statics[__CLASS__]['mailchimp_api'];
   }
 
   /**
@@ -130,7 +134,7 @@ class CRM_Mailchimp_Utils {
    * This is for testing purposes only.
    */
   public static function setMailchimpApi(CRM_Mailchimp_Api3 $api) {
-    static::$mailchimp_api = $api;
+    Civi::$statics[__CLASS__]['mailchimp_api'] = $api;
   }
 
   /**
@@ -356,8 +360,8 @@ class CRM_Mailchimp_Utils {
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {
       $list_name = CRM_Mailchimp_Utils::getMCListName($dao->mc_list_id);
-      $interest_name = CRM_Mailchimp_Utils::getMCInterestName($dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id);
-      $category_name = CRM_Mailchimp_Utils::getMCCategoryName($dao->mc_list_id, $dao->mc_grouping_id);
+      $interest_name = CRM_Mailchimp_Utils::getMailchimpInterestName($dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id);
+      $category_name = CRM_Mailchimp_Utils::getMailchimpCategoryName($dao->mc_list_id, $dao->mc_grouping_id);
       $groups[$dao->entity_id] =
         array(
           // Details about Mailchimp
@@ -490,49 +494,49 @@ class CRM_Mailchimp_Utils {
    * return the group name for given list, grouping and group
    *
    */
-  public static function getMCInterestName($listID, $category_id, $interest_id) {
+  public static function getMailchimpInterestName($listID, $categoryID, $interestID) {
     $info = static::getMCInterestGroupings($listID);
 
     // Check list, grouping, and group exist
-    if (empty($info[$category_id]['interests'][$interest_id])) {
+    if (empty($info[$categoryID]['interests'][$interestID])) {
       $name = null;
     }
     else {
-      $name = $info[$category_id]['interests'][$interest_id]['name'];
+      $name = $info[$categoryID]['interests'][$interestID]['name'];
     }
-    CRM_Mailchimp_Utils::checkDebug(__FUNCTION__ . " called for list '$listID', category '$category_id', interest '$interest_id', returning '$name'");
+    CRM_Mailchimp_Utils::checkDebug(__FUNCTION__ . " called for list '$listID', category '$categoryID', interest '$interestID', returning '$name'");
     return $name;
   }
 
   /**
    * Return the grouping name for given list, grouping MC Ids.
    */
-  public static function getMCCategoryName($listID, $category_id) {
+  public static function getMailchimpCategoryName($listID, $categoryID) {
     $info = static::getMCInterestGroupings($listID);
 
     // Check list, grouping, and group exist.
     $name = NULL;
-    if (!empty($info[$category_id])) {
-      $name = $info[$category_id]['name'];
+    if (!empty($info[$categoryID])) {
+      $name = $info[$categoryID]['name'];
     }
-    CRM_Mailchimp_Utils::checkDebug("CRM_Mailchimp_Utils::getMCCategoryName for list $listID cat $category_id returning $name");
+    CRM_Mailchimp_Utils::checkDebug("CRM_Mailchimp_Utils::getMailchimpCategoryName for list $listID cat $categoryID returning $name");
     return $name;
   }
 
   /**
    * Get Mailchimp group ID group name.
    */
-  public static function getMailchimpGroupIdFromName($list_id, $group_name) {
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $listID', $list_id);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $groupName', $list_id);
+  public static function getMailchimpGroupIdFromName($listID, $groupName) {
+    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $listID', $listID);
+    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $groupName', $listID);
 
-    if (empty($list_id) || empty($group_name)) {
+    if (empty($listID) || empty($groupName)) {
       return NULL;
     }
 
     $mc_lists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
     try {
-      $results = $mc_lists->interestGroupings($list_id);
+      $results = $mc_lists->interestGroupings($listID);
     }
     catch (Exception $e) {
       return NULL;
@@ -555,14 +559,11 @@ class CRM_Mailchimp_Utils {
     // @TODO Make enable_debugging namespaced.
     if (Civi::settings()->get('enable_debugging')) {
       if ($variable === 'VARIABLE_NOT_PROVIDED') {
-        // Simple log message.
-        CRM_Core_Error::debug_log_message($description, FALSE, 'mailchimp');
+        Civi::log()->info($description);
       }
       else {
         // Log a variable.
-        CRM_Core_Error::debug_log_message(
-          $description . "\n" . var_export($variable,1)
-          , FALSE, 'mailchimp');
+        Civi::log()->info("$description", array('variable' => $variable));
       }
     }
   }
