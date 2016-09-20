@@ -1,9 +1,9 @@
 <?php
+
 /**
  * @file
  * Exception base class for all Mailchimp API exceptions.
  */
-
 abstract class CRM_Mailchimp_Exception extends Exception {
 
   public $request;

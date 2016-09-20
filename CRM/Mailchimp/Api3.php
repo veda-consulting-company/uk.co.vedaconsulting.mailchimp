@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Mailchimp API v3.0 service wrapper.
@@ -26,38 +27,56 @@
  *
  */
 class CRM_Mailchimp_Api3 {
-  /** string Mailchimp API key */
+
+  /**
+   * string Mailchimp API key
+   */
   protected $api_key;
 
-  /** string URL to API end point. All API resources extend this. */
+  /**
+   * string URL to API end point. All API resources extend this.
+   */
   protected $server;
 
-  /** bool If set will use curl to talk to Mailchimp's API. Otherwise no
-    *  networking. */
-  protected $network_enabled=TRUE;
+  /**
+   * bool If set will use curl to talk to Mailchimp's API. Otherwise no networking.
+   */
+  protected $network_enabled = TRUE;
 
-  /** Callback for testing */
+  /**
+   * Callback for testing
+   */
   protected $mock_curl = NULL;
-  /** Object that holds details used in the latest request.
-   *  Public access just for testing purposes.
+
+  /**
+   * Object that holds details used in the latest request.
+   * Public access just for testing purposes.
    */
   public $request;
-  /** Object that holds the latest response.
+
+  /**
+   * Object that holds the latest response.
    *  Props are http_code (e.g. 200 for success, found) and data.
    *
    *  This is returned from any of the get() post() etc. methods, but may be
    *  accessed directly as a property of this object, too.
    */
   public $response;
-  /** For debugging. */
-  protected static $request_id=0;
-  /** callback - if set logging will happen via the log() method.
+
+  /**
+   * For debugging.
+   */
+  protected static $request_id = 0;
+
+  /**
+   * callback - if set logging will happen via the log() method.
    *
    *  Nb. a CiviCRM_Core_Error::debug_log_message facility is injected if you
    *  enable debugging on the Mailchimp settings screen. But you can inject
    *  something different, e.g. for testing.
    */
   protected $log_facility;
+
   /**
    * @param array $settings contains key 'api_key', possibly other settings.
    */
@@ -82,6 +101,7 @@ class CRM_Mailchimp_Api3 {
     $datacenter = $matches[1];
     $this->server = "https://$datacenter.api.mailchimp.com/3.0";
   }
+
   /**
    * Sets the log_facility to a callback
    */
@@ -95,7 +115,7 @@ class CRM_Mailchimp_Api3 {
   /**
    * Perform a GET request.
    */
-  public function get($url, $data=null) {
+  public function get($url, $data = NULL) {
     return $this->makeRequest('GET', $url, $data);
   }
 
@@ -123,7 +143,7 @@ class CRM_Mailchimp_Api3 {
   /**
    * Perform a DELETE request.
    */
-  public function delete($url, $data=null) {
+  public function delete($url, $data = NULL) {
     return $this->makeRequest('DELETE', $url);
   }
 
@@ -133,7 +153,7 @@ class CRM_Mailchimp_Api3 {
    * It quicker to run small ops directly for <15 items.
    *
    */
-  public function batchAndWait(Array $batch, $method=NULL) {
+  public function batchAndWait(Array $batch, $method = NULL) {
     // This can take a long time...
     set_time_limit(0);
 
@@ -146,8 +166,8 @@ class CRM_Mailchimp_Api3 {
     }
 
     // Validate the batch operations.
-    foreach ($batch as $i=>$request) {
-      if (count($request)<2) {
+    foreach ($batch as $i => $request) {
+      if (count($request) < 2) {
         throw new InvalidArgumentException("Batch item $i invalid - at least two values required.");
       }
       if (!preg_match('/^get|post|put|patch|delete$/i', $request[0])) {
@@ -185,8 +205,7 @@ class CRM_Mailchimp_Api3 {
         $data = isset($item[2]) ? $item[2] : [];
         try {
           $this->$method($path, $data);
-        }
-        catch (CRM_Mailchimp_RequestErrorException $e) {
+        } catch (CRM_Mailchimp_RequestErrorException $e) {
           // Here we ignore exceptions from Mailchimp not because we want to,
           // but because we have no way of handling such errors when done for
           // 15+ items in a proper batch, so we don't handle them here either.
@@ -194,6 +213,7 @@ class CRM_Mailchimp_Api3 {
       }
     }
   }
+
   /**
    * Sends a batch request.
    *
@@ -212,18 +232,20 @@ class CRM_Mailchimp_Api3 {
           $op['body'] = json_encode($request[2]);
         }
       }
-      $ops []= $op;
+      $ops [] = $op;
     }
     $result = $this->post('/batches', ['operations' => $ops]);
 
     return $result;
   }
+
   /**
    * Setter for $network_enabled.
    */
-  public function setNetworkEnabled($enable=TRUE) {
+  public function setNetworkEnabled($enable = TRUE) {
     $this->network_enabled = (bool) $enable;
   }
+
   /**
    * Provide mock for curl.
    *
@@ -239,7 +261,7 @@ class CRM_Mailchimp_Api3 {
    * Note the object must be operating with network-enabled for this to be
    * called; it exactly replaces the curl work.
    *
-   * @param null|callback $callback. If called with anything other than a
+   * @param null|callback $callback . If called with anything other than a
    * callback, this functionality is disabled.
    */
   public function setMockCurl($callback) {
@@ -250,6 +272,7 @@ class CRM_Mailchimp_Api3 {
       $this->mock_curl = NULL;
     }
   }
+
   /**
    * All request types handled here.
    *
@@ -265,7 +288,7 @@ class CRM_Mailchimp_Api3 {
    * @throw CRM_Mailchimp_NetworkErrorException
    * @throw CRM_Mailchimp_RequestErrorException
    */
-  protected function makeRequest($method, $url, $data=null) {
+  protected function makeRequest($method, $url, $data = NULL) {
     if (substr($url, 0, 1) != '/') {
       throw new InvalidArgumentException("Invalid URL - must begin with root /");
     }
@@ -288,28 +311,28 @@ class CRM_Mailchimp_Api3 {
       'verifyhost' => 2,
     ];
 
-    if ($data !== null) {
+    if ($data !== NULL) {
       if ($this->request->method == 'GET') {
         // For GET requests, data must be added as query string.
         // Append if there's already a query string.
         $query_string = http_build_query($data);
         if ($query_string) {
-          $this->request->url .= ((strpos($this->request->url, '?')===false) ? '?' : '&')
+          $this->request->url .= ((strpos($this->request->url, '?') === FALSE) ? '?' : '&')
             . $query_string;
         }
       }
       else {
         // Other requests have it added as JSON
         $this->request->data = json_encode($data);
-        $this->request->headers []= "Content-Length: " . strlen($this->request->data);
+        $this->request->headers [] = "Content-Length: " . strlen($this->request->data);
       }
     }
 
     // We set up a null response.
     $this->response = (object) [
-      'http_code' => null,
-      'data' => null,
-      ];
+      'http_code' => NULL,
+      'data' => NULL,
+    ];
 
     if ($this->network_enabled) {
       $this->sendRequest();
@@ -321,6 +344,7 @@ class CRM_Mailchimp_Api3 {
     }
     return $this->response;
   }
+
   /**
    * Send the request and prepare the response.
    */
@@ -347,13 +371,13 @@ class CRM_Mailchimp_Api3 {
       $output += [
         'exec' => '{}',
         'info' => [],
-        ];
+      ];
       $output['info'] += [
         'http_code' => 200,
         'content_type' => 'application/json',
-        ];
+      ];
       $result = $output['exec'];
-      $info   = $output['info'];
+      $info = $output['info'];
     }
 
     return $this->curlResultToResponse($info, $result);
@@ -370,24 +394,24 @@ class CRM_Mailchimp_Api3 {
       return;
     }
 
-    $msg    = "Request #{$this->request->id}\n=============================================\n";
+    $msg = "Request #{$this->request->id}\n=============================================\n";
     if (!$this->network_enabled) {
       $msg .= "Network      : DISABLED\n";
     }
-    $msg   .= "Method       : {$this->request->method}\n";
-    $msg   .= "Url          : {$this->request->url}\n";
+    $msg .= "Method       : {$this->request->method}\n";
+    $msg .= "Url          : {$this->request->url}\n";
 
     if (isset($this->request->created)) {
       $msg .= "Took         : " . round((microtime(TRUE) - $this->request->created), 2) . "s\n";
     }
-    $msg   .= "Response Code: "
-        . (isset($this->response->http_code) ? $this->response->http_code : 'NO RESPONSE HTTP CODE')
-        . "\n";
+    $msg .= "Response Code: "
+      . (isset($this->response->http_code) ? $this->response->http_code : 'NO RESPONSE HTTP CODE')
+      . "\n";
 
-    $msg   .= "Request Body : " . str_replace("\n", "\n               ",
-      var_export(json_decode($this->request->data), TRUE)) . "\n";
-    $msg   .= "Response Body: " . str_replace("\n", "\n               ",
-      var_export($this->response->data, TRUE));
+    $msg .= "Request Body : " . str_replace("\n", "\n               ",
+        var_export(json_decode($this->request->data), TRUE)) . "\n";
+    $msg .= "Response Body: " . str_replace("\n", "\n               ",
+        var_export($this->response->data, TRUE));
     $msg .= "\n\n";
 
     // Log response.
@@ -422,9 +446,9 @@ class CRM_Mailchimp_Api3 {
     // Check response object is set up.
     if (!isset($this->response)) {
       $this->response = (object) [
-        'http_code' => null,
-        'data' => null,
-        ];
+        'http_code' => NULL,
+        'data' => NULL,
+      ];
     }
 
     // Copy http_code into response object. (May yet be used by exceptions.)
@@ -442,7 +466,7 @@ class CRM_Mailchimp_Api3 {
       throw new CRM_Mailchimp_NetworkErrorException($this);
     }
 
-    $this->response->data = $result ? json_decode($result) : null;
+    $this->response->data = $result ? json_decode($result) : NULL;
     $this->log();
 
     // Check for errors and throw appropriate CRM_Mailchimp_ExceptionBase.
@@ -459,4 +483,5 @@ class CRM_Mailchimp_Api3 {
     // All good return response as a convenience.
     return $this->response;
   }
+
 }

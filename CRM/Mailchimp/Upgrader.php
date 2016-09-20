@@ -11,32 +11,32 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
   /**
    * Example: Run an external SQL script when the module is installed
    *
-  public function install() {
-    $this->executeSqlFile('sql/myinstall.sql');
-  }
-
-  /**
+   * public function install() {
+   * $this->executeSqlFile('sql/myinstall.sql');
+   * }
+   *
+   * /**
    * Example: Run an external SQL script when the module is uninstalled
    *
-  public function uninstall() {
-   $this->executeSqlFile('sql/myuninstall.sql');
-  }
-
-  /**
+   * public function uninstall() {
+   * $this->executeSqlFile('sql/myuninstall.sql');
+   * }
+   *
+   * /**
    * Example: Run a simple query when a module is enabled
    *
-  public function enable() {
-    CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 1 WHERE bar = "whiz"');
-  }
-
-  /**
+   * public function enable() {
+   * CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 1 WHERE bar = "whiz"');
+   * }
+   *
+   * /**
    * Example: Run a simple query when a module is disabled
    *
-  public function disable() {
-    CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 0 WHERE bar = "whiz"');
-  }
-
-  /**
+   * public function disable() {
+   * CRM_Core_DAO::executeQuery('UPDATE foo SET is_active = 0 WHERE bar = "whiz"');
+   * }
+   *
+   * /**
    * Example: Run a couple simple queries
    *
    * @return TRUE on success
@@ -55,7 +55,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     }
     return TRUE;
   }
-  
+
   /**
    * Upgrading to version 1.7
    *
@@ -64,11 +64,11 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
    */
   public function upgrade_17() {
     $this->ctx->log->info('Applying update v1.7');
-		
-		// Disabled the pull cron job, as we have moved the pull and push to same cron job
-		$query = "DELETE FROM civicrm_job WHERE api_entity = 'Mailchimp' AND api_action = 'pull'";
+
+    // Disabled the pull cron job, as we have moved the pull and push to same cron job
+    $query = "DELETE FROM civicrm_job WHERE api_entity = 'Mailchimp' AND api_action = 'pull'";
     CRM_Core_DAO::executeQuery($query);
-		
+
     return TRUE;
   }
 
@@ -89,8 +89,11 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     // Use new API to get lists. Allow for 10,000 lists so we don't bother
     // batching.
     $lists = [];
-    foreach ($api->get("/lists", ['fields'=>'lists.id,lists.name','count'=>10000])->data->lists
-      as $list) {
+    foreach ($api->get("/lists", [
+      'fields' => 'lists.id,lists.name',
+      'count' => 10000,
+    ])->data->lists
+             as $list) {
       $lists[$list->id] = ['name' => $list->name];
     }
 
@@ -98,7 +101,10 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     // Loop lists.
     foreach (array_keys($lists) as $list_id) {
       // Fetch Interest categories.
-      $categories = $api->get("/lists/$list_id/interest-categories", ['count' => 10000, 'fields' => 'categories.id,categories.title'])->data->categories;
+      $categories = $api->get("/lists/$list_id/interest-categories", [
+        'count' => 10000,
+        'fields' => 'categories.id,categories.title',
+      ])->data->categories;
       if (!$categories) {
         continue;
       }
@@ -111,7 +117,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
 
         // Match this category by name with the old 'groupings'
         $matched_old_grouping = FALSE;
-        foreach($old as $old_grouping) {
+        foreach ($old as $old_grouping) {
           if ($old_grouping['name'] == $category->title) {
             $matched_old_grouping = $old_grouping;
             break;
@@ -119,16 +125,27 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
         }
         if ($matched_old_grouping) {
           // Found a match.
-          $cat_queries []= ['list_id' => $list_id, 'old' => $matched_old_grouping['id'], 'new' => $category->id];
+          $cat_queries [] = [
+            'list_id' => $list_id,
+            'old' => $matched_old_grouping['id'],
+            'new' => $category->id,
+          ];
 
           // Now do interests (old: groups)
-          $interests = $api->get("/lists/$list_id/interest-categories/$category->id/interests", ['fields'=>'interests.id,interests.name','count'=>10000])->data->interests;
+          $interests = $api->get("/lists/$list_id/interest-categories/$category->id/interests", [
+            'fields' => 'interests.id,interests.name',
+            'count' => 10000,
+          ])->data->interests;
           foreach ($interests as $interest) {
             // Can we find this interest by name?
             $matched_old_group = FALSE;
-            foreach($matched_old_grouping['groups'] as $old_group) {
+            foreach ($matched_old_grouping['groups'] as $old_group) {
               if ($old_group['name'] == $interest->name) {
-                $int_queries []= ['list_id' => $list_id, 'old' => $old_group['id'], 'new' => $interest->id];
+                $int_queries [] = [
+                  'list_id' => $list_id,
+                  'old' => $old_group['id'],
+                  'new' => $interest->id,
+                ];
                 break;
               }
             }
@@ -177,23 +194,23 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     // Create Push Sync job.
     $params = array(
       'sequential' => 1,
-      'name'          => 'Mailchimp Push Sync',
-      'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
+      'name' => 'Mailchimp Push Sync',
+      'description' => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
       'run_frequency' => 'Daily',
-      'api_entity'    => 'Mailchimp',
-      'api_action'    => 'pushsync',
-      'is_active'     => 0,
+      'api_entity' => 'Mailchimp',
+      'api_action' => 'pushsync',
+      'is_active' => 0,
     );
     $result = civicrm_api3('job', 'create', $params);
     // Create Pull Sync job.
     $params = array(
       'sequential' => 1,
-      'name'          => 'Mailchimp Pull Sync',
-      'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
+      'name' => 'Mailchimp Pull Sync',
+      'description' => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
       'run_frequency' => 'Daily',
-      'api_entity'    => 'Mailchimp',
-      'api_action'    => 'pullsync',
-      'is_active'     => 0,
+      'api_entity' => 'Mailchimp',
+      'api_action' => 'pullsync',
+      'is_active' => 0,
     );
     $result = civicrm_api3('job', 'create', $params);
 
@@ -205,11 +222,11 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
    * @return TRUE on success
    * @throws Exception
   public function upgrade_4201() {
-    $this->ctx->log->info('Applying update 4201');
-    // this path is relative to the extension base dir
-    $this->executeSqlFile('sql/upgrade_4201.sql');
-    return TRUE;
-  } // */
+   * $this->ctx->log->info('Applying update 4201');
+   * // this path is relative to the extension base dir
+   * $this->executeSqlFile('sql/upgrade_4201.sql');
+   * return TRUE;
+   * } // */
 
 
   /**
@@ -218,17 +235,17 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
    * @return TRUE on success
    * @throws Exception
   public function upgrade_4202() {
-    $this->ctx->log->info('Planning update 4202'); // PEAR Log interface
-
-    $this->addTask(ts('Process first step'), 'processPart1', $arg1, $arg2);
-    $this->addTask(ts('Process second step'), 'processPart2', $arg3, $arg4);
-    $this->addTask(ts('Process second step'), 'processPart3', $arg5);
-    return TRUE;
-  }
-  public function processPart1($arg1, $arg2) { sleep(10); return TRUE; }
-  public function processPart2($arg3, $arg4) { sleep(10); return TRUE; }
-  public function processPart3($arg5) { sleep(10); return TRUE; }
-  // */
+   * $this->ctx->log->info('Planning update 4202'); // PEAR Log interface
+   *
+   * $this->addTask(ts('Process first step'), 'processPart1', $arg1, $arg2);
+   * $this->addTask(ts('Process second step'), 'processPart2', $arg3, $arg4);
+   * $this->addTask(ts('Process second step'), 'processPart3', $arg5);
+   * return TRUE;
+   * }
+   * public function processPart1($arg1, $arg2) { sleep(10); return TRUE; }
+   * public function processPart2($arg3, $arg4) { sleep(10); return TRUE; }
+   * public function processPart3($arg5) { sleep(10); return TRUE; }
+   * // */
 
 
   /**
@@ -238,27 +255,27 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
    * @return TRUE on success
    * @throws Exception
   public function upgrade_4203() {
-    $this->ctx->log->info('Planning update 4203'); // PEAR Log interface
-
-    $minId = CRM_Core_DAO::singleValueQuery('SELECT coalesce(min(id),0) FROM civicrm_contribution');
-    $maxId = CRM_Core_DAO::singleValueQuery('SELECT coalesce(max(id),0) FROM civicrm_contribution');
-    for ($startId = $minId; $startId <= $maxId; $startId += self::BATCH_SIZE) {
-      $endId = $startId + self::BATCH_SIZE - 1;
-      $title = ts('Upgrade Batch (%1 => %2)', array(
-        1 => $startId,
-        2 => $endId,
-      ));
-      $sql = '
-        UPDATE civicrm_contribution SET foobar = whiz(wonky()+wanker)
-        WHERE id BETWEEN %1 and %2
-      ';
-      $params = array(
-        1 => array($startId, 'Integer'),
-        2 => array($endId, 'Integer'),
-      );
-      $this->addTask($title, 'executeSql', $sql, $params);
-    }
-    return TRUE;
-  } // */
+   * $this->ctx->log->info('Planning update 4203'); // PEAR Log interface
+   *
+   * $minId = CRM_Core_DAO::singleValueQuery('SELECT coalesce(min(id),0) FROM civicrm_contribution');
+   * $maxId = CRM_Core_DAO::singleValueQuery('SELECT coalesce(max(id),0) FROM civicrm_contribution');
+   * for ($startId = $minId; $startId <= $maxId; $startId += self::BATCH_SIZE) {
+   * $endId = $startId + self::BATCH_SIZE - 1;
+   * $title = ts('Upgrade Batch (%1 => %2)', array(
+   * 1 => $startId,
+   * 2 => $endId,
+   * ));
+   * $sql = '
+   * UPDATE civicrm_contribution SET foobar = whiz(wonky()+wanker)
+   * WHERE id BETWEEN %1 and %2
+   * ';
+   * $params = array(
+   * 1 => array($startId, 'Integer'),
+   * 2 => array($endId, 'Integer'),
+   * );
+   * $this->addTask($title, 'executeSql', $sql, $params);
+   * }
+   * return TRUE;
+   * } // */
 
 }

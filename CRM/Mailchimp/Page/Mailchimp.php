@@ -3,10 +3,11 @@
 require_once 'CRM/Core/Page.php';
 
 class CRM_Mailchimp_Page_Mailchimp extends CRM_Core_Page {
+
   function run() {
     // Example: Set the page-title dynamically; alternatively, declare a static title in xml/Menu/*.xml
     CRM_Utils_System::setTitle(ts('Mailchimp'));
-    
+
     $error_count = $_GET['error_count'];
     $group_id = $_GET['group_id'];
 
@@ -23,4 +24,5 @@ class CRM_Mailchimp_Page_Mailchimp extends CRM_Core_Page {
     $this->assign('errordetails', $result);
     parent::run();
   }
+
 }

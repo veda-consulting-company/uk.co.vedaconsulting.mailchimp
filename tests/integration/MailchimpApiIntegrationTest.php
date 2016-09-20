@@ -15,7 +15,9 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
   public static function setUpBeforeClass() {
     $api = CRM_Mailchimp_Utils::getMailchimpApi(TRUE);
     //$api->setLogFacility(function($m){print $m;});
-    $api->setLogFacility(function($m){CRM_Core_Error::debug_log_message($m, FALSE, 'mailchimp');});
+    $api->setLogFacility(function ($m) {
+      CRM_Core_Error::debug_log_message($m, FALSE, 'mailchimp');
+    });
     static::createMailchimpFixtures();
   }
 
@@ -49,7 +51,10 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     $this->assertGreaterThan(0, static::$civicrm_contact_1['contact_id']);
     $this->assertGreaterThan(0, static::$civicrm_contact_2['contact_id']);
 
-    foreach ([static::$civicrm_contact_1, static::$civicrm_contact_2] as $contact) {
+    foreach ([
+               static::$civicrm_contact_1,
+               static::$civicrm_contact_2,
+             ] as $contact) {
       $this->assertGreaterThan(0, $contact['contact_id']);
       $this->assertNotEmpty($contact['email']);
       $this->assertNotEmpty($contact['subscriber_hash']);
@@ -67,8 +72,13 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
   public function tearDown() {
     // Delete all GroupContact records on our test contacts to test groups.
     $api = CRM_Mailchimp_Utils::getMailchimpApi();
-    $contacts = array_filter([static::$civicrm_contact_1, static::$civicrm_contact_2],
-      function($_) { return $_['contact_id']>0; });
+    $contacts = array_filter([
+      static::$civicrm_contact_1,
+      static::$civicrm_contact_2,
+    ],
+      function ($_) {
+        return $_['contact_id'] > 0;
+      });
 
     // Ensure list is empty.
     $list_id = static::$test_list_id;
@@ -77,8 +87,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       if ($contact['subscriber_hash']) {
         try {
           $api->delete($url_prefix . $contact['subscriber_hash']);
-        }
-        catch (CRM_Mailchimp_RequestErrorException $e) {
+        } catch (CRM_Mailchimp_RequestErrorException $e) {
           if (!$e->response || $e->response->http_code != 404) {
             throw $e;
           }
@@ -93,14 +102,18 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     $this->tearDownCiviCrmFixtures();
     return;
     foreach ($contacts as $contact) {
-      foreach ([static::$civicrm_group_id_membership, static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2] as $group_id) {
+      foreach ([
+                 static::$civicrm_group_id_membership,
+                 static::$civicrm_group_id_interest_1,
+                 static::$civicrm_group_id_interest_2,
+               ] as $group_id) {
         $this->deleteGroup($contact, $group_id, TRUE);
         // Ensure name is as it should be as some tests change this.
         civicrm_api3('Contact', 'create', [
           'contact_id' => $contact['contact_id'],
           'first_name' => $contact['first_name'],
-          'last_name' =>  $contact['last_name'],
-          ]);
+          'last_name' => $contact['last_name'],
+        ]);
       }
     }
   }
@@ -123,10 +136,9 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     try {
       $result = $api->batchAndWait([
         ['get', "/lists"],
-        ['get', "/campaigns/", ['count'=>10]],
+        ['get', "/campaigns/", ['count' => 10]],
       ]);
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -159,7 +171,8 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
    * @group basics
    */
   public function test404() {
-    CRM_Mailchimp_Utils::getMailchimpApi()->get('/lists/thisisnotavalidlisthash');
+    CRM_Mailchimp_Utils::getMailchimpApi()
+      ->get('/lists/thisisnotavalidlisthash');
   }
 
   /**
@@ -197,11 +210,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 0,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 0,
-        'newContacts'   => 0,
-        'failures'      => 0,
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 0,
+        'newContacts' => 0,
+        'failures' => 0,
       ], $matches);
 
       // There should not be any in sync records.
@@ -221,16 +234,15 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
 
       // Now check they are subscribed.
       $not_found = TRUE;
-      $i =0;
+      $i = 0;
       $start = time();
       //print date('Y-m-d H:i:s') . " Mailchimp batch returned 'finished'\n";
-      while ($not_found && $i++ < 2*10) {
+      while ($not_found && $i++ < 2 * 10) {
         try {
           $result = $api->get("/lists/" . static::$test_list_id . "/members/" . static::$civicrm_contact_1['subscriber_hash'], ['fields' => 'status']);
           // print date('Y-m-d H:i:s') . " found now " . round(time() - $start, 2) . "s after Mailchimp reported the batch had finished.\n";
           $not_found = FALSE;
-        }
-        catch (CRM_Mailchimp_RequestErrorException $e) {
+        } catch (CRM_Mailchimp_RequestErrorException $e) {
           if ($e->response->http_code == 404) {
             // print date('Y-m-d H:i:s') . " not found yet\n";
             sleep(10);
@@ -240,8 +252,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
           }
         }
       }
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -290,7 +301,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       civicrm_api3('Contact', 'create', [
         'contact_id' => static::$civicrm_contact_1['contact_id'],
         'first_name' => 'Betty',
-        ]);
+      ]);
 
       $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
       // Are the changes noted?
@@ -304,12 +315,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 1,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // As the records are not in sync, none should get deleted.
       $in_sync = $sync->removeInSync('push');
@@ -322,7 +333,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       civicrm_api3('Contact', 'create', [
         'contact_id' => static::$civicrm_contact_1['contact_id'],
         'first_name' => static::$civicrm_contact_1['first_name'],
-        ]);
+      ]);
       // Add the interest group locally only.
       $this->joinGroup(static::$civicrm_contact_1, static::$civicrm_group_id_interest_1, TRUE);
 
@@ -338,12 +349,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 1, // xxx
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // As the records are not in sync, none should get deleted.
       $in_sync = $sync->removeInSync('push');
@@ -373,12 +384,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 1,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // No records in sync, check this.
       $in_sync = $sync->removeInSync('push');
@@ -398,19 +409,18 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 2,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 2,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 2,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // Verify that they are in deed all in sync:
       $in_sync = $sync->removeInSync('push');
       $this->assertEquals(2, $in_sync);
 
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -466,11 +476,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 0,
         'byUniqueEmail' => 1,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
       ], $matches, '$matches is as expected.');
 
       // Are the changes noted? As the records are not in sync, none should get
@@ -505,11 +515,10 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       foreach ((array) $result->interests as $interested) {
         $this->assertEquals(0, $interested, '$interested is 0.');
       }
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       fwrite(STDERR, 'Message: ' . $e->getMessage());
       fwrite(STDERR, 'Request: ' . isset($e->request) ? $e->request : 'NULL');
-      fwrite(STDERR, 'Response: ' . isset($e->response) ? $e->response: 'NULL');
+      fwrite(STDERR, 'Response: ' . isset($e->response) ? $e->response : 'NULL');
       throw $e;
     }
   }
@@ -535,12 +544,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 0,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 0,
-        'newContacts'   => 0,
-        'failures'      => 1,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 0,
+        'newContacts' => 0,
+        'failures' => 1,
+      ], $matches);
 
       // Nothing is insync.
       $in_sync = $sync->removeInSync('push');
@@ -551,8 +560,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals(0, $stats['updates']);
       $this->assertEquals(0, $stats['unsubscribes']);
       $this->assertEquals(0, $stats['additions']);
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -598,12 +606,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 2,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 2,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 2,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // Remove in-sync things (both have changed, should be zero)
       $in_sync = $sync->removeInSync('pull');
@@ -613,11 +621,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $stats = $sync->updateCiviFromMailchimp();
       $this->assertEquals([
         'created' => 0,
-        'joined'  => 0,
+        'joined' => 0,
         'in_sync' => 2, // both are in the membership group.
         'removed' => 0,
         'updated' => 1, // only one contact should be changed.
-        ], $stats);
+      ], $stats);
 
       // Ensure the updated name for contact 1 is pulled from Mailchimp to Civi.
       civicrm_api3('Contact', 'getsingle', [
@@ -632,8 +640,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       ]);
 
       CRM_Mailchimp_Sync::dropTemporaryTables();
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -659,10 +666,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
 
       // Change interests at Mailchimp: de-select interest1 and add interest2.
       $result = $api->patch('/lists/' . static::$test_list_id . '/members/' . static::$civicrm_contact_1['subscriber_hash'],
-        ['interests' => [
-          static::$test_interest_id_1 => FALSE,
-          static::$test_interest_id_2 => TRUE,
-        ]]);
+        [
+          'interests' => [
+            static::$test_interest_id_1 => FALSE,
+            static::$test_interest_id_2 => TRUE,
+          ],
+        ]);
       $this->assertEquals(200, $result->http_code);
 
       // Collect data from Mailchimp and CiviCRM.
@@ -674,12 +683,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 1,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // Remove in-sync things (both have changed, should be zero)
       $in_sync = $sync->removeInSync('pull');
@@ -689,18 +698,17 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $stats = $sync->updateCiviFromMailchimp();
       $this->assertEquals([
         'created' => 0,
-        'joined'  => 0,
+        'joined' => 0,
         'in_sync' => 1,
         'removed' => 0,
         'updated' => 1,
-        ], $stats);
+      ], $stats);
 
       $this->assertContactIsNotInGroup(static::$civicrm_contact_1['contact_id'], static::$civicrm_group_id_interest_1);
       $this->assertContactIsInGroup(static::$civicrm_contact_1['contact_id'], static::$civicrm_group_id_interest_2);
 
       CRM_Mailchimp_Sync::dropTemporaryTables();
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -725,7 +733,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       // CiviCRM.
       $result = civicrm_api3('Group', 'create', [
         'id' => static::$civicrm_group_id_interest_1,
-        static::$custom_is_mc_update_grouping => 0
+        static::$custom_is_mc_update_grouping => 0,
       ]);
 
       // Add contact 1 to interest1, then subscribe contact 1.
@@ -746,12 +754,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 1,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // Remove in-sync things - should be 1 because except for this change
       // we're not allowed to change, nothing has changed.
@@ -759,8 +767,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals(1, $in_sync);
 
       CRM_Mailchimp_Sync::dropTemporaryTables();
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -793,7 +800,10 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     // Delete contact1 from CiviCRM
     // We have to ensure no post hooks are fired, so we disable the API.
     CRM_Mailchimp_Utils::$post_hook_enabled = FALSE;
-    $result = civicrm_api3('Contact', 'delete', ['id' => static::$civicrm_contact_1['contact_id'], 'skip_undelete' => 1]);
+    $result = civicrm_api3('Contact', 'delete', [
+      'id' => static::$civicrm_contact_1['contact_id'],
+      'skip_undelete' => 1,
+    ]);
     static::$civicrm_contact_1['contact_id'] = 0;
     CRM_Mailchimp_Utils::$post_hook_enabled = TRUE;
 
@@ -807,12 +817,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 0,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 0,
-        'newContacts'   => 1,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 0,
+        'newContacts' => 1,
+        'failures' => 0,
+      ], $matches);
 
       // Remove in-sync things (nothing should be in sync)
       $in_sync = $sync->removeInSync('pull');
@@ -822,11 +832,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $stats = $sync->updateCiviFromMailchimp();
       $this->assertEquals([
         'created' => 1,
-        'joined'  => 0,
+        'joined' => 0,
         'in_sync' => 0,
         'removed' => 0,
         'updated' => 0,
-        ], $stats);
+      ], $stats);
 
       // Ensure expected change was made.
       $result = civicrm_api3('Contact', 'getsingle', [
@@ -834,7 +844,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         'first_name' => static::$civicrm_contact_1['first_name'],
         'last_name' => static::$civicrm_contact_1['last_name'],
         'return' => 'group',
-        ]);
+      ]);
       // If that didn't throw an exception, the contact was created.
       // Store the new contact id in the fixture to enable clearup.
       static::$civicrm_contact_1['contact_id'] = (int) $result['contact_id'];
@@ -842,8 +852,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $in_groups = CRM_Mailchimp_Utils::splitGroupTitles($result['groups'], $sync->group_details);
       $this->assertContains(static::$civicrm_group_id_membership, $in_groups, "New contact was not in membership group, but should be.");
       $this->assertContains(static::$civicrm_group_id_interest_1, $in_groups, "New contact was not in interest group 1, but should be.");
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -873,7 +882,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       // Update contact 1 at Mailchimp to unsubscribed.
       $api = CRM_Mailchimp_Utils::getMailchimpApi();
       $result = $api->patch('/lists/' . static::$test_list_id . '/members/' . static::$civicrm_contact_1['subscriber_hash'],
-          ['status' => 'unsubscribed']);
+        ['status' => 'unsubscribed']);
       $this->assertEquals(200, $result->http_code);
 
       // Delete contact 2 from Mailchimp completely.
@@ -893,12 +902,12 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 0,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 0,
-        'newContacts'   => 0,
-        'failures'      => 0,
-        ], $matches);
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 0,
+        'newContacts' => 0,
+        'failures' => 0,
+      ], $matches);
 
       // Remove in-sync things (nothing is in sync)
       $in_sync = $sync->removeInSync('pull');
@@ -908,18 +917,17 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $stats = $sync->updateCiviFromMailchimp();
       $this->assertEquals([
         'created' => 0,
-        'joined'  => 0,
+        'joined' => 0,
         'in_sync' => 0,
         'removed' => 2,
         'updated' => 0,
-        ], $stats);
+      ], $stats);
 
       // Each contact should now be removed from the group.
       $this->assertContactIsNotInGroup(static::$civicrm_contact_1['contact_id'], static::$civicrm_group_id_membership);
       $this->assertContactIsNotInGroup(static::$civicrm_contact_2['contact_id'], static::$civicrm_group_id_membership);
 
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -962,18 +970,17 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         'bySubscribers' => 0,
         // Email at MC only belongs to c1.
         'byUniqueEmail' => 1,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
       ], $matches);
 
       // Remove in-sync things these two should be in-sync.
       $in_sync = $sync->removeInSync('pull');
       $this->assertEquals(1, $in_sync);
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -1005,7 +1012,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         'is_bulkmail' => 1,
       ]);
       // Update our name.
-      civicrm_api3('Contact', 'create',[
+      civicrm_api3('Contact', 'create', [
         'contact_id' => static::$civicrm_contact_1['contact_id'],
         'first_name' => 'Betty',
       ]);
@@ -1023,11 +1030,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         'bySubscribers' => 0,
         // Email at MC only belongs to c1.
         'byUniqueEmail' => 1,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
       ], $matches);
 
       // Remove in-sync things - they are not in sync.
@@ -1038,11 +1045,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $stats = $sync->updateCiviFromMailchimp();
       $this->assertEquals([
         'created' => 0,
-        'joined'  => 0,
+        'joined' => 0,
         'in_sync' => 1, // Contact should be recognised as in group.
         'removed' => 0,
         'updated' => 1, // Name should be updated.
-        ], $stats);
+      ], $stats);
 
       // Check first name was changed back to the original, last name unchanged.
       $this->assertContactName(static::$civicrm_contact_1,
@@ -1050,8 +1057,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         static::$civicrm_contact_1['last_name']);
       // Check contact is (still) in membership group.
       $this->assertContactIsInGroup(static::$civicrm_contact_1['contact_id'], static::$civicrm_group_id_membership);
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -1085,7 +1091,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         'byNameEmail' => 0,
         'bySingle' => 0,
         'totalMatched' => 0,
-        'newContacts'   => 0,
+        'newContacts' => 0,
         'failures' => 1,
       ], $matches);
 
@@ -1097,7 +1103,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $stats = $sync->updateCiviFromMailchimp();
       $this->assertEquals([
         'created' => 0,
-        'joined'  => 0,
+        'joined' => 0,
         // Contact should be recognised as in group.
         'in_sync' => 0,
         'removed' => 0,
@@ -1105,11 +1111,10 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
         'updated' => 0,
       ], $stats);
 
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       fwrite(STDERR, 'Message: ' . $e->getMessage());
       fwrite(STDERR, 'Request: ' . isset($e->request) ? $e->request : 'NULL');
-      fwrite(STDERR, 'Response: ' . isset($e->response) ? $e->response: 'NULL');
+      fwrite(STDERR, 'Response: ' . isset($e->response) ? $e->response : 'NULL');
       throw $e;
     }
   }
@@ -1133,13 +1138,19 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->joinMembershipGroup(static::$civicrm_contact_1);
       // Check their interest group was set.
       $result = $api->get("/lists/" . static::$test_list_id . "/members/" . static::$civicrm_contact_1['subscriber_hash'], ['fields' => 'status,interests'])->data;
-      $this->assertEquals((object) [static::$test_interest_id_1 => TRUE, static::$test_interest_id_2 => FALSE], $result->interests);
+      $this->assertEquals((object) [
+        static::$test_interest_id_1 => TRUE,
+        static::$test_interest_id_2 => FALSE,
+      ], $result->interests);
 
       // Remove them to the interest group.
       $this->removeGroup(static::$civicrm_contact_1, static::$civicrm_group_id_interest_1);
       // Check their interest group was unset.
       $result = $api->get("/lists/" . static::$test_list_id . "/members/" . static::$civicrm_contact_1['subscriber_hash'], ['fields' => 'status,interests'])->data;
-      $this->assertEquals((object) [static::$test_interest_id_1 => FALSE, static::$test_interest_id_2 => FALSE], $result->interests);
+      $this->assertEquals((object) [
+        static::$test_interest_id_1 => FALSE,
+        static::$test_interest_id_2 => FALSE,
+      ], $result->interests);
 
       // Add them to the 2nd interest group.
       // While this is a dull test, we assume it works if the other interest
@@ -1148,7 +1159,10 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->joinGroup(static::$civicrm_contact_1, static::$civicrm_group_id_interest_2);
       // Check their interest group was set.
       $result = $api->get("/lists/" . static::$test_list_id . "/members/" . static::$civicrm_contact_1['subscriber_hash'], ['fields' => 'status,interests'])->data;
-      $this->assertEquals((object) [static::$test_interest_id_1 => FALSE, static::$test_interest_id_2 => TRUE], $result->interests);
+      $this->assertEquals((object) [
+        static::$test_interest_id_1 => FALSE,
+        static::$test_interest_id_2 => TRUE,
+      ], $result->interests);
 
       // Now check collections work.
       $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
@@ -1160,11 +1174,11 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       $this->assertEquals([
         'bySubscribers' => 1,
         'byUniqueEmail' => 0,
-        'byNameEmail'   => 0,
-        'bySingle'      => 0,
-        'totalMatched'  => 1,
-        'newContacts'   => 0,
-        'failures'      => 0,
+        'byNameEmail' => 0,
+        'bySingle' => 0,
+        'totalMatched' => 1,
+        'newContacts' => 0,
+        'failures' => 0,
       ], $matches);
 
       // This should return 1
@@ -1202,8 +1216,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       // Now check the tables are both empty.
       $this->assertEquals(0, $sync->countMailchimpMembers());
       $this->assertEquals(0, $sync->countCiviCrmMembers());
-    }
-    catch (CRM_Mailchimp_Exception $e) {
+    } catch (CRM_Mailchimp_Exception $e) {
       // Spit out request and response for debugging.
       print "Request:\n";
       print_r($e->request);
@@ -1226,8 +1239,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     $api = CRM_Mailchimp_Utils::getMailchimpApi();
     try {
       $result = $api->get("/lists/" . static::$test_list_id . "/members/$contact[subscriber_hash]", ['fields' => 'status']);
-    }
-    catch (CRM_Mailchimp_RequestErrorException $e) {
+    } catch (CRM_Mailchimp_RequestErrorException $e) {
       if ($e->response->http_code == 404) {
         // Not subscribed give more helpful error.
         $this->fail("Expected contact $contact[email] to be in the list at Mailchimp, but MC said resource not found; i.e. not subscribed.");
@@ -1248,8 +1260,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     try {
       $subscriber_hash = static::$civicrm_contact_1['subscriber_hash'];
       $result = $api->get("/lists/" . static::$test_list_id . "/members/$contact[subscriber_hash]", ['fields' => 'status']);
-    }
-    catch (CRM_Mailchimp_RequestErrorException $e) {
+    } catch (CRM_Mailchimp_RequestErrorException $e) {
       $this->assertEquals(404, $e->response->http_code);
     }
   }
@@ -1267,7 +1278,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
     $result = civicrm_api3('Contact', 'getsingle', [
       'contact_id' => $contact['contact_id'],
       'return' => 'first_name,last_name',
-      ]);
+    ]);
     if ($first_name !== NULL) {
       $this->assertEquals($first_name, $result['first_name'],
         "First name was not as expected for contact $contact[contact_id]");

@@ -36,11 +36,11 @@ class CRM_Mailchimp_Upgrader_Base {
    * Obtain a reference to the active upgrade handler.
    */
   static public function instance() {
-    if (! self::$instance) {
+    if (!self::$instance) {
       // FIXME auto-generate
       self::$instance = new CRM_Mailchimp_Upgrader(
         'uk.co.vedaconsulting.mailchimp',
-        realpath(__DIR__ .'/../../../')
+        realpath(__DIR__ . '/../../../')
       );
     }
     return self::$instance;
@@ -86,7 +86,7 @@ class CRM_Mailchimp_Upgrader_Base {
   /**
    * Run a CustomData file
    *
-   * @param string $xml_file  the CustomData XML file path (absolute path)
+   * @param string $xml_file the CustomData XML file path (absolute path)
    *
    * @return bool
    */
@@ -205,7 +205,7 @@ class CRM_Mailchimp_Upgrader_Base {
    * @return array(revisionNumbers) sorted numerically
    */
   public function getRevisions() {
-    if (! is_array($this->revisions)) {
+    if (!is_array($this->revisions)) {
       $this->revisions = array();
 
       $clazz = new ReflectionClass(get_class($this));

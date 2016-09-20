@@ -41,9 +41,9 @@ class CRM_Mailchimp_Permission extends CRM_Core_Permission {
   public static function check($permissions) {
     $permissions = (array) $permissions;
     if (!CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported()) {
-      array_walk_recursive($permissions, function(&$v, $k) {
+      array_walk_recursive($permissions, function (&$v, $k) {
         if (array_key_exists($v, CRM_Mailchimp_Permission::getMailchimpPermissions())) {
-            $v = CRM_Core_Permission::ALWAYS_ALLOW_PERMISSION;
+          $v = CRM_Core_Permission::ALWAYS_ALLOW_PERMISSION;
         }
       });
     }

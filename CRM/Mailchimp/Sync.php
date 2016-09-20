@@ -1,9 +1,11 @@
 <?php
+
 /**
  * @file
  * This class holds all the sync logic for a particular list.
  */
 class CRM_Mailchimp_Sync {
+
   /**
    * Holds the Mailchimp List ID.
    *
@@ -13,19 +15,19 @@ class CRM_Mailchimp_Sync {
 
   /**
    * Cache of details from CRM_Mailchimp_Utils::getGroupsToSync.
-   ▾ $this->group_details['61'] = (array [12])
-     ⬦ $this->group_details['61']['list_id'] = (string [10]) `4882f4fdb8`
-     ⬦ $this->group_details['61']['category_id'] = (null)
-     ⬦ $this->group_details['61']['category_name'] = (null)
-     ⬦ $this->group_details['61']['interest_id'] = (null)
-     ⬦ $this->group_details['61']['interest_name'] = (null)
-     ⬦ $this->group_details['61']['is_mc_update_grouping'] = (string [1]) `0`
-     ⬦ $this->group_details['61']['civigroup_title'] = (string [28]) `mailchimp_integration_test_1`
-     ⬦ $this->group_details['61']['civigroup_uses_cache'] = (bool) 0
-     ⬦ $this->group_details['61']['grouping_id'] = (null)
-     ⬦ $this->group_details['61']['grouping_name'] = (null)
-     ⬦ $this->group_details['61']['group_id'] = (null)
-     ⬦ $this->group_details['61']['group_name'] = (null)
+   * ▾ $this->group_details['61'] = (array [12])
+   * ⬦ $this->group_details['61']['list_id'] = (string [10]) `4882f4fdb8`
+   * ⬦ $this->group_details['61']['category_id'] = (null)
+   * ⬦ $this->group_details['61']['category_name'] = (null)
+   * ⬦ $this->group_details['61']['interest_id'] = (null)
+   * ⬦ $this->group_details['61']['interest_name'] = (null)
+   * ⬦ $this->group_details['61']['is_mc_update_grouping'] = (string [1]) `0`
+   * ⬦ $this->group_details['61']['civigroup_title'] = (string [28]) `mailchimp_integration_test_1`
+   * ⬦ $this->group_details['61']['civigroup_uses_cache'] = (bool) 0
+   * ⬦ $this->group_details['61']['grouping_id'] = (null)
+   * ⬦ $this->group_details['61']['grouping_name'] = (null)
+   * ⬦ $this->group_details['61']['group_id'] = (null)
+   * ⬦ $this->group_details['61']['group_name'] = (null)
    */
   protected $group_details;
   /**
@@ -39,9 +41,10 @@ class CRM_Mailchimp_Sync {
 
   /** If true no changes will be made to Mailchimp or CiviCRM. */
   protected $dry_run = FALSE;
+
   public function __construct($list_id) {
     $this->list_id = $list_id;
-    $this->group_details = CRM_Mailchimp_Utils::getGroupsToSync($groupIDs=[], $list_id, $membership_only=FALSE);
+    $this->group_details = CRM_Mailchimp_Utils::getGroupsToSync($groupIDs = [], $list_id, $membership_only = FALSE);
     foreach ($this->group_details as $group_id => $group_details) {
       if (empty($group_details['category_id'])) {
         $this->membership_group_id = $group_id;
@@ -54,27 +57,29 @@ class CRM_Mailchimp_Sync {
     $this->interest_group_details = $this->group_details;
     unset($this->interest_group_details[$this->membership_group_id]);
   }
+
   /**
    * Getter.
    */
   public function __get($property) {
     switch ($property) {
-    case 'list_id':
-    case 'membership_group_id':
-    case 'group_details':
-    case 'interest_group_details':
-    case 'dry_run':
-      return $this->$property;
+      case 'list_id':
+      case 'membership_group_id':
+      case 'group_details':
+      case 'interest_group_details':
+      case 'dry_run':
+        return $this->$property;
     }
     throw new InvalidArgumentException("'$property' property inaccessible or unknown");
   }
+
   /**
    * Setter.
    */
   public function __set($property, $value) {
     switch ($property) {
-    case 'dry_run':
-      return $this->$property = (bool) $value;
+      case 'dry_run':
+        return $this->$property = (bool) $value;
     }
     throw new InvalidArgumentException("'$property' property inaccessible or unknown");
   }
@@ -117,15 +122,16 @@ class CRM_Mailchimp_Sync {
     $api = CRM_Mailchimp_Utils::getMailchimpApi();
     $offset = 0;
     $batch_size = 1000;
-    $total = null;
+    $total = NULL;
     $list_id = $this->list_id;
-    $fetch_batch = function() use($api, &$offset, &$total, $batch_size, $list_id) {
-      if ($total !== null && $offset >= $total) {
+    $fetch_batch = function () use ($api, &$offset, &$total, $batch_size, $list_id) {
+      if ($total !== NULL && $offset >= $total) {
         // End of results.
         return [];
       }
       $response = $api->get("/lists/$this->list_id/members", [
-        'offset' => $offset, 'count' => $batch_size,
+        'offset' => $offset,
+        'count' => $batch_size,
         'status' => 'subscribed',
         'fields' => 'total_items,members.email_address,members.merge_fields,members.interests',
       ]);
@@ -141,7 +147,7 @@ class CRM_Mailchimp_Sync {
       $start = microtime(TRUE);
       foreach ($members as $member) {
         $first_name = isset($member->merge_fields->FNAME) ? $member->merge_fields->FNAME : '';
-        $last_name  = isset($member->merge_fields->LNAME) ? $member->merge_fields->LNAME : '';
+        $last_name = isset($member->merge_fields->LNAME) ? $member->merge_fields->LNAME : '';
 
         if (!$first_name && !$last_name && !empty($member->merge_fields->NAME)) {
           // No first or last names received, but we have a NAME merge field so
@@ -179,7 +185,7 @@ class CRM_Mailchimp_Sync {
         }
         $collected++;
       }
-      CRM_Mailchimp_Utils::checkDebug('collectMailchimp took ' . round(microtime(TRUE) - $start,2) . 's to copy ' . count($members) . ' mailchimp Members to tmp table.');
+      CRM_Mailchimp_Utils::checkDebug('collectMailchimp took ' . round(microtime(TRUE) - $start, 2) . 's to copy ' . count($members) . ' mailchimp Members to tmp table.');
     }
 
     // Tidy up.
@@ -187,6 +193,7 @@ class CRM_Mailchimp_Sync {
     $db->freePrepared($insert);
     return $collected;
   }
+
   /**
    * Collect CiviCRM data into temporary working table.
    *
@@ -280,7 +287,7 @@ class CRM_Mailchimp_Sync {
     $collected = 0;
     $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
     // Loop contacts:
-    foreach ($result['values'] as $id=>$contact) {
+    foreach ($result['values'] as $id => $contact) {
       // Which email to use?
       $email = isset($contact['bulk_email'])
         ? $contact['bulk_email']
@@ -308,7 +315,14 @@ class CRM_Mailchimp_Sync {
       // See note above about why we don't include email in the hash.
       // $hash = md5($email . $contact['first_name'] . $contact['last_name'] . $info);
       $hash = md5($contact['first_name'] . $contact['last_name'] . $info);
-      $db->execute($insert, array($contact['id'], $email, $contact['first_name'], $contact['last_name'], $hash, $info));
+      $db->execute($insert, array(
+        $contact['id'],
+        $email,
+        $contact['first_name'],
+        $contact['last_name'],
+        $hash,
+        $info,
+      ));
       $collected++;
     }
 
@@ -351,7 +365,7 @@ class CRM_Mailchimp_Sync {
     // Clear out any old errors to do with this list.
     CRM_Core_DAO::executeQuery(
       "DELETE FROM mailchimp_log WHERE group_id = %1;",
-      [1 => [$this->membership_group_id, 'Integer' ]]);
+      [1 => [$this->membership_group_id, 'Integer']]);
 
     $stats = [
       'bySubscribers' => 0,
@@ -393,8 +407,7 @@ class CRM_Mailchimp_Sync {
           // Successful match.
           $stats['bySingle']++;
         }
-      }
-      catch (CRM_Mailchimp_DuplicateContactsException $e) {
+      } catch (CRM_Mailchimp_DuplicateContactsException $e) {
         $contact_id = NULL;
         $failures++;
       }
@@ -412,8 +425,8 @@ class CRM_Mailchimp_Sync {
     }
     $db->freePrepared($update);
     $took = microtime(TRUE) - $start;
-    CRM_Mailchimp_Utils::checkDebug('guessContactIdSingle took ' . round($took,2)
-      . "s for $stats[bySingle] records (" . round($took/$stats['bySingle'],2) . "s/record");
+    CRM_Mailchimp_Utils::checkDebug('guessContactIdSingle took ' . round($took, 2)
+      . "s for $stats[bySingle] records (" . round($took / $stats['bySingle'], 2) . "s/record");
     $stats['totalMatched'] = array_sum($stats);
     $stats['newContacts'] = $new;
     $stats['failures'] = $failures;
@@ -428,11 +441,12 @@ class CRM_Mailchimp_Sync {
           'titanic' message
          FROM tmp_mailchimp_push_m
          WHERE cid_guess IS NULL;",
-      [1 => [$this->membership_group_id, 'Integer']]);
+        [1 => [$this->membership_group_id, 'Integer']]);
     }
 
     return $stats;
   }
+
   /**
    * Removes from the temporary tables those records that do not need processing
    * because they are identical.
@@ -522,8 +536,18 @@ class CRM_Mailchimp_Sync {
 
       $params = static::updateMailchimpFromCiviLogic(
         $merge_fields,
-        ['email' => $dao->c_email, 'first_name' => $dao->c_first_name, 'last_name' => $dao->c_last_name, 'interests' => $dao->c_interests],
-        ['email' => $dao->m_email, 'first_name' => $dao->m_first_name, 'last_name' => $dao->m_last_name, 'interests' => $dao->m_interests]);
+        [
+          'email' => $dao->c_email,
+          'first_name' => $dao->c_first_name,
+          'last_name' => $dao->c_last_name,
+          'interests' => $dao->c_interests,
+        ],
+        [
+          'email' => $dao->m_email,
+          'first_name' => $dao->m_first_name,
+          'last_name' => $dao->m_last_name,
+          'interests' => $dao->m_interests,
+        ]);
 
       if (!$params) {
         // This is the case if the changes could not be made due to policy
@@ -541,7 +565,7 @@ class CRM_Mailchimp_Sync {
           $_ .= " change email to '$params[email_address]'";
         }
         if (key_exists('merge_fields', $params)) {
-          foreach ($params['merge_fields'] as $field=>$value) {
+          foreach ($params['merge_fields'] as $field => $value) {
             $_ .= " set $field = $value";
           }
         }
@@ -550,12 +574,17 @@ class CRM_Mailchimp_Sync {
       else {
         // Add the operation to the batch.
         $params['status'] = 'subscribed';
-        $operations []= ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
+        $operations [] = [
+          'PUT',
+          $url_prefix . md5(strtolower($dao->c_email)),
+          $params,
+        ];
       }
 
       if ($dao->m_email) {
         $changes++;
-      } else {
+      }
+      else {
         $additions++;
       }
     }
@@ -576,14 +605,22 @@ class CRM_Mailchimp_Sync {
     else {
       // For real, not dry run.
       foreach ($removals as $email) {
-        $operations []= ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
+        $operations [] = [
+          'PATCH',
+          $url_prefix . md5(strtolower($email)),
+          ['status' => 'unsubscribed'],
+        ];
       }
       if ($operations) {
         $result = $api->batchAndWait($operations);
       }
     }
 
-    return ['additions' => $additions, 'updates' => $changes, 'unsubscribes' => $unsubscribes];
+    return [
+      'additions' => $additions,
+      'updates' => $changes,
+      'unsubscribes' => $unsubscribes,
+    ];
   }
 
   /**
@@ -648,15 +685,15 @@ class CRM_Mailchimp_Sync {
     // Stats.
     $stats = [
       'created' => 0,
-      'joined'  => 0,
+      'joined' => 0,
       'in_sync' => 0,
       'removed' => 0,
       'updated' => 0,
-      ];
+    ];
 
     // all Mailchimp table *except* titanics: where the contact matches multiple
     // contacts in CiviCRM.
-    $dao = CRM_Core_DAO::executeQuery( "SELECT m.*,
+    $dao = CRM_Core_DAO::executeQuery("SELECT m.*,
       c.contact_id c_contact_id,
       c.interests c_interests, c.first_name c_first_name, c.last_name c_last_name
       FROM tmp_mailchimp_push_m m
@@ -666,7 +703,7 @@ class CRM_Mailchimp_Sync {
 
     // Create lookup hash to map Mailchimp Interest Ids to CiviCRM Groups.
     $interest_to_group_id = [];
-    foreach ($this->interest_group_details as $group_id=>$details) {
+    foreach ($this->interest_group_details as $group_id => $details) {
       $interest_to_group_id[$details['interest_id']] = $group_id;
     }
 
@@ -699,7 +736,7 @@ class CRM_Mailchimp_Sync {
         // if needed and making sure we don't overwrite
         // something with nothing. See issue #188.
         $edits = static::updateCiviFromMailchimpContactLogic(
-          ['first_name' => $dao->first_name,   'last_name' => $dao->last_name],
+          ['first_name' => $dao->first_name, 'last_name' => $dao->last_name],
           ['first_name' => $dao->c_first_name, 'last_name' => $dao->c_last_name]
         );
         if ($edits) {
@@ -722,11 +759,11 @@ class CRM_Mailchimp_Sync {
           // Live:
           $result = civicrm_api3('Contact', 'create', [
             'contact_type' => 'Individual',
-            'first_name'   => $dao->first_name,
-            'last_name'    => $dao->last_name,
-            'email'        => $dao->email,
-            'sequential'   => 1,
-            ]);
+            'first_name' => $dao->first_name,
+            'last_name' => $dao->last_name,
+            'email' => $dao->email,
+            'sequential' => 1,
+          ]);
           $contact_id = $result['values'][0]['id'];
           $changes['additions'][$this->membership_group_id][] = $contact_id;
         }
@@ -756,7 +793,7 @@ class CRM_Mailchimp_Sync {
         }
 
         // Discover what needs changing to bring CiviCRM inline with Mailchimp.
-        foreach ($mc_interests as $interest=>$member_has_interest) {
+        foreach ($mc_interests as $interest => $member_has_interest) {
           if ($member_has_interest && empty($civi_interests[$interest])) {
             // Member is interested in something, but CiviCRM does not know yet.
             if (!$this->dry_run) {
@@ -789,7 +826,7 @@ class CRM_Mailchimp_Sync {
     // We must remove them from the membership group.
     // Accademic interest (#188): what's faster, this or a 'WHERE NOT EXISTS'
     // construct?
-    $dao = CRM_Core_DAO::executeQuery( "
+    $dao = CRM_Core_DAO::executeQuery("
     SELECT c.contact_id
       FROM tmp_mailchimp_push_c c
       LEFT OUTER JOIN tmp_mailchimp_push_m m ON m.cid_guess = c.contact_id
@@ -798,7 +835,7 @@ class CRM_Mailchimp_Sync {
     // Collect the contact_ids that need removing from the membership group.
     while ($dao->fetch()) {
       if (!$this->dry_run) {
-        $changes['removals'][$this->membership_group_id][] =$dao->contact_id;
+        $changes['removals'][$this->membership_group_id][] = $dao->contact_id;
       }
       else {
         CRM_Mailchimp_Utils::checkDebug("Would remove CiviCRM contact $dao->contact_id from membership group - no longer subscribed at Mailchimp.");
@@ -813,14 +850,14 @@ class CRM_Mailchimp_Sync {
       // Make the changes.
       if ($changes['additions']) {
         // We have some contacts to add into groups...
-        foreach($changes['additions'] as $groupID => $contactIDs) {
+        foreach ($changes['additions'] as $groupID => $contactIDs) {
           CRM_Contact_BAO_GroupContact::addContactsToGroup($contactIDs, $groupID, 'Admin', 'Added');
         }
       }
 
       if ($changes['removals']) {
         // We have some contacts to add into groups...
-        foreach($changes['removals'] as $groupID => $contactIDs) {
+        foreach ($changes['removals'] as $groupID => $contactIDs) {
           CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contactIDs, $groupID, 'Admin', 'Removed');
         }
       }
@@ -914,7 +951,9 @@ class CRM_Mailchimp_Sync {
       }
     }
     // Sort longest strings first.
-    uksort($map, function($a, $b) { return strlen($a) - strlen($b); });
+    uksort($map, function ($a, $b) {
+      return strlen($a) - strlen($b);
+    });
 
     // Remove the found titles longest first.
     $groups = [];
@@ -924,12 +963,13 @@ class CRM_Mailchimp_Sync {
       if ($i !== FALSE) {
         $groups[] = $civi_group_id;
         // Remove this from the string.
-        $group_input = substr($group_input, 0, $i+1) . substr($group_input, $i + strlen(",$interest_group_details,"));
+        $group_input = substr($group_input, 0, $i + 1) . substr($group_input, $i + strlen(",$interest_group_details,"));
       }
     }
 
     return $groups;
   }
+
   /**
    * Get list of emails to unsubscribe.
    *
@@ -953,6 +993,7 @@ class CRM_Mailchimp_Sync {
     }
     return $emails;
   }
+
   /**
    * Return a count of the members on Mailchimp from the tmp_mailchimp_push_m
    * table.
@@ -986,8 +1027,8 @@ class CRM_Mailchimp_Sync {
     $contact = civicrm_api3('Contact', 'getsingle', [
       'contact_id' => $contact_id,
       'return' => ['first_name', 'last_name', 'email_id', 'email', 'group'],
-      'sequential' => 1
-      ]);
+      'sequential' => 1,
+    ]);
 
     $in_groups = CRM_Mailchimp_Utils::splitGroupTitles($contact['groups'], $this->group_details);
     $currently_a_member = in_array($this->membership_group_id, $in_groups);
@@ -1010,16 +1051,14 @@ class CRM_Mailchimp_Sync {
       try {
         $result = $api->patch("/lists/$this->list_id/members/$subscriber_hash",
           ['status' => 'unsubscribed']);
-      }
-      catch (CRM_Mailchimp_RequestErrorException $e) {
+      } catch (CRM_Mailchimp_RequestErrorException $e) {
         if ($e->response->http_code == 404) {
           // OK. Mailchimp didn't know about them anyway. Fine.
         }
         else {
           CRM_Core_Session::setStatus(ts('There was a problem trying to unsubscribe this contact at Mailchimp; any differences will remain until a CiviCRM to Mailchimp Sync is done.'));
         }
-      }
-      catch (CRM_Mailchimp_NetworkErrorException $e) {
+      } catch (CRM_Mailchimp_NetworkErrorException $e) {
         CRM_Core_Session::setStatus(ts('There was a network problem trying to unsubscribe this contact at Mailchimp; any differences will remain until a CiviCRM to Mailchimp Sync is done.'));
       }
       return;
@@ -1035,7 +1074,7 @@ class CRM_Mailchimp_Sync {
       'merge_fields' => [
         'FNAME' => $contact['first_name'],
         'LNAME' => $contact['last_name'],
-        ],
+      ],
     ];
     // Do interest groups.
     $data['interests'] = $this->getComparableInterestsFromCiviCrmGroups($contact['groups']);
@@ -1044,14 +1083,13 @@ class CRM_Mailchimp_Sync {
     }
     try {
       $result = $api->put("/lists/$this->list_id/members/$subscriber_hash", $data);
-    }
-    catch (CRM_Mailchimp_RequestErrorException $e) {
+    } catch (CRM_Mailchimp_RequestErrorException $e) {
       CRM_Core_Session::setStatus(ts('There was a problem trying to subscribe this contact at Mailchimp:') . $e->getMessage());
-    }
-    catch (CRM_Mailchimp_NetworkErrorException $e) {
+    } catch (CRM_Mailchimp_NetworkErrorException $e) {
       CRM_Core_Session::setStatus(ts('There was a network problem trying to unsubscribe this contact at Mailchimp; any differences will remain until a CiviCRM to Mailchimp Sync is done.'));
     }
   }
+
   /**
    * Identify a contact who is expected to be subscribed to this list.
    *
@@ -1093,27 +1131,28 @@ class CRM_Mailchimp_Sync {
    * @param string $email
    * @param string|null $first_name
    * @param string|null $last_name
-   * @param bool $must_be_on_list    If TRUE, only return an ID if this contact
+   * @param bool $must_be_on_list If TRUE, only return an ID if this contact
    *                                 is known to be on the list. defaults to
    *                                 FALSE.
    * @throw CRM_Mailchimp_DuplicateContactsException if the email is known bit
    * it fails to identify one contact.
    * @return int|null Contact Id if found.
    */
-  public function guessContactIdSingle($email, $first_name=NULL, $last_name=NULL, $must_be_on_list=FALSE) {
+  public function guessContactIdSingle($email, $first_name = NULL, $last_name = NULL, $must_be_on_list = FALSE) {
 
     // API call returns all matching emails, and all contacts attached to those
     // emails IF the contact is in our group.
     $result = civicrm_api3('Email', 'get', [
-      'sequential'      => 1,
-      'email'           => $email,
+      'sequential' => 1,
+      'email' => $email,
       'api.Contact.get' => [
-              'is_deleted' => 0,
-              'return'     => "first_name,last_name"],
+        'is_deleted' => 0,
+        'return' => "first_name,last_name",
+      ],
     ]);
 
     // Candidates are any emails that belong to a not-deleted contact.
-    $email_candidates = array_filter($result['values'], function($_) {
+    $email_candidates = array_filter($result['values'], function ($_) {
       return ($_['api.Contact.get']['count'] == 1);
     });
     if (count($email_candidates) == 0) {
@@ -1134,7 +1173,7 @@ class CRM_Mailchimp_Sync {
       'group' => $this->membership_group_id,
       'contact_id' => ['IN' => array_keys($candidates)],
       'return' => 'contact_id',
-      ]);
+    ]);
     $in_group = $result['values'];
 
     // If must be on the membership list, then reduce the candidates to just
@@ -1212,6 +1251,7 @@ class CRM_Mailchimp_Sync {
     // to get messy.
     throw new CRM_Mailchimp_DuplicateContactsException($candidates);
   }
+
   /**
    * Guess the contact id for contacts whose email is found in the temporary
    * table made by collectCiviCrm.
@@ -1230,7 +1270,7 @@ class CRM_Mailchimp_Sync {
    */
   public static function guessContactIdsBySubscribers() {
     return static::runSqlReturnAffectedRows(
-       "UPDATE tmp_mailchimp_push_m m
+      "UPDATE tmp_mailchimp_push_m m
         INNER JOIN tmp_mailchimp_push_c c ON m.email = c.email
         SET m.cid_guess = c.contact_id
         WHERE m.cid_guess IS NULL");
@@ -1249,7 +1289,7 @@ class CRM_Mailchimp_Sync {
   public static function guessContactIdsByUniqueEmail() {
     // If an address is unique, that's the one we need.
     return static::runSqlReturnAffectedRows(
-        "UPDATE tmp_mailchimp_push_m m
+      "UPDATE tmp_mailchimp_push_m m
         INNER JOIN (
           SELECT email, c.id AS contact_id
           FROM civicrm_email e
@@ -1260,6 +1300,7 @@ class CRM_Mailchimp_Sync {
         SET m.cid_guess = uniques.contact_id
         ");
   }
+
   /**
    * Guess the contact id for contacts whose only email matches.
    *
@@ -1277,7 +1318,7 @@ class CRM_Mailchimp_Sync {
 
     // look for email and names that match where there's only one match.
     return static::runSqlReturnAffectedRows(
-        "UPDATE tmp_mailchimp_push_m m
+      "UPDATE tmp_mailchimp_push_m m
         INNER JOIN (
           SELECT email, first_name, last_name, c.id AS contact_id
           FROM civicrm_email e
@@ -1289,6 +1330,7 @@ class CRM_Mailchimp_Sync {
         WHERE m.first_name != '' AND m.last_name != ''
         ");
   }
+
   /**
    * Drop tmp_mailchimp_push_m and tmp_mailchimp_push_c, if they exist.
    *
@@ -1300,6 +1342,7 @@ class CRM_Mailchimp_Sync {
     CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
     CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS tmp_mailchimp_push_c;");
   }
+
   /**
    * Drop mailchimp_log table if it exists.
    *
@@ -1310,6 +1353,7 @@ class CRM_Mailchimp_Sync {
   public static function dropLogTable() {
     CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS mailchimp_log;");
   }
+
   /**
    * Create new tmp_mailchimp_push_m.
    *
@@ -1338,7 +1382,7 @@ class CRM_Mailchimp_Sync {
    * server, so about 4s/1000 members.
    */
   public static function createTemporaryTableForMailchimp() {
-    CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
+    CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
         email VARCHAR(200) NOT NULL,
@@ -1354,6 +1398,7 @@ class CRM_Mailchimp_Sync {
     // Convenience in collectMailchimp.
     return $dao;
   }
+
   /**
    * Create new tmp_mailchimp_push_c.
    *
@@ -1361,7 +1406,7 @@ class CRM_Mailchimp_Sync {
    * they are needed over multiple sessions because of queue.
    */
   public static function createTemporaryTableForCiviCRM() {
-    CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_c;");
+    CRM_Core_DAO::executeQuery("DROP TABLE IF EXISTS tmp_mailchimp_push_c;");
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
         email VARCHAR(200) NOT NULL,
@@ -1375,6 +1420,7 @@ class CRM_Mailchimp_Sync {
         ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
     return $dao;
   }
+
   /**
    * Logic to determine update needed.
    *
@@ -1477,4 +1523,5 @@ class CRM_Mailchimp_Sync {
     $dao->free();
     return $result;
   }
+
 }
