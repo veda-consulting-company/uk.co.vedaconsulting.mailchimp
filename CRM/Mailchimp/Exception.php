@@ -1,16 +1,16 @@
 <?php
+
 /**
  * @file
  * Exception base class for all Mailchimp API exceptions.
  */
-
 abstract class CRM_Mailchimp_Exception extends Exception {
 
   public $request;
 
   public $response;
 
-  public function __construct(CRM_Mailchimp_Api3 $api, $message_prefix='') {
+  public function __construct(CRM_Mailchimp_Api3 $api, $message_prefix = '') {
     $this->request = isset($api->request) ? clone($api->request) : NULL;
     $this->response = isset($api->response) ? clone($api->response) : NULL;
 

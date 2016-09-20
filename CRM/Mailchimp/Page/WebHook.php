@@ -1,4 +1,5 @@
 <?php
+
 class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
   const MC_SETTING_GROUP = 'MailChimp Preferences';
@@ -22,6 +23,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * CiviCRM contact id.
    */
   public $contact_id;
+
   /**
    * Process a webhook request from Mailchimp.
    *
@@ -29,21 +31,18 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * https://apidocs.mailchimp.com/webhooks/
    */
   public function run() {
-
     CRM_Mailchimp_Utils::checkDebug("Webhook POST: " . serialize($_POST));
     // Empty response object, default response code.
     try {
       $expected_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
-      $given_key = isset($_GET['key']) ? $_GET['key'] : null;
+      $given_key = isset($_GET['key']) ? $_GET['key'] : NULL;
       list($response_code, $response_object) = $this->processRequest($expected_key, $given_key, $_POST);
       CRM_Mailchimp_Utils::checkDebug("Webhook response code $response_code (200 = ok)");
-    }
-    catch (RuntimeException $e) {
+    } catch (RuntimeException $e) {
       $response_code = $e->getCode();
       $response_object = NULL;
       CRM_Mailchimp_Utils::checkDebug("Webhook RuntimeException code $response_code (200 means OK): " . $e->getMessage());
-    }
-    catch (Exception $e) {
+    } catch (Exception $e) {
       // Broad catch.
       $response_code = 500;
       $response_object = NULL;
@@ -74,7 +73,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * Methods may return data for mailchimp, or may throw RuntimeException
    * objects, the error code of which will be used for the response.
    * So you can throw a `RuntimeException("Invalid webhook configuration", 500);`
-   * to tell mailchimp the webhook failed, but you can equally throw a 
+   * to tell mailchimp the webhook failed, but you can equally throw a
    * `RuntimeException("soft fail", 200)` which will not tell Mailchimp there
    * was any problem. Mailchimp retries if there was a problem.
    *
@@ -83,19 +82,24 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * @return array with two values: $response_code, $response_object.
    */
   public function processRequest($expected_key, $key, $request_data) {
-
     // Check CMS's permission for (presumably) anonymous users.
     if (CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported() && !CRM_Mailchimp_Permission::check('allow webhook posts')) {
       throw new RuntimeException("Missing allow webhook posts permission.", 500);
     }
 
     // Check the 2 keys exist and match.
-    if (!$key || !$expected_key || $key != $expected_key ) {
+    if (!$key || !$expected_key || $key != $expected_key) {
       throw new RuntimeException("Invalid security key.", 500);
     }
 
     if (empty($request_data['data']['list_id']) || empty($request_data['type'])
-      || !in_array($request_data['type'], ['subscribe', 'unsubscribe', 'profile', 'upemail', 'cleaned'])
+      || !in_array($request_data['type'], [
+        'subscribe',
+        'unsubscribe',
+        'profile',
+        'upemail',
+        'cleaned',
+      ])
     ) {
       // We are not programmed to respond to this type of request.
       // But maybe Mailchimp introduced something new, so we'll just say OK.
@@ -153,6 +157,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // clarity.
     $this->findOrCreateSubscribeAndUpdate();
   }
+
   /**
    * Handle unsubscribe requests.
    *
@@ -165,21 +170,19 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    *
    */
   public function unsubscribe() {
-
     try {
       $this->contact_id = $this->sync->guessContactIdSingle(
         $this->request_data['email'],
         $this->request_data['merges']['FNAME'],
         $this->request_data['merges']['LNAME'],
-        $must_be_in_group=TRUE
+        $must_be_in_group = TRUE
       );
       if (!$this->contact_id) {
         // Hmm. We don't think they *are* subscribed.
         // Nothing for us to do.
         return;
       }
-    }
-    catch (CRM_Mailchimp_DuplicateContactsException $e) {
+    } catch (CRM_Mailchimp_DuplicateContactsException $e) {
       // We cannot process this webhook.
       throw new RuntimeException("Duplicate contact: " . $e->getMessage(), 500);
     }
@@ -187,10 +190,11 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // Contact has just unsubscribed, we'll need to remove them from the group.
     civicrm_api3('GroupContact', 'create', [
       'contact_id' => $this->contact_id,
-      'group_id'   => $this->sync->membership_group_id,
-      'status'     => 'Removed',
-      ]);
+      'group_id' => $this->sync->membership_group_id,
+      'status' => 'Removed',
+    ]);
   }
+
   /**
    * Handle profile update requests.
    *
@@ -224,7 +228,8 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    */
   public function upemail() {
     if (empty($this->request_data['new_email'])
-      || empty($this->request_data['old_email'])) {
+      || empty($this->request_data['old_email'])
+    ) {
       // Weird.
       throw new RuntimeException("Attempt to change an email address without specifying both email addresses.", 400);
     }
@@ -232,9 +237,8 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // Identify contact.
     try {
       $contact_id = $this->sync->guessContactIdSingle(
-        $this->request_data['old_email'], NULL, NULL, $must_be_in_group=TRUE);
-    }
-    catch (CRM_Mailchimp_DuplicateContactsException $e) {
+        $this->request_data['old_email'], NULL, NULL, $must_be_in_group = TRUE);
+    } catch (CRM_Mailchimp_DuplicateContactsException $e) {
       throw new RuntimeException("Duplicate contact: " . $e->getMessage(), 500);
     }
     if (!$contact_id) {
@@ -267,8 +271,8 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       'email' => $this->request_data['new_email'],
       'is_bulkmail' => 1,
     ]);
-
   }
+
   /**
    * Email removed by Mailchimp.
    *
@@ -324,7 +328,6 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     }
   }
 
-  // Helper functions.
   /**
    * Find/create, and update.
    *
@@ -336,15 +339,14 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    *
    */
   public function findOrCreateSubscribeAndUpdate() {
-
     $this->findOrCreateContact();
 
     // Check whether names have changed.
     $contact = civicrm_api3('Contact', 'getsingle', ['contact_id' => $this->contact_id]);
-    $edits   = CRM_Mailchimp_Sync::updateCiviFromMailchimpContactLogic(
+    $edits = CRM_Mailchimp_Sync::updateCiviFromMailchimpContactLogic(
       [
         'first_name' => empty($this->request_data['merges']['FNAME']) ? '' : $this->request_data['merges']['FNAME'],
-        'last_name'  => empty($this->request_data['merges']['LNAME']) ? '' : $this->request_data['merges']['LNAME'],
+        'last_name' => empty($this->request_data['merges']['LNAME']) ? '' : $this->request_data['merges']['LNAME'],
       ],
       $contact);
     if ($edits) {
@@ -355,12 +357,13 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     // Contact has just subscribed, we'll need to add them to the list.
     civicrm_api3('GroupContact', 'create', [
       'contact_id' => $this->contact_id,
-      'group_id'   => $this->sync->membership_group_id,
-      'status'     => 'Added',
-      ]);
+      'group_id' => $this->sync->membership_group_id,
+      'status' => 'Added',
+    ]);
 
     $this->updateInterestsFromMerges();
   }
+
   /**
    * Finds or creates the contact from email, first and last name.
    *
@@ -374,9 +377,10 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     try {
       // Check for missing merges fields.
       $this->request_data['merges'] += ['FNAME' => '', 'LNAME' => ''];
-      if (  empty($this->request_data['merges']['FNAME'])
-        &&  empty($this->request_data['merges']['LNAME'])
-        && !empty($this->request_data['merges']['NAME'])) {
+      if (empty($this->request_data['merges']['FNAME'])
+        && empty($this->request_data['merges']['LNAME'])
+        && !empty($this->request_data['merges']['NAME'])
+      ) {
         // No first or last names received, but we have a NAME merge field so
         // try splitting that.
         $names = explode(' ', $this->request_data['merges']['NAME']);
@@ -401,7 +405,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
         $result = civicrm_api3('Contact', 'create', [
           'contact_type' => 'Individual',
           'first_name' => $this->request_data['merges']['FNAME'],
-          'last_name'  => $this->request_data['merges']['LNAME'],
+          'last_name' => $this->request_data['merges']['LNAME'],
         ]);
         if (!$result['id']) {
           throw new RuntimeException("Failed to create contact", 500);
@@ -412,17 +416,17 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
           'contact_id' => $this->contact_id,
           'email' => $this->request_data['email'],
           'is_bulkmail' => 1,
-          ]);
+        ]);
         if (!$result['id']) {
           throw new RuntimeException("Failed to create contact's email", 500);
         }
       }
-    }
-    catch (CRM_Mailchimp_DuplicateContactsException $e) {
+    } catch (CRM_Mailchimp_DuplicateContactsException $e) {
       // We cannot process this webhook.
       throw new RuntimeException("Duplicate contact: " . $e->getMessage(), 500);
     }
   }
+
   /**
    * Mailchimp still sends interests to webhooks in an old school way.
    *
@@ -434,7 +438,10 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     $should_be_in = $this->sync->splitMailchimpWebhookGroupsToCiviGroupIds($this->request_data['merges']['INTERESTS']);
 
     // Now get a list of all the groups they *are* in.
-    $result = civicrm_api3('Contact', 'getsingle', ['return' => 'group', 'contact_id' => $this->contact_id]);
+    $result = civicrm_api3('Contact', 'getsingle', [
+      'return' => 'group',
+      'contact_id' => $this->contact_id,
+    ]);
     $is_in = CRM_Mailchimp_Utils::splitGroupTitles($result['groups'], $this->sync->interest_group_details);
 
     // Finally loop all the mapped interest groups and process any differences.

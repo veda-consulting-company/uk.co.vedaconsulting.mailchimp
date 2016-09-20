@@ -1,5 +1,10 @@
 <?php
-$classes_root =  implode(DIRECTORY_SEPARATOR,[dirname(dirname(__DIR__)), 'CRM', 'Mailchimp', '']);
+$classes_root = implode(DIRECTORY_SEPARATOR, [
+  dirname(dirname(__DIR__)),
+  'CRM',
+  'Mailchimp',
+  '',
+]);
 require $classes_root . 'Exception.php';
 require $classes_root . 'NetworkErrorException.php';
 require $classes_root . 'RequestErrorException.php';
@@ -8,15 +13,15 @@ require $classes_root . 'Api3.php';
 /**
  * Unit tests for Mailchimp API.
  */
-
 class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
 
   protected $mock_api_key = 'shhhhhhhhhhhhhh-uk1';
   protected $api;
+
   /**
    * Gets instance of the API.
    */
-  protected function getApi($settings='SETTINGS_NOT_PROVIDED') {
+  protected function getApi($settings = 'SETTINGS_NOT_PROVIDED') {
     if ($settings === 'SETTINGS_NOT_PROVIDED') {
       $settings = ['api_key' => $this->mock_api_key];
     }
@@ -34,7 +39,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
    * @expectedException InvalidArgumentException
    */
   public function testApiKeyRequiredNull() {
-    $this->getApi(null);
+    $this->getApi(NULL);
   }
 
   /**
@@ -52,8 +57,9 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
    * @expectedException InvalidArgumentException
    */
   public function testApiKeyRequiredEmptyKey() {
-    $this->getApi(['api_key' => null]);
+    $this->getApi(['api_key' => NULL]);
   }
+
   /**
    * The API key must end in a datacentre subdomain prefix.
    *
@@ -62,6 +68,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
   public function testApiKeyFailsWithoutDatacentre() {
     $this->getApi(['api_key' => 'foo']);
   }
+
   /**
    * Test get API.
    *
@@ -80,48 +87,52 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     $api = $this->getApi();
     $api->get('foo');
   }
+
   /**
    * Check GET requests are being created properly.
    */
   public function testGetRequest() {
     $api = $this->getApi();
     $response = $api->get('/foo');
-    $request  = $api->request;
+    $request = $api->request;
 
     // Check the request URL was properly assembled.
     $this->assertTrue(isset($request->url));
-    $this->assertEquals( "https://uk1.api.mailchimp.com/3.0/foo", $request->url);
-    $this->assertEquals( "GET", $request->method);
-    $this->assertEquals( "dummy:$this->mock_api_key", $request->userpwd);
+    $this->assertEquals("https://uk1.api.mailchimp.com/3.0/foo", $request->url);
+    $this->assertEquals("GET", $request->method);
+    $this->assertEquals("dummy:$this->mock_api_key", $request->userpwd);
     $this->assertFalse($request->verifypeer);
     $this->assertEquals(2, $request->verifyhost);
     $this->assertEquals('', $request->data);
     $this->assertEquals(["Content-Type: Application/json;charset=UTF-8"], $request->headers);
   }
+
   /**
    * Check GET requests are being created properly.
    */
   public function testGetRequestQs() {
     $api = $this->getApi();
-    $response = $api->get('/foo', ['name'=>'bar']);
-    $request  = $api->request;
+    $response = $api->get('/foo', ['name' => 'bar']);
+    $request = $api->request;
 
     // Check the request URL was properly assembled.
     $this->assertTrue(isset($request->url));
-    $this->assertEquals( "https://uk1.api.mailchimp.com/3.0/foo?name=bar", $request->url);
+    $this->assertEquals("https://uk1.api.mailchimp.com/3.0/foo?name=bar", $request->url);
   }
+
   /**
    * Check GET requests are being created properly.
    */
   public function testGetRequestQsAppend() {
     $api = $this->getApi();
-    $response = $api->get('/foo?x=1', ['name'=>'bar']);
-    $request  = $api->request;
+    $response = $api->get('/foo?x=1', ['name' => 'bar']);
+    $request = $api->request;
 
     // Check the request URL was properly assembled.
     $this->assertTrue(isset($request->url));
-    $this->assertEquals( "https://uk1.api.mailchimp.com/3.0/foo?x=1&name=bar", $request->url);
+    $this->assertEquals("https://uk1.api.mailchimp.com/3.0/foo?x=1&name=bar", $request->url);
   }
+
   /**
    * Check GET requests throws exception if resource not found.
    *
@@ -130,8 +141,12 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
    */
   public function testNotFoundException() {
     $api = $this->getApi();
-    $request  = $api->curlResultToResponse(['http_code'=>404,'content_type'=>'application/json'],'{"title":"not found"}');
+    $request = $api->curlResultToResponse([
+      'http_code' => 404,
+      'content_type' => 'application/json',
+    ], '{"title":"not found"}');
   }
+
   /**
    * Check network exception.
    *
@@ -140,8 +155,12 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
    */
   public function testNetworkError() {
     $api = $this->getApi();
-    $request  = $api->curlResultToResponse(['http_code'=>500,'content_type'=>'application/json'],'{"title":"witty error ha ha so funny."}');
+    $request = $api->curlResultToResponse([
+      'http_code' => 500,
+      'content_type' => 'application/json',
+    ], '{"title":"witty error ha ha so funny."}');
   }
+
   /**
    * Check curl mocking works.
    *
@@ -153,7 +172,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     // Network must be enabled for this to work.
     $api->setNetworkEnabled(TRUE);
 
-    $api->setMockCurl(function($request) {
+    $api->setMockCurl(function ($request) {
       return ['exec' => '{"prop":"val"}'];
     });
     $result = $api->get('/');
@@ -161,12 +180,13 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     $this->assertEquals((object) ['prop' => 'val'], $result->data);
 
     // Finally test throwing an exception.
-    $api->setMockCurl(function($request) {
+    $api->setMockCurl(function ($request) {
       throw new RuntimeException("thrown by mock");
     });
     // Bland request.
     $api->get('/');
   }
+
   /**
    * Tests that calling batch including a request that will fail does not throw
    * exception.
@@ -178,7 +198,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     $api->setNetworkEnabled(TRUE);
 
     // first test that the error is thrown.
-    $api->setMockCurl(function($request) {
+    $api->setMockCurl(function ($request) {
       return [
         'info' => ['http_code' => 400],
         'exec' => '{"title":"Invalid Resource","status":400,"detail":"looks like a duffer"}',
@@ -187,14 +207,13 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     try {
       $result = $api->get('/');
       $this->fail("Expected CRM_Mailchimp_RequestErrorException");
-    }
-    catch (CRM_Mailchimp_RequestErrorException $e) {
+    } catch (CRM_Mailchimp_RequestErrorException $e) {
       // Good.
       $this->assertEquals("Mailchimp API said: Invalid Resource", $e->getMessage());
     }
 
     // Now test that it's not thrown if in a batch.
-    $api->setMockCurl(function($request) {
+    $api->setMockCurl(function ($request) {
       if ($request->url == 'https://uk1.api.mailchimp.com/3.0/success') {
         return [];
       }
@@ -210,7 +229,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     $result = $api->batchAndWait([
       ['get', '/success'],
       ['put', '/invalid/request'],
-      ]);
+    ]);
   }
 }
 

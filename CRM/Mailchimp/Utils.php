@@ -1,16 +1,33 @@
 <?php
+/**
+ * @file
+ *  CiviCRM Mailchimp utilities.
+ */
 
+/**
+ * @class
+ *  Mailchimp utilities.
+ */
 class CRM_Mailchimp_Utils {
 
+  /**
+   * DEPRECATED option_group.
+   */
   const MC_SETTING_GROUP = 'MailChimp Preferences';
 
-  /** Mailchimp API object to use. */
+  /**
+   * Mailchimp API object to use.
+   */
   static protected $mailchimp_api;
 
-  /** Holds runtime cache of group details */
+  /**
+   * Holds runtime cache of group details.
+   */
   static protected $mailchimp_interest_details = [];
 
-  /** Holds a cache of list names from Mailchimp */
+  /**
+   * Holds a cache of list names from Mailchimp.
+   */
   static protected $mailchimp_lists;
 
   /**
@@ -46,17 +63,21 @@ class CRM_Mailchimp_Utils {
    * If we just split on comma then the contacts would only be in the "sponsored
    * walk" group and never the one with the comma in.
    *
-   * @param string $group_titles As output by the CiviCRM api for a contact when
-   * you request the 'group' output (which comes in a key called 'groups').
-   * @param array $group_details As from CRM_Mailchimp_Utils::getGroupsToSync
-   * but only including groups you're interested in.
-   * @return array CiviCRM groupIds.
+   * @param string $group_titles
+   *   As output by CiviCRM api for contact when requested the 'group' output
+   *   (in a key called 'groups').
+   * @param array $group_details
+   *   As from CRM_Mailchimp_Utils::getGroupsToSync but only including groups
+   *   you're interested in.
+   *
+   * @return array
+   *   CiviCRM groupIds.
    */
   public static function splitGroupTitles($group_titles, $group_details) {
     $groups = [];
 
     // Sort the group titles by length, longest first.
-    uasort($group_details, function($a, $b) {
+    uasort($group_details, function ($a, $b) {
       return (strlen($b['civigroup_title']) - strlen($a['civigroup_title']));
     });
     // Remove the found titles longest first.
@@ -67,13 +88,16 @@ class CRM_Mailchimp_Utils {
       if ($i !== FALSE) {
         $groups[] = $civi_group_id;
         // Remove this from the string.
-        $group_titles = substr($group_titles, 0, $i+1) . substr($group_titles, $i + strlen(",$detail[civigroup_title],"));
+        $group_titles = substr($group_titles, 0, $i + 1) . substr($group_titles, $i + strlen(",$detail[civigroup_title],"));
       }
     }
     return $groups;
   }
+
   /**
    * Returns the webhook URL.
+   *
+   * @TODO Convert to namespaced settings, use Civi::setting()->get().
    */
   public static function getWebhookUrl() {
     $security_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
@@ -90,6 +114,7 @@ class CRM_Mailchimp_Utils {
 
     return $webhook_url;
   }
+
   /**
    * Returns an API class for talking to Mailchimp.
    *
@@ -100,19 +125,23 @@ class CRM_Mailchimp_Utils {
    *
    * @param bool $reset If set it will replace the API object with a default.
    * Only useful after changing stored credentials.
+   *
+   * @TODO Use static::$mailchimp_api instead of local
+   * static for faster / simpler tests?
    */
-  public static function getMailchimpApi($reset=FALSE) {
+  public static function getMailchimpApi($reset = FALSE) {
     if ($reset) {
       static::$mailchimp_api = NULL;
     }
 
     // Singleton pattern.
     if (!isset(static::$mailchimp_api)) {
-      $params = ['api_key' => CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key')];
+      // @TODO Make this not depend on MC_SETTING_GROUP.
+      $params = ['api_key' => Civi::settings()->get('api_key')];
       $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
       if ($debugging == 1) {
         // We want debugging. Inject a logging callback.
-        $params['log_facility'] = function($message) {
+        $params['log_facility'] = function ($message) {
           CRM_Core_Error::debug_log_message($message, FALSE, 'mailchimp');
         };
       }
@@ -140,6 +169,7 @@ class CRM_Mailchimp_Utils {
     static::$mailchimp_lists = NULL;
     static::$mailchimp_interest_details = [];
   }
+
   /**
    * Check all mapped groups' lists.
    *
@@ -153,9 +183,9 @@ class CRM_Mailchimp_Utils {
    * or such.
    *
    */
-  public static function checkGroupsConfig($groups=NULL) {
+  public static function checkGroupsConfig($groups = NULL) {
     if ($groups === NULL) {
-      $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+      $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), NULL, $membership_only = TRUE);
     }
     if (!is_array($groups)) {
       throw new InvalidArgumentException("expected array argument, if provided");
@@ -166,7 +196,6 @@ class CRM_Mailchimp_Utils {
     // Check all our groups do not have the sources:API set in the webhook, and
     // that they do have the webhook set.
     foreach ($groups as $group_id => $details) {
-
       $group_settings_link = "<a href='/civicrm/group?reset=1&action=update&id=$group_id' >"
         . htmlspecialchars($details['civigroup_title']) . "</a>";
 
@@ -174,44 +203,43 @@ class CRM_Mailchimp_Utils {
         [1 => $group_settings_link, 2 => $details['list_id']]);
 
       try {
-        $test_warnings = CRM_Mailchimp_Utils::configureList($details['list_id'], $dry_run=TRUE);
+        $test_warnings = CRM_Mailchimp_Utils::configureList($details['list_id'], $dryRun = TRUE);
         foreach ($test_warnings as $_) {
-          $warnings []= $message_prefix . $_;
+          $warnings [] = $message_prefix . $_;
         }
-      }
-      catch (CRM_Mailchimp_NetworkErrorException $e) {
-        $warnings []= $message_prefix . ts("Problems (possibly temporary) fetching details from Mailchimp. ") . $e->getMessage();
-      }
-      catch (CRM_Mailchimp_RequestErrorException $e) {
+      } catch (CRM_Mailchimp_NetworkErrorException $e) {
+        $warnings [] = $message_prefix . ts("Problems (possibly temporary) fetching details from Mailchimp. ") . $e->getMessage();
+      } catch (CRM_Mailchimp_RequestErrorException $e) {
         $message = $e->getMessage();
         if ($e->response->http_code == 404) {
           // A little more helpful than "resource not found".
-          $warnings []= $message_prefix . ts("The Mailchimp list that this once worked with has "
-            ."been deleted on Mailchimp. Please edit the CiviCRM group settings to "
-            ."either specify a different Mailchimp list that exists, or to remove "
-            ."the Mailchimp integration for this group.");
+          $warnings [] = $message_prefix . ts("The Mailchimp list that this once worked with has "
+              . "been deleted on Mailchimp. Please edit the CiviCRM group settings to "
+              . "either specify a different Mailchimp list that exists, or to remove "
+              . "the Mailchimp integration for this group.");
         }
         else {
-          $warnings []= $message_prefix . ts("Problems fetching details from Mailchimp. ") . $e->getMessage();
+          $warnings [] = $message_prefix . ts("Problems fetching details from Mailchimp. ") . $e->getMessage();
         }
       }
     }
 
     if ($warnings) {
-      CRM_Core_Error::debug_log_message('Mailchimp list check warnings' . var_export($warnings,1));
+      CRM_Core_Error::debug_log_message('Mailchimp list check warnings' . var_export($warnings, 1));
     }
     return $warnings;
   }
+
   /**
    * Configure webhook with Mailchimp.
    *
    * Returns a list of messages to display to the user.
    *
-   * @param string $list_id Mailchimp List Id.
-   * @param bool $dry_run   If set no changes are made.
+   * @param string $listID Mailchimp List Id.
+   * @param bool $dryRun If set no changes are made.
    * @return array
    */
-  public static function configureList($list_id, $dry_run = FALSE) {
+  public static function configureList($listID, $dryRun = FALSE) {
     $api = CRM_Mailchimp_Utils::getMailchimpApi();
     $expected = [
       'url' => CRM_Mailchimp_Utils::getWebhookUrl(),
@@ -229,20 +257,20 @@ class CRM_Mailchimp_Utils {
         'api' => FALSE,
       ],
     ];
-    $verb = $dry_run ? 'Need to change ' : 'Changed ';
+    $verb = $dryRun ? 'Need to change ' : 'Changed ';
     try {
-      $result = $api->get("/lists/$list_id/webhooks");
+      $result = $api->get("/lists/$listID/webhooks");
       $webhooks = $result->data->webhooks;
-      //$webhooks = $api->get("/lists/$list_id/webhooks")->data->webhooks;
+      //$webhooks = $api->get("/lists/$listID/webhooks")->data->webhooks;
 
       if (empty($webhooks)) {
-        $messages []= ts(($dry_run ? 'Need to create' : 'Created') .' a webhook at Mailchimp');
+        $messages [] = ts(($dryRun ? 'Need to create' : 'Created') . ' a webhook at Mailchimp');
       }
       else {
         // Existing webhook(s) - check thoroughly.
         if (count($webhooks) > 1) {
           // Unusual case, leave it alone.
-          $messages [] = "Mailchimp list $list_id has more than one webhook configured. This is unusual, and so CiviCRM has not made any changes. Please ensure the webhook is set up correctly.";
+          $messages [] = "Mailchimp list $listID has more than one webhook configured. This is unusual, and so CiviCRM has not made any changes. Please ensure the webhook is set up correctly.";
           return $messages;
         }
 
@@ -250,18 +278,29 @@ class CRM_Mailchimp_Utils {
         $messages = [];
         // Correct URL?
         if ($webhooks[0]->url != $expected['url']) {
-          $messages []= ts($verb . 'webhook URL from %1 to %2', [1 => $webhooks[0]->url, 2 => $expected['url']]);
+          $messages [] = ts($verb . 'webhook URL from %1 to %2', [
+            1 => $webhooks[0]->url,
+            2 => $expected['url'],
+          ]);
         }
         // Correct sources?
         foreach ($expected['sources'] as $source => $expected_value) {
           if ($webhooks[0]->sources->$source != $expected_value) {
-            $messages []= ts($verb . 'webhook source %1 from %2 to %3', [1 => $source, 2 => (int) $webhooks[0]->sources->$source, 3 => (int)$expected_value]);
+            $messages [] = ts($verb . 'webhook source %1 from %2 to %3', [
+              1 => $source,
+              2 => (int) $webhooks[0]->sources->$source,
+              3 => (int) $expected_value,
+            ]);
           }
         }
         // Correct events?
         foreach ($expected['events'] as $event => $expected_value) {
           if ($webhooks[0]->events->$event != $expected_value) {
-            $messages []= ts($verb . 'webhook event %1 from %2 to %3', [1 => $event, 2 => (int) $webhooks[0]->events->$event, 3 => (int) $expected_value]);
+            $messages [] = ts($verb . 'webhook event %1 from %2 to %3', [
+              1 => $event,
+              2 => (int) $webhooks[0]->events->$event,
+              3 => (int) $expected_value,
+            ]);
           }
         }
 
@@ -270,32 +309,31 @@ class CRM_Mailchimp_Utils {
           return;
         }
 
-        if (!$dry_run) {
+        if (!$dryRun) {
           // As of May 2016, there doesn't seem to be an update method for
           // webhooks, so we just delete this and add another.
-          $api->delete("/lists/$list_id/webhooks/" . $webhooks[0]->id);
+          $api->delete("/lists/$listID/webhooks/" . $webhooks[0]->id);
         }
       }
-      if (!$dry_run) {
+      if (!$dryRun) {
         // Now create the proper one.
-        $result = $api->post("/lists/$list_id/webhooks", $expected);
+        $result = $api->post("/lists/$listID/webhooks", $expected);
       }
 
-    }
-    catch (CRM_Mailchimp_RequestErrorException $e) {
+    } catch (CRM_Mailchimp_RequestErrorException $e) {
       if ($e->request->method == 'GET' && $e->response->http_code == 404) {
         $messages [] = ts("The Mailchimp list that this once worked with has been deleted");
       }
       else {
-        $messages []= ts("Problems updating or fetching from Mailchimp. Please manually check the configuration. ") . $e->getMessage();
+        $messages [] = ts("Problems updating or fetching from Mailchimp. Please manually check the configuration. ") . $e->getMessage();
       }
-    }
-    catch (CRM_Mailchimp_NetworkErrorException $e) {
-      $messages []= ts("Problems (possibly temporary) talking to Mailchimp. ") . $e->getMessage();
+    } catch (CRM_Mailchimp_NetworkErrorException $e) {
+      $messages [] = ts("Problems (possibly temporary) talking to Mailchimp. ") . $e->getMessage();
     }
 
     return $messages;
   }
+
   /**
    * Look up an array of CiviCRM groups linked to Maichimp groupings.
    *
@@ -324,15 +362,15 @@ class CRM_Mailchimp_Utils {
    *         'group_id'
    *         'group_name'
    */
-  public static function getGroupsToSync($groupIDs = array(), $mc_list_id = null, $membership_only = FALSE) {
-
+  public static function getGroupsToSync($groupIDs = array(), $mc_list_id = NULL, $membership_only = FALSE) {
     $params = $groups = $temp = array();
-    $groupIDs = array_filter(array_map('intval',$groupIDs));
+    $groupIDs = array_filter(array_map('intval', $groupIDs));
 
     if (!empty($groupIDs)) {
       $groupIDs = implode(',', $groupIDs);
       $whereClause = "entity_id IN ($groupIDs)";
-    } else {
+    }
+    else {
       $whereClause = "1 = 1";
     }
 
@@ -348,11 +386,13 @@ class CRM_Mailchimp_Utils {
       $whereClause .= " AND (mc_grouping_id IS NULL OR mc_grouping_id = '')";
     }
 
-    $query  = "
-      SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title, cg.saved_search_id, cg.children
- FROM    civicrm_value_mailchimp_settings mcs
-      INNER JOIN civicrm_group cg ON mcs.entity_id = cg.id
+    $query = "
+      SELECT entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping,
+             cg.title as civigroup_title, cg.saved_search_id, cg.children
+        FROM civicrm_value_mailchimp_settings mcs
+  INNER JOIN civicrm_group cg ON mcs.entity_id = cg.id
       WHERE $whereClause";
+
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {
       $list_name = CRM_Mailchimp_Utils::getMCListName($dao->mc_list_id);
@@ -361,22 +401,22 @@ class CRM_Mailchimp_Utils {
       $groups[$dao->entity_id] =
         array(
           // Details about Mailchimp
-          'list_id'               => $dao->mc_list_id,
-          'list_name'             => $list_name,
-          'category_id'           => $dao->mc_grouping_id,
-          'category_name'         => $category_name,
-          'interest_id'           => $dao->mc_group_id,
-          'interest_name'         => $interest_name,
+          'list_id' => $dao->mc_list_id,
+          'list_name' => $list_name,
+          'category_id' => $dao->mc_grouping_id,
+          'category_name' => $category_name,
+          'interest_id' => $dao->mc_group_id,
+          'interest_name' => $interest_name,
           // Details from CiviCRM
           'is_mc_update_grouping' => $dao->is_mc_update_grouping,
-          'civigroup_title'       => $dao->civigroup_title,
-          'civigroup_uses_cache'    => (bool) (($dao->saved_search_id > 0) || (bool) $dao->children),
+          'civigroup_title' => $dao->civigroup_title,
+          'civigroup_uses_cache' => (bool) (($dao->saved_search_id > 0) || (bool) $dao->children),
 
           // Deprecated from Mailchimp.
-          'grouping_id'           => $dao->mc_grouping_id,
-          'grouping_name'         => $category_name,
-          'group_id'              => $dao->mc_group_id,
-          'group_name'            => $interest_name,
+          'grouping_id' => $dao->mc_grouping_id,
+          'grouping_name' => $category_name,
+          'group_id' => $dao->mc_group_id,
+          'group_name' => $interest_name,
         );
     }
 
@@ -390,21 +430,24 @@ class CRM_Mailchimp_Utils {
    *
    * @return string.
    */
-  public static function getMCListName($list_id) {
+  public static function getMCListName($listID) {
     if (!isset(static::$mailchimp_lists)) {
-      static::$mailchimp_lists[$list_id] = [];
+      static::$mailchimp_lists[$listID] = [];
       $api = CRM_Mailchimp_Utils::getMailchimpApi();
-      $lists = $api->get('/lists', ['fields' => 'lists.id,lists.name','count'=>10000])->data->lists;
+      $lists = $api->get('/lists', [
+        'fields' => 'lists.id,lists.name',
+        'count' => 10000,
+      ])->data->lists;
       foreach ($lists as $list) {
         static::$mailchimp_lists[$list->id] = $list->name;
       }
     }
 
-    if (!isset(static::$mailchimp_lists[$list_id])) {
+    if (!isset(static::$mailchimp_lists[$listID])) {
       // Return ZLS if not found.
       return '';
     }
-    return static::$mailchimp_lists[$list_id];
+    return static::$mailchimp_lists[$listID];
   }
 
   /**
@@ -428,7 +471,6 @@ class CRM_Mailchimp_Utils {
    *
    */
   public static function getMCInterestGroupings($listID) {
-
     if (empty($listID)) {
       CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Utils::getMCInterestGroupings called without list id');
       return NULL;
@@ -442,10 +484,9 @@ class CRM_Mailchimp_Utils {
         // Get list name.
         $api = CRM_Mailchimp_Utils::getMailchimpApi();
         $categories = $api->get("/lists/$listID/interest-categories",
-            ['fields' => 'categories.id,categories.title','count'=>10000])
+          ['fields' => 'categories.id,categories.title', 'count' => 10000])
           ->data->categories;
-      }
-      catch (CRM_Mailchimp_RequestErrorException $e) {
+      } catch (CRM_Mailchimp_RequestErrorException $e) {
         if ($e->response->http_code == 404) {
           // Controlled response
           CRM_Core_Error::debug_log_message("Mailchimp error: List $listID is not found.");
@@ -455,8 +496,7 @@ class CRM_Mailchimp_Utils {
           CRM_Core_Error::debug_log_message('Unhandled Mailchimp error: ' . $e->getMessage());
           throw $e;
         }
-      }
-      catch (CRM_Mailchimp_NetworkErrorException $e) {
+      } catch (CRM_Mailchimp_NetworkErrorException $e) {
         CRM_Core_Error::debug_log_message('Unhandled Mailchimp network error: ' . $e->getMessage());
         throw $e;
         return NULL;
@@ -469,14 +509,14 @@ class CRM_Mailchimp_Utils {
         // Need to look up interests for this category.
         $interests = CRM_Mailchimp_Utils::getMailchimpApi()
           ->get("/lists/$listID/interest-categories/$category->id/interests",
-            ['fields' => 'interests.id,interests.name','count'=>10000])
+            ['fields' => 'interests.id,interests.name', 'count' => 10000])
           ->data->interests;
 
         $mapper[$listID][$category->id] = [
           'id' => $category->id,
           'name' => $category->title,
           'interests' => [],
-          ];
+        ];
         foreach ($interests as $interest) {
           $mapper[$listID][$category->id]['interests'][$interest->id] =
             ['id' => $interest->id, 'name' => $interest->name];
@@ -491,41 +531,41 @@ class CRM_Mailchimp_Utils {
    * return the group name for given list, grouping and group
    *
    */
-  public static function getMCInterestName($listID, $category_id, $interest_id) {
+  public static function getMCInterestName($listID, $categoryID, $interestID) {
     $info = static::getMCInterestGroupings($listID);
 
     // Check list, grouping, and group exist
-    if (empty($info[$category_id]['interests'][$interest_id])) {
-      $name = null;
+    if (empty($info[$categoryID]['interests'][$interestID])) {
+      $name = NULL;
     }
     else {
-      $name = $info[$category_id]['interests'][$interest_id]['name'];
+      $name = $info[$categoryID]['interests'][$interestID]['name'];
     }
-    CRM_Mailchimp_Utils::checkDebug(__FUNCTION__ . " called for list '$listID', category '$category_id', interest '$interest_id', returning '$name'");
+    CRM_Mailchimp_Utils::checkDebug(__FUNCTION__ . " called for list '$listID', category '$categoryID', interest '$interestID', returning '$name'");
     return $name;
   }
 
   /**
    * Return the grouping name for given list, grouping MC Ids.
    */
-  public static function getMCCategoryName($listID, $category_id) {
+  public static function getMCCategoryName($listID, $categoryID) {
     $info = static::getMCInterestGroupings($listID);
 
-    // Check list, grouping, and group exist
+    // Check list, grouping, and group exist.
     $name = NULL;
-    if (!empty($info[$category_id])) {
-      $name = $info[$category_id]['name'];
+    if (!empty($info[$categoryID])) {
+      $name = $info[$categoryID]['name'];
     }
-    CRM_Mailchimp_Utils::checkDebug("CRM_Mailchimp_Utils::getMCCategoryName for list $listID cat $category_id returning $name");
+    CRM_Mailchimp_Utils::checkDebug("CRM_Mailchimp_Utils::getMCCategoryName for list $listID cat $categoryID returning $name");
     return $name;
   }
 
   /**
-   * Get Mailchimp group ID group name
+   * Get Mailchimp group ID group name.
    */
   public static function getMailchimpGroupIdFromName($listID, $groupName) {
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $listID', $listID);
-    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $groupName', $groupName);
+    CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils getMailchimpGroupIdFromName $groupName', $listID);
 
     if (empty($listID) || empty($groupName)) {
       return NULL;
@@ -534,11 +574,10 @@ class CRM_Mailchimp_Utils {
     $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
     try {
       $results = $mcLists->interestGroupings($listID);
-    } 
-    catch (Exception $e) {
+    } catch (Exception $e) {
       return NULL;
     }
-    
+
     foreach ($results as $grouping) {
       foreach ($grouping['groups'] as $group) {
         if ($group['name'] == $groupName) {
@@ -548,37 +587,33 @@ class CRM_Mailchimp_Utils {
       }
     }
   }
-  
+
   /**
    * Log a message and optionally a variable, if debugging is enabled.
    */
-  public static function checkDebug($description, $variable='VARIABLE_NOT_PROVIDED') {
-    $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
-
-    if ($debugging == 1) {
+  public static function checkDebug($description, $variable = 'VARIABLE_NOT_PROVIDED') {
+    // @TODO Make enable_debugging namespaced.
+    if (Civi::settings()->get('enable_debugging')) {
       if ($variable === 'VARIABLE_NOT_PROVIDED') {
-        // Simple log message.
-        CRM_Core_Error::debug_log_message($description, FALSE, 'mailchimp');
+        Civi::log()->info($description);
       }
       else {
         // Log a variable.
-        CRM_Core_Error::debug_log_message(
-          $description . "\n" . var_export($variable,1)
-          , FALSE, 'mailchimp');
+        Civi::log()->info("$description", array('variable' => $variable));
       }
     }
   }
 
-  // Deprecated - remove these once Mailchimp turn off APIv2, scheduled end of
-  // 2016.
   /**
-   * deprecated (soon!) v1, v2 API
+   * Deprecated (soon!) v1, v2 API.
+   *
+   * @TODO Remove these once Mailchimp turn off APIv2, scheduled end of 2016.
    */
   public static function mailchimp() {
-    $apiKey   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
-    $mcClient = new Mailchimp($apiKey);
-    //CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils mailchimp $mcClient', $mcClient);
-    return $mcClient;
+    $apiKey = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
+    $mcApi = new Mailchimp($apiKey);
+    // CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils mailchimp $mcClient', $mcClient);
+    return $mcApi;
   }
 
 }

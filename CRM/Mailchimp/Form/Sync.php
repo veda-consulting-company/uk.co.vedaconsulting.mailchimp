@@ -1,13 +1,13 @@
 <?php
+
 /**
  * @file
  * This provides the Sync Push from CiviCRM to Mailchimp form.
  */
-
 class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
   const QUEUE_NAME = 'mc-sync';
-  const END_URL    = 'civicrm/mailchimp/sync';
+  const END_URL = 'civicrm/mailchimp/sync';
   const END_PARAMS = 'state=done';
 
   /**
@@ -20,7 +20,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
       $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
-      $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only=TRUE);
+      $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), NULL, $membership_only = TRUE);
       if (!$groups) {
         return;
       }
@@ -42,12 +42,12 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       $dao = CRM_Core_DAO::executeQuery("SELECT * FROM mailchimp_log ORDER BY id");
       $logs = [];
       while ($dao->fetch()) {
-        $logs []= [
+        $logs [] = [
           'group' => $dao->group_id,
           'email' => $dao->email,
           'name' => $dao->name,
           'message' => $dao->message,
-          ];
+        ];
       }
       $this->assign('error_messages', $logs);
     }
@@ -61,7 +61,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    */
   public function buildQuickForm() {
 
-    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), NULL, $membership_only = TRUE);
     $will = '';
     $wont = '';
     if (!empty($_GET['reset'])) {
@@ -115,7 +115,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     if ($runner) {
       // Run Everything in the Queue via the Web.
       $runner->runAllViaWeb();
-    } else {
+    }
+    else {
       CRM_Core_Session::setStatus(ts('Nothing to sync. Make sure mailchimp settings are configured for the groups with enough members.'));
     }
   }
@@ -126,8 +127,8 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   public static function getRunner($skipEndUrl = FALSE, $dry_run = FALSE) {
     // Setup the Queue
     $queue = CRM_Queue_Service::singleton()->create(array(
-      'name'  => self::QUEUE_NAME,
-      'type'  => 'Sql',
+      'name' => self::QUEUE_NAME,
+      'type' => 'Sql',
       'reset' => TRUE,
     ));
 
@@ -136,7 +137,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     CRM_Core_BAO_Setting::setItem($stats, CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
 
     // We need to process one list at a time.
-    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), NULL, $membership_only = TRUE);
     CRM_Mailchimp_Utils::checkDebug('CRM_Mailchimp_Form_Sync getRunner $groups= ', $groups);
 
     // Each list is a task.
@@ -149,17 +150,17 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       }
 
       $stats[$details['list_id']] = [
-        'c_count'      => 0,
-        'mc_count'     => 0,
-        'in_sync'      => 0,
-        'updates'      => 0,
-        'additions'    => 0,
+        'c_count' => 0,
+        'mc_count' => 0,
+        'in_sync' => 0,
+        'updates' => 0,
+        'additions' => 0,
         'unsubscribes' => 0,
       ];
 
       $identifier = "List " . $listCount++ . " " . $details['civigroup_title'];
 
-      $task  = new CRM_Queue_Task(
+      $task = new CRM_Queue_Task(
         ['CRM_Mailchimp_Form_Sync', 'syncPushList'],
         [$details['list_id'], $identifier, $dry_run],
         "$identifier: collecting data from CiviCRM."
@@ -168,23 +169,23 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
       // Add the Task to the Queue
       $queue->createItem($task);
     }
-    if (count($stats)==1) {
+    if (count($stats) == 1) {
       // Nothing to do. (only key is 'dry_run')
       return FALSE;
     }
 
     // Setup the Runner
-		$runnerParams = array(
+    $runnerParams = array(
       'title' => ($dry_run ? ts('Dry Run: ') : '') . ts('Mailchimp Push Sync: update Mailchimp from CiviCRM'),
       'queue' => $queue,
-      'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
+      'errorMode' => CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
     );
-		// Skip End URL to prevent redirect
-		// if calling from cron job
-		if ($skipEndUrl == TRUE) {
-			unset($runnerParams['onEndUrl']);
-		}
+    // Skip End URL to prevent redirect
+    // if calling from cron job
+    if ($skipEndUrl == TRUE) {
+      unset($runnerParams['onEndUrl']);
+    }
     $runner = new CRM_Queue_Runner($runnerParams);
 
     static::updatePushStats($stats);
@@ -203,35 +204,35 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Add the CiviCRM collect data task to the queue
     // It's important that this comes before the Mailchimp one, as some
     // fast contact matching SQL can run if it's done this way.
-    $ctx->queue->createItem( new CRM_Queue_Task(
+    $ctx->queue->createItem(new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushCollectCiviCRM'),
       array($listID),
       "$identifier: Fetched data from CiviCRM, fetching from Mailchimp..."
     ));
 
     // Add the Mailchimp collect data task to the queue
-    $ctx->queue->createItem( new CRM_Queue_Task(
+    $ctx->queue->createItem(new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushCollectMailchimp'),
       array($listID),
       "$identifier: Fetched data from Mailchimp. Matching..."
     ));
 
     // Add the slow match process for difficult contacts.
-    $ctx->queue->createItem( new CRM_Queue_Task(
+    $ctx->queue->createItem(new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushDifficultMatches'),
       array($listID),
       "$identifier: Matched up contacts. Comparing..."
     ));
 
     // Add the Mailchimp collect data task to the queue
-    $ctx->queue->createItem( new CRM_Queue_Task(
+    $ctx->queue->createItem(new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushIgnoreInSync'),
       array($listID),
       "$identifier: Ignored any in-sync already. Updating Mailchimp..."
     ));
 
     // Add the Mailchimp changes
-    $ctx->queue->createItem( new CRM_Queue_Task(
+    $ctx->queue->createItem(new CRM_Queue_Task(
       array('CRM_Mailchimp_Form_Sync', 'syncPushToMailchimp'),
       array($listID, $dry_run),
       "$identifier: Completed additions/updates/unsubscribes."
@@ -263,7 +264,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // Nb. collectCiviCrm must have run before we call this.
     $sync = new CRM_Mailchimp_Sync($listID);
-    $stats[$listID]['mc_count'] = $sync->collectMailchimp('push', $civi_collect_has_already_run=TRUE);
+    $stats[$listID]['mc_count'] = $sync->collectMailchimp('push', $civi_collect_has_already_run = TRUE);
 
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync syncPushCollectMailchimp $stats[$listID][mc_count]', $stats[$listID]['mc_count']);
     static::updatePushStats($stats);
@@ -324,14 +325,15 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync updatePushStats $updates= ', $updates);
 
     $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
-    foreach ($updates as $listId=>$settings) {
+    foreach ($updates as $listId => $settings) {
       if ($listId == 'dry_run') {
         continue;
       }
-      foreach ($settings as $key=>$val) {
+      foreach ($settings as $key => $val) {
         $stats[$listId][$key] = $val;
       }
     }
     CRM_Core_BAO_Setting::setItem($stats, CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
   }
+
 }
