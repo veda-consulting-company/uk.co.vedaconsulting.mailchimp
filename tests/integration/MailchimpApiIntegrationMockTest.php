@@ -196,11 +196,11 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       // Interest 1 only.
       "$i" => [static::$civicrm_group_id_interest_1],
       // Interest 1 and 2 only.
-      "$i,$j" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
+      "$i, $j" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
       // Many interests!
-      "$j,another interest,$i,and another" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
+      "$j, another interest, $i, and another" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
       // Reversed order and other interests.
-      "other list name,$j,$i,and another" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
+      "other list name, $j, $i, and another" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
       // No relevant local interests, just other non MC groups.
       "other list name,and another" => [],
       // In no groups.
