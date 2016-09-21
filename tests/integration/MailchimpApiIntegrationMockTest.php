@@ -76,6 +76,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    * This is a dependency of some other tests because it also caches the result,
    * which means that we don't have to duplicate prophecies for this behaviour
    * in other tests.
+   *
+   * @group interests
    */
   public function testGetMCInterestGroupings() {
 
@@ -111,11 +113,13 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       ->willReturn(json_decode('{"http_code":200,"data":{"lists":[{"id":"dummylistid","title":"'. static::MC_TEST_LIST_NAME . '"}]}}'));
     CRM_Mailchimp_Utils::getMCListName('dummylistid');
   }
+
   /**
    * Tests the mapping of CiviCRM group memberships to an array of Mailchimp
    * interest Ids => Bool.
    *
    * @depends testGetMCInterestGroupings
+   * @group interests
    */
   public function testGetComparableInterestsFromCiviCrmGroups() {
 
@@ -147,11 +151,13 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We didn't change the fixture.
     static::$fixture_should_be_reset = FALSE;
   }
+
   /**
    * Tests the mapping of CiviCRM group memberships to an array of Mailchimp
    * interest Ids => Bool.
    *
    * @depends testGetMCInterestGroupings
+   * @group interests
    */
   public function testGetComparableInterestsFromMailchimp() {
 
