@@ -182,7 +182,6 @@ class CRM_Mailchimp_Sync {
     }
 
     // Tidy up.
-    fclose($handle);
     $db->freePrepared($insert);
     return $collected;
   }
