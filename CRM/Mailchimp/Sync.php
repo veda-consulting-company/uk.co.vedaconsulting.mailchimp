@@ -1464,7 +1464,7 @@ class CRM_Mailchimp_Sync {
   /**
    * There's probably a better way to do this.
    */
-  public static function runSqlReturnAffectedRows($sql, $params) {
+  public static function runSqlReturnAffectedRows($sql, $params = array()) {
     $dao = new CRM_Core_DAO();
     $q = CRM_Core_DAO::composeQuery($sql, $params);
     $result = $dao->query($q);
