@@ -91,8 +91,7 @@ function civicrm_api3_mailchimp_getinterests($params) {
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_pushsync($params) {
-	
-	// Do push from CiviCRM to mailchimp 
+  // Do push from CiviCRM to mailchimp
   $runner = CRM_Mailchimp_Form_Sync::getRunner($skipEndUrl = TRUE);
   if ($runner) {
     $result = $runner->runAll();
