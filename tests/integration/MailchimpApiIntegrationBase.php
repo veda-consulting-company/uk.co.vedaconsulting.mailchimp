@@ -279,15 +279,15 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
    *
    */
   public static function createTestContact(&$contact) {
-    $domain = preg_replace('@^https?://([^/]+).*$@', '$1', CIVICRM_UF_BASEURL);
-    $email = strtolower($contact['first_name'] . '.' . $contact['last_name']) . '@' . $domain;
-    $contact['email'] = $email;
-    $contact['subscriber_hash'] = md5(strtolower($email));
+    $url_parts = parse_url(CIVICRM_UF_BASEURL);
+    $contact['email'] = strtolower($contact['first_name'] . '.' . $contact['last_name']) . '@' . $url_parts['host'];
+    $contact['subscriber_hash'] = md5(strtolower($contact['email']));
+
     $result = civicrm_api3('Contact', 'get', ['sequential' => 1,
       'first_name' => $contact['first_name'],
       'last_name'  => $contact['last_name'],
-      'email'      => $email,
-      ]);
+      'email'      => $contact['email'],
+    ]);
 
     if ($result['count'] == 0) {
       // Create the contact.
@@ -296,7 +296,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
         'first_name' => $contact['first_name'],
         'last_name'  => $contact['last_name'],
         'api.Email.create' => [
-          'email'      => $email,
+          'email'      => $contact['email'],
           'is_bulkmail' => 1,
           'is_primary' => 1,
         ],

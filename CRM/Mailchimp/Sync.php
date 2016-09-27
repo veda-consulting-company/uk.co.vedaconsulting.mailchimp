@@ -152,9 +152,16 @@ class CRM_Mailchimp_Sync {
             $last_name = implode(' ', $names);
           }
         }
+
         // Find out which of our mapped groups apply to this subscriber.
         // Serialize the grouping array for SQL storage - this is the fastest way.
-        $interests = serialize($this->getComparableInterestsFromMailchimp($member->interests, $mode));
+        if (isset($member->interests)) {
+          $interests = serialize($this->getComparableInterestsFromMailchimp($member->interests, $mode));
+        }
+        else {
+          // Can't be NULL as the DB will reject this, so empty string.
+          $interests = '';
+        }
 
         // we're ready to store this but we need a hash that contains all the info
         // for comparison with the hash created from the CiviCRM data (elsewhere).
@@ -182,10 +189,10 @@ class CRM_Mailchimp_Sync {
     }
 
     // Tidy up.
-    fclose($handle);
     $db->freePrepared($insert);
     return $collected;
   }
+
   /**
    * Collect CiviCRM data into temporary working table.
    *
@@ -315,6 +322,7 @@ class CRM_Mailchimp_Sync {
 
     return $collected;
   }
+
   /**
    * Match mailchimp records to particular contacts in CiviCRM.
    *
@@ -335,7 +343,6 @@ class CRM_Mailchimp_Sync {
    * - failures (duplicate contacts in CiviCRM)
    */
   public function matchMailchimpMembersToContacts() {
-
     // Ensure we have the mailchimp_log table.
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE IF NOT EXISTS mailchimp_log (
@@ -359,7 +366,8 @@ class CRM_Mailchimp_Sync {
       'totalMatched' => 0,
       'newContacts' => 0,
       'failures' => 0,
-      ];
+    ];
+
     // Do the fast SQL identification against CiviCRM contacts.
     $start = microtime(TRUE);
     $stats['bySubscribers'] = static::guessContactIdsBySubscribers();
@@ -408,9 +416,14 @@ class CRM_Mailchimp_Sync {
       }
     }
     $db->freePrepared($update);
+
     $took = microtime(TRUE) - $start;
-    CRM_Mailchimp_Utils::checkDebug('guessContactIdSingle took ' . round($took,2)
-      . "s for $stats[bySingle] records (" . round($took/$stats['bySingle'],2) . "s/record");
+    $took = round($took, 2);
+    $secs_per_rec = $stats['bySingle'] ?
+      round($took / $stats['bySingle'],2) : 0;
+    CRM_Mailchimp_Utils::checkDebug("guessContactIdSingle took {$took} sec " .
+      "for {$stats['bySingle']} records ({$secs_per_rec} s/record)");
+
     $stats['totalMatched'] = array_sum($stats);
     $stats['newContacts'] = $new;
     $stats['failures'] = $failures;
@@ -430,6 +443,7 @@ class CRM_Mailchimp_Sync {
 
     return $stats;
   }
+
   /**
    * Removes from the temporary tables those records that do not need processing
    * because they are identical.
@@ -547,7 +561,7 @@ class CRM_Mailchimp_Sync {
       else {
         // Add the operation to the batch.
         $params['status'] = 'subscribed';
-        $operations []= ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
+        $operations[] = ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
       }
 
       if ($dao->m_email) {
@@ -573,11 +587,13 @@ class CRM_Mailchimp_Sync {
     else {
       // For real, not dry run.
       foreach ($removals as $email) {
-        $operations []= ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
+        $operations[] = ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
       }
-      if ($operations) {
-        $result = $api->batchAndWait($operations);
-      }
+    }
+
+    if (!$this->dry_run && !empty($operations)) {
+      CRM_Mailchimp_Utils::checkDebug("Batching operations: " . print_r($operations, 1));
+      $result = $api->batchAndWait($operations);
     }
 
     return ['additions' => $additions, 'updates' => $changes, 'unsubscribes' => $unsubscribes];
@@ -890,18 +906,17 @@ class CRM_Mailchimp_Sync {
   }
 
   /**
-   * Convert a 'groups' string as provided by Mailchimp's Webhook request API to
+   * Convert an 'INTERESTS' string as provided by Mailchimp's Webhook POST to
    * an array of CiviCRM group ids.
    *
    * Nb. a Mailchimp webhook is the equivalent of a 'pull' operation so we
    * ignore any groups that Mailchimp is not allowed to update.
    *
-   * @param string $groups as returned by Mailchimp's merges.INTERESTS request
-   * data.
-   * @return array of interest_ids to booleans.
+   * @param string $group_input
+   *   As POSTed to Webhook in Mailchimp's merges.INTERESTS data.
+   * @return array CiviCRM group IDs.
    */
   public function splitMailchimpWebhookGroupsToCiviGroupIds($group_input) {
-
     // Create a map of Mailchimp interest names to Civi Groups.
     $map = [];
     foreach ($this->interest_group_details as $group_id => $details) {
@@ -910,23 +925,25 @@ class CRM_Mailchimp_Sync {
         $map[$details['interest_name']] = $group_id;
       }
     }
+
     // Sort longest strings first.
     uksort($map, function($a, $b) { return strlen($a) - strlen($b); });
 
     // Remove the found titles longest first.
     $groups = [];
-    $group_input = ",$group_input,";
+    $group_input = ", $group_input,";
     foreach ($map as $interest_name => $civi_group_id) {
-      $i = strpos($group_input, ",$interest_name,");
+      $i = strpos($group_input, ", $interest_name,");
       if ($i !== FALSE) {
         $groups[] = $civi_group_id;
         // Remove this from the string.
-        $group_input = substr($group_input, 0, $i+1) . substr($group_input, $i + strlen(",$interest_group_details,"));
+        $group_input = substr($group_input, 0, $i + 1) . substr($group_input, $i + strlen(", $interest_group_details,"));
       }
     }
 
     return $groups;
   }
+
   /**
    * Get list of emails to unsubscribe.
    *
@@ -1388,7 +1405,6 @@ class CRM_Mailchimp_Sync {
    * @return array changes in format required by Mailchimp API.
    */
   public static function updateMailchimpFromCiviLogic($merge_fields, $civi_details, $mailchimp_details) {
-
     $params = [];
     // I think possibly some installations don't have Multibyte String Functions
     // installed?
@@ -1465,7 +1481,7 @@ class CRM_Mailchimp_Sync {
   /**
    * There's probably a better way to do this.
    */
-  public static function runSqlReturnAffectedRows($sql, $params) {
+  public static function runSqlReturnAffectedRows($sql, $params = array()) {
     $dao = new CRM_Core_DAO();
     $q = CRM_Core_DAO::composeQuery($sql, $params);
     $result = $dao->query($q);

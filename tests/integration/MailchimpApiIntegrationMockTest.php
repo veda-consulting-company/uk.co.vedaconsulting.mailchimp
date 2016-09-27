@@ -76,6 +76,8 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
    * This is a dependency of some other tests because it also caches the result,
    * which means that we don't have to duplicate prophecies for this behaviour
    * in other tests.
+   *
+   * @group interests
    */
   public function testGetMCInterestGroupings() {
 
@@ -111,11 +113,13 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       ->willReturn(json_decode('{"http_code":200,"data":{"lists":[{"id":"dummylistid","title":"'. static::MC_TEST_LIST_NAME . '"}]}}'));
     CRM_Mailchimp_Utils::getMCListName('dummylistid');
   }
+
   /**
    * Tests the mapping of CiviCRM group memberships to an array of Mailchimp
    * interest Ids => Bool.
    *
    * @depends testGetMCInterestGroupings
+   * @group interests
    */
   public function testGetComparableInterestsFromCiviCrmGroups() {
 
@@ -147,11 +151,13 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We didn't change the fixture.
     static::$fixture_should_be_reset = FALSE;
   }
+
   /**
    * Tests the mapping of CiviCRM group memberships to an array of Mailchimp
    * interest Ids => Bool.
    *
    * @depends testGetMCInterestGroupings
+   * @group interests
    */
   public function testGetComparableInterestsFromMailchimp() {
 
@@ -176,6 +182,45 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We didn't change the fixture.
     static::$fixture_should_be_reset = FALSE;
   }
+
+  /**
+   * Tests the mapping of group and interest names as posted by Mailchimp
+   * Webhook to CiviCRM Group IDs.
+   *
+   * CiviCRM groups via ... provides Foo,Bar,Baz
+   * Mailchimp Webhook POST provides Foo, Bar, Baz
+   *
+   * @depends testGetMCInterestGroupings
+   * @group interests
+   */
+  public function testSplitMailchimpWebhookGroupsToCiviGroupIds() {
+    $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
+    $i = static::MC_INTEREST_NAME_1;
+    $j = static::MC_INTEREST_NAME_2;
+
+    $cases = [
+      // Interest 1 only.
+      "$i" => [static::$civicrm_group_id_interest_1],
+      // Interest 1 and 2 only.
+      "$i, $j" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
+      // Many interests!
+      "$j, another interest, $i, and another" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
+      // Reversed order and other interests.
+      "other list name, $j, $i, and another" => [static::$civicrm_group_id_interest_1, static::$civicrm_group_id_interest_2],
+      // No relevant local interests, just other non MC groups.
+      "other list name,and another" => [],
+      // In no groups.
+      "" => [],
+    ];
+    foreach ($cases as $input=>$expected) {
+      $ints = $sync->SplitMailchimpWebhookGroupsToCiviGroupIds($input);
+      $this->assertEquals($expected, $ints, "mapping failed for test '$input'");
+    }
+
+    // We didn't change the fixture.
+    static::$fixture_should_be_reset = FALSE;
+  }
+
   /**
    * Checks that we are unable to instantiate a CRM_Mailchimp_Sync object with
    * an invalid List.
