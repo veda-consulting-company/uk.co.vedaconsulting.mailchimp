@@ -890,18 +890,17 @@ class CRM_Mailchimp_Sync {
   }
 
   /**
-   * Convert a 'groups' string as provided by Mailchimp's Webhook request API to
+   * Convert an 'INTERESTS' string as provided by Mailchimp's Webhook POST to
    * an array of CiviCRM group ids.
    *
    * Nb. a Mailchimp webhook is the equivalent of a 'pull' operation so we
    * ignore any groups that Mailchimp is not allowed to update.
    *
-   * @param string $groups as returned by Mailchimp's merges.INTERESTS request
-   * data.
-   * @return array of interest_ids to booleans.
+   * @param string $group_input
+   *   As POSTed to Webhook in Mailchimp's merges.INTERESTS data.
+   * @return array CiviCRM group IDs.
    */
   public function splitMailchimpWebhookGroupsToCiviGroupIds($group_input) {
-
     // Create a map of Mailchimp interest names to Civi Groups.
     $map = [];
     foreach ($this->interest_group_details as $group_id => $details) {
@@ -910,18 +909,19 @@ class CRM_Mailchimp_Sync {
         $map[$details['interest_name']] = $group_id;
       }
     }
+
     // Sort longest strings first.
     uksort($map, function($a, $b) { return strlen($a) - strlen($b); });
 
     // Remove the found titles longest first.
     $groups = [];
-    $group_input = ",$group_input,";
+    $group_input = ", $group_input,";
     foreach ($map as $interest_name => $civi_group_id) {
-      $i = strpos($group_input, ",$interest_name,");
+      $i = strpos($group_input, ", $interest_name,");
       if ($i !== FALSE) {
         $groups[] = $civi_group_id;
         // Remove this from the string.
-        $group_input = substr($group_input, 0, $i+1) . substr($group_input, $i + strlen(",$interest_group_details,"));
+        $group_input = substr($group_input, 0, $i + 1) . substr($group_input, $i + strlen(", $interest_group_details,"));
       }
     }
 
