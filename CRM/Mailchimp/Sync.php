@@ -192,6 +192,7 @@ class CRM_Mailchimp_Sync {
     $db->freePrepared($insert);
     return $collected;
   }
+
   /**
    * Collect CiviCRM data into temporary working table.
    *
@@ -560,7 +561,7 @@ class CRM_Mailchimp_Sync {
       else {
         // Add the operation to the batch.
         $params['status'] = 'subscribed';
-        $operations []= ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
+        $operations[] = ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
       }
 
       if ($dao->m_email) {
@@ -586,11 +587,13 @@ class CRM_Mailchimp_Sync {
     else {
       // For real, not dry run.
       foreach ($removals as $email) {
-        $operations []= ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
+        $operations[] = ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
       }
-      if ($operations) {
-        $result = $api->batchAndWait($operations);
-      }
+    }
+
+    if (!$this->dry_run && !empty($operations)) {
+      CRM_Mailchimp_Utils::checkDebug("Batching operations: " . print_r($operations, 1));
+      $result = $api->batchAndWait($operations);
     }
 
     return ['additions' => $additions, 'updates' => $changes, 'unsubscribes' => $unsubscribes];
@@ -1402,7 +1405,6 @@ class CRM_Mailchimp_Sync {
    * @return array changes in format required by Mailchimp API.
    */
   public static function updateMailchimpFromCiviLogic($merge_fields, $civi_details, $mailchimp_details) {
-
     $params = [];
     // I think possibly some installations don't have Multibyte String Functions
     // installed?
