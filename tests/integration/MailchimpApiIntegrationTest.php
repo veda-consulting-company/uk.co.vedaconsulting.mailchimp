@@ -515,6 +515,8 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
   }
 
   /**
+   * @throws \CRM_Mailchimp_Exception
+   * @throws \Exception
    */
   public function testPushDoesNotUnsubscribeDuplicates() {
     try {
