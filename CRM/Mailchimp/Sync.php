@@ -335,7 +335,6 @@ class CRM_Mailchimp_Sync {
    * - failures (duplicate contacts in CiviCRM)
    */
   public function matchMailchimpMembersToContacts() {
-
     // Ensure we have the mailchimp_log table.
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE IF NOT EXISTS mailchimp_log (
@@ -359,7 +358,8 @@ class CRM_Mailchimp_Sync {
       'totalMatched' => 0,
       'newContacts' => 0,
       'failures' => 0,
-      ];
+    ];
+
     // Do the fast SQL identification against CiviCRM contacts.
     $start = microtime(TRUE);
     $stats['bySubscribers'] = static::guessContactIdsBySubscribers();
@@ -408,9 +408,14 @@ class CRM_Mailchimp_Sync {
       }
     }
     $db->freePrepared($update);
+
     $took = microtime(TRUE) - $start;
-    CRM_Mailchimp_Utils::checkDebug('guessContactIdSingle took ' . round($took,2)
-      . "s for $stats[bySingle] records (" . round($took/$stats['bySingle'],2) . "s/record");
+    $took = round($took, 2);
+    $secs_per_rec = $stats['bySingle'] ?
+      round($took / $stats['bySingle'],2) : 0;
+    CRM_Mailchimp_Utils::checkDebug("guessContactIdSingle took {$took} sec " .
+      "for {$stats['bySingle']} records ({$secs_per_rec} s/record)");
+
     $stats['totalMatched'] = array_sum($stats);
     $stats['newContacts'] = $new;
     $stats['failures'] = $failures;
@@ -430,6 +435,7 @@ class CRM_Mailchimp_Sync {
 
     return $stats;
   }
+
   /**
    * Removes from the temporary tables those records that do not need processing
    * because they are identical.
@@ -927,6 +933,7 @@ class CRM_Mailchimp_Sync {
 
     return $groups;
   }
+
   /**
    * Get list of emails to unsubscribe.
    *
