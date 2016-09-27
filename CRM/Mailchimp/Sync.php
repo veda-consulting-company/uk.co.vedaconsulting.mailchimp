@@ -152,9 +152,13 @@ class CRM_Mailchimp_Sync {
             $last_name = implode(' ', $names);
           }
         }
+
         // Find out which of our mapped groups apply to this subscriber.
         // Serialize the grouping array for SQL storage - this is the fastest way.
-        $interests = serialize($this->getComparableInterestsFromMailchimp($member->interests, $mode));
+        $interests = null;
+        if (isset($member->interests)) {
+          $interests = serialize($this->getComparableInterestsFromMailchimp($member->interests, $mode));
+        }
 
         // we're ready to store this but we need a hash that contains all the info
         // for comparison with the hash created from the CiviCRM data (elsewhere).
@@ -315,6 +319,7 @@ class CRM_Mailchimp_Sync {
 
     return $collected;
   }
+
   /**
    * Match mailchimp records to particular contacts in CiviCRM.
    *
