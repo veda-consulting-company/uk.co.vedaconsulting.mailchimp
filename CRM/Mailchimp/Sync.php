@@ -155,9 +155,12 @@ class CRM_Mailchimp_Sync {
 
         // Find out which of our mapped groups apply to this subscriber.
         // Serialize the grouping array for SQL storage - this is the fastest way.
-        $interests = null;
         if (isset($member->interests)) {
           $interests = serialize($this->getComparableInterestsFromMailchimp($member->interests, $mode));
+        }
+        else {
+          // Can't be NULL as the DB will reject this, so empty string.
+          $interests = '';
         }
 
         // we're ready to store this but we need a hash that contains all the info
