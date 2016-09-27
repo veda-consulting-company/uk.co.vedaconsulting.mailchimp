@@ -53,6 +53,10 @@ class CRM_Mailchimp_Utils {
    * @return array CiviCRM groupIds.
    */
   public static function splitGroupTitles($group_titles, $group_details) {
+    if (preg_match('/^[0-9,]+$/', $group_titles)) {
+      return array_filter(explode(',', $group_titles));
+    }
+
     $groups = [];
 
     // Sort the group titles by length, longest first.
