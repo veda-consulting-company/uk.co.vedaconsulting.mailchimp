@@ -566,6 +566,6 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
 
     // Trigger mini sync for this person and this list.
     $sync = new CRM_Mailchimp_Sync($groups[$objectId]['list_id']);
-    $sync->syncSingleContact($objectRef[0]);
+    $sync->updateMailchimpFromCiviSingleContact($objectRef[0]);
 	}
 }

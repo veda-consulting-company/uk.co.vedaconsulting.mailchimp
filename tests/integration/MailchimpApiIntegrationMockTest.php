@@ -261,7 +261,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // If someone is added to the CiviCRM group, then we should expect them to
     // get subscribed.
 
-    // Prepare the mock for the syncSingleContact
+    // Prepare the mock for the updateMailchimpFromCiviSingleContact
     // We expect that a PUT request is sent to Mailchimp.
     $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash",
       Argument::that(function($_){
@@ -286,7 +286,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // If someone is removed or deleted from the CiviCRM group they should get
     // removed from Mailchimp.
 
-    // Prepare the mock for the syncSingleContact - this should get called
+    // Prepare the mock for the updateMailchimpFromCiviSingleContact - this should get called
     // twice.
     $api_prophecy->patch("/lists/dummylistid/members/$subscriber_hash", ['status' => 'unsubscribed'])
       ->shouldbecalledTimes(2);
@@ -331,7 +331,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Because this person is NOT on the membership list, nothing we do to their
     // interest group membership should result in a Mailchimp update.
     //
-    // Prepare the mock for the syncSingleContact
+    // Prepare the mock for the updateMailchimpFromCiviSingleContact
     $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash", Argument::any())->shouldNotBeCalled();
 
     $result = civicrm_api3('GroupContact', 'create', [
@@ -363,7 +363,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
     CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
 
-    // Prepare the mock for the syncSingleContact
+    // Prepare the mock for the updateMailchimpFromCiviSingleContact
     // We expect that a PUT request is sent to Mailchimp.
     $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash",
       Argument::that(function($_){

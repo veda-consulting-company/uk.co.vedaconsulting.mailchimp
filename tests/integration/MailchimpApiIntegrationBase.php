@@ -519,6 +519,15 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
    *              static::$civicrm_group_id_interest_{1,2}
    */
   public function joinGroup($contact, $group_id, $disable_post_hooks=FALSE) {
+    // Subscription at Mailchimp happens via the post hook. As that hook is also
+    // run in user contexts it errors with CRM_Core_Session::setMessage(),
+    // rather than an exception which may cause problems for the user. So we
+    // have to look for and catch these errors via the session.
+
+    // Ensure we have no session status message.
+    $session = CRM_Core_Session::singleton();
+    $session->getStatus(TRUE);
+
     if ($disable_post_hooks) {
       $original_state = CRM_Mailchimp_Utils::$post_hook_enabled;
       CRM_Mailchimp_Utils::$post_hook_enabled = FALSE;
@@ -531,6 +540,11 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     ]);
     if ($disable_post_hooks) {
       CRM_Mailchimp_Utils::$post_hook_enabled = $original_state;
+    }
+    $errors = $session->getStatus(TRUE);
+    if ($errors) {
+      // Throw it to break the tests.
+      throw new Exception($errors[0]['text']);
     }
     return $result;
   }

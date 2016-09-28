@@ -1125,7 +1125,8 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
    * collectMailchimp and collectCiviCrm work as expected.
    *
    *
-   * This uses the posthook, which in turn uses syncSingleContact.
+   * This uses the posthook, which in turn uses
+   * updateMailchimpFromCiviSingleContact.
    *
    * If all is working then at that point both collections should match.
    *

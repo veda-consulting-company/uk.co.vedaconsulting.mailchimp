@@ -991,9 +991,8 @@ class CRM_Mailchimp_Sync {
    * Sync a single contact's membership and interests for this list from their
    * details in CiviCRM.
    *
-   * @todo rename as push
    */
-  public function syncSingleContact($contact_id) {
+  public function updateMailchimpFromCiviSingleContact($contact_id) {
 
     // Get all the groups related to this list that the contact is currently in.
     // We have to use this dodgy API that concatenates the titles of the groups
