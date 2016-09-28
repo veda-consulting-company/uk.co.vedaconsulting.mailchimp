@@ -254,7 +254,6 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     static::$civicrm_group_id_interest_1 = (int) static::createMappedInterestGroup($custom_ids, static::C_TEST_INTEREST_GROUP_NAME_1, static::$test_interest_id_1);
     static::$civicrm_group_id_interest_2 = (int) static::createMappedInterestGroup($custom_ids, static::C_TEST_INTEREST_GROUP_NAME_2, static::$test_interest_id_2);
 
-
     // Now create test contacts
     // Re-set their names.
     static::$civicrm_contact_1 = [
