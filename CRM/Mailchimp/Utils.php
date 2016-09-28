@@ -54,7 +54,9 @@ class CRM_Mailchimp_Utils {
    */
   public static function splitGroupTitles($group_titles, $group_details) {
     if (preg_match('/^[0-9,]+$/', $group_titles)) {
-      return array_filter(explode(',', $group_titles));
+      // Extract the group Ids, ensure that they match those found as keys in
+      // $group_details as these are the only ones we're interested in.
+      return array_intersect(array_keys($group_details), array_filter(explode(',', $group_titles)));
     }
 
     $groups = [];
@@ -65,7 +67,6 @@ class CRM_Mailchimp_Utils {
     });
     // Remove the found titles longest first.
     $group_titles = ",$group_titles,";
-
     foreach ($group_details as $civi_group_id => $detail) {
       $i = strpos($group_titles, ",$detail[civigroup_title],");
       if ($i !== FALSE) {
