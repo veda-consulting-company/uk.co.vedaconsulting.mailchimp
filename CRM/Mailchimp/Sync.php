@@ -431,7 +431,7 @@ class CRM_Mailchimp_Sync {
     if ($stats['failures']) {
       // Copy errors into the mailchimp_log table.
       CRM_Core_DAO::executeQuery(
-        "INSERT INTO mailchimp_log (group_id, message)
+        "INSERT INTO mailchimp_log (group_id, email, name, message)
          SELECT %1 group_id,
           email,
           CONCAT_WS(' ', first_name, last_name) name,
