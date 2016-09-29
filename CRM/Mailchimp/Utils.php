@@ -58,6 +58,8 @@ class CRM_Mailchimp_Utils {
       // $group_details as these are the only ones we're interested in.
       return array_intersect(array_keys($group_details), array_filter(explode(',', $group_titles)));
     }
+    // @todo The rest of this code will not be needed once everyone is using
+    // 4.7.11 or later. https://issues.civicrm.org/jira/browse/CRM-19426
 
     $groups = [];
 
