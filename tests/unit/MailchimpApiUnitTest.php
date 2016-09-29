@@ -190,7 +190,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     }
     catch (CRM_Mailchimp_RequestErrorException $e) {
       // Good.
-      $this->assertEquals("Mailchimp API said: Invalid Resource", $e->getMessage());
+      $this->assertEquals("Mailchimp API said: Invalid Resource (looks like a duffer)", $e->getMessage());
     }
 
     // Now test that it's not thrown if in a batch.
