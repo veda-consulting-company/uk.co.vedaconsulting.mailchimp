@@ -917,31 +917,7 @@ class CRM_Mailchimp_Sync {
    * @return array CiviCRM group IDs.
    */
   public function splitMailchimpWebhookGroupsToCiviGroupIds($group_input) {
-    // Create a map of Mailchimp interest names to Civi Groups.
-    $map = [];
-    foreach ($this->interest_group_details as $group_id => $details) {
-      if ($details['is_mc_update_grouping'] == 1) {
-        // This group is configured to allow updates from Mailchimp to CiviCRM.
-        $map[$details['interest_name']] = $group_id;
-      }
-    }
-
-    // Sort longest strings first.
-    uksort($map, function($a, $b) { return strlen($a) - strlen($b); });
-
-    // Remove the found titles longest first.
-    $groups = [];
-    $group_input = ", $group_input,";
-    foreach ($map as $interest_name => $civi_group_id) {
-      $i = strpos($group_input, ", $interest_name,");
-      if ($i !== FALSE) {
-        $groups[] = $civi_group_id;
-        // Remove this from the string.
-        $group_input = substr($group_input, 0, $i + 1) . substr($group_input, $i + strlen(", $interest_group_details,"));
-      }
-    }
-
-    return $groups;
+    return CRM_Mailchimp_Utils::splitGroupTitlesFromMailchimp($group_input, $this->interest_group_details);
   }
 
   /**

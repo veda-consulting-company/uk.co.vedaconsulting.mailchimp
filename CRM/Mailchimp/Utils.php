@@ -80,6 +80,30 @@ class CRM_Mailchimp_Utils {
     return $groups;
   }
   /**
+   * Split a string of group titles from Mailchimp into an array of groupIds.
+   *
+   * @param string $group_titles As output by the Mailchimp api.
+   * @param array $group_details As from CRM_Mailchimp_Utils::getGroupsToSync
+   * but only including groups you're interested in.
+   * @return array CiviCRM groupIds.
+   */
+  public static function splitGroupTitlesFromMailchimp($group_input, $group_details) {
+    // Split on commas, excluding those escaped with backslash.
+    $interest_names = array_map(function($_) { return str_replace('\\,', ',', $_); },
+      preg_split('/(?<!\\\\), /', $group_input));
+
+    $groups = [];
+    foreach ($group_details as $civi_group_id => $details) {
+      if ($details['is_mc_update_grouping'] == 1) {
+        // This group is configured to allow updates from Mailchimp to CiviCRM.
+        if (in_array($details['interest_name'], $interest_names)) {
+          $groups[] = $civi_group_id;
+        }
+      }
+    }
+    return $groups;
+  }
+  /**
    * Returns the webhook URL.
    */
   public static function getWebhookUrl() {
