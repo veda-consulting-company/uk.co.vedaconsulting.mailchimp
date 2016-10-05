@@ -840,7 +840,7 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
       // Store the new contact id in the fixture to enable clearup.
       static::$civicrm_contact_1['contact_id'] = (int) $result['contact_id'];
       // Check they're in the membership group.
-      $in_groups = CRM_Mailchimp_Utils::splitGroupTitles($result['groups'], $sync->group_details);
+      $in_groups = CRM_Mailchimp_Utils::getGroupIds($result['groups'], $sync->group_details);
       $this->assertContains(static::$civicrm_group_id_membership, $in_groups, "New contact was not in membership group, but should be.");
       $this->assertContains(static::$civicrm_group_id_interest_1, $in_groups, "New contact was not in interest group 1, but should be.");
     }

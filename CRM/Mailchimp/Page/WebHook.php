@@ -435,7 +435,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
     // Now get a list of all the groups they *are* in.
     $result = civicrm_api3('Contact', 'getsingle', ['return' => 'group', 'contact_id' => $this->contact_id]);
-    $is_in = CRM_Mailchimp_Utils::splitGroupTitles($result['groups'], $this->sync->interest_group_details);
+    $is_in = CRM_Mailchimp_Utils::getGroupIds($result['groups'], $this->sync->interest_group_details);
 
     // Finally loop all the mapped interest groups and process any differences.
     foreach ($this->sync->interest_group_details as $group_id => $details) {

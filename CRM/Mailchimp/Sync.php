@@ -857,7 +857,7 @@ class CRM_Mailchimp_Sync {
    */
   public function getComparableInterestsFromCiviCrmGroups($groups, $mode) {
     $civi_groups = $groups
-      ? array_flip(CRM_Mailchimp_Utils::splitGroupTitles($groups, $this->interest_group_details))
+      ? array_flip(CRM_Mailchimp_Utils::getGroupIds($groups, $this->interest_group_details))
       : [];
     $info = [];
     foreach ($this->interest_group_details as $civi_group_id => $details) {
@@ -1001,7 +1001,7 @@ class CRM_Mailchimp_Sync {
       'sequential' => 1
       ]);
 
-    $in_groups = CRM_Mailchimp_Utils::splitGroupTitles($contact['groups'], $this->group_details);
+    $in_groups = CRM_Mailchimp_Utils::getGroupIds($contact['groups'], $this->group_details);
     $currently_a_member = in_array($this->membership_group_id, $in_groups);
 
     if (empty($contact['email'])) {
