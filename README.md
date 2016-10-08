@@ -221,3 +221,7 @@ extension does not currently handle this case.
 Originally work was done by the science gallery, then Veda Consulting and
 Artful Robot. Thanks also to Sumatran Orangutan Society for funding some of the work to
 implement Mailchimp API v3.
+
+## Technical people and developers
+
+Please see <README-tech.md>

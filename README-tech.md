@@ -17,7 +17,7 @@ hidden from subscribers at all times.
 One of the challenges is to *identify the CiviCRM* contact that a mailchimp
 member matches. The code for this is centralised in
 `CRM_Mailchimp_Sync::guessContactIdSingle()`, which has tests at
-`MailchimpApiIntegrationMockTest::testGuessContactIdSingle()`. 
+`MailchimpApiMockTest::testGuessContactIdSingle()`. 
 
 Look at the comment block for that test and for the `guessContactIdSingle`
 method for details of how contacts are identified. However, this is slow and so
@@ -64,16 +64,19 @@ available (i.e. not "on hold") email in this order:
 
 ## Tests are provided at different levels.
 
-- Unit tests check the logic of certain bits of the system. These can be run
-  without CiviCRM or Mailchimp services.
+1. tests in tests/phpunit are designed to be run automatically, e.g. by CI.
+   Within this dir there are **unit** tests that are proper unit tests (i.e.
+   tests that do not rely on anything other than the system under test; no
+   dependencies; no connection to a database or external service.) and
+   integration tests that do depend on the CiviCRM database, but none of these
+   test use the actual Mailchimp API; none of them require a Mailchimp account.
+   Some of the tests mock the Mailchimp API with Prophesy.
 
-- Integration tests require a CiviCRM install but mock the Mailchimp service.
-  This enables testing such as checking that CiviCRM is making the expected
-  calls to the API
-
-- Integration tests that run with live Mailchimp. These test that the Mailchimp
-  API is behaving as expected, and/or that the use of it is achieving what we
-  think it is achieving.
+2. tests in tests/integration are NOT designed to run automatically and *do*
+   require a Mailchimp account, properly configured in CiviCRM. You need to run
+   these in a special way. Ideally they would be rewritten to use the `cv`
+   program to bootstrap Civi in a way that would work for Wordpress and Drupal,
+   currently the boostrapping is hackish. PRs welcome :-)
 
 # Push CiviCRM to Mailchimp Sync for a list.
 
@@ -104,7 +107,7 @@ The test cases are as follows:
 This logic is tested by `tests/unit/SyncTest.php`
 
 The collection, comparison and API calls  are tested in
-`tests/integration/MailchimpApiIntegrationTest.php1`
+`tests/integration/MailchimpApiIntegrationTest.php`
 
 ## Interest changes to subscribed contacts are pushed.
 
@@ -193,8 +196,8 @@ changes which defaults to ticked, and when you save it will ensure everything is
 correct.
 
 Tests
-- `MailchimpApiIntegrationMockTest::testCheckGroupsConfig`
-- `MailchimpApiIntegrationMockTest::testConfigureList`
+- `MailchimpApiMockTest::testCheckGroupsConfig`
+- `MailchimpApiMockTest::testConfigureList`
 
 
 
@@ -222,8 +225,8 @@ interest change is not attempted to be registered with Mailchimp.
 
 See Tests:
 
-- `MailchimpApiIntegrationMockTest::testPostHookForMembershipListChanges()`
-- `MailchimpApiIntegrationMockTest::testPostHookForInterestGroupChanges()`
+- `MailchimpApiMockTest::testPostHookForMembershipListChanges()`
+- `MailchimpApiMockTest::testPostHookForInterestGroupChanges()`
 
 Because of these limitations, you cannot rely on this hook to keep your list
 up-to-date and will always need to do a CiviCRM to Mailchimp Push sync before
@@ -242,7 +245,7 @@ Warnings are displayed on screen when these settings are wrong and these include
 a link to the group's settings page, from which you can auto-configure the list
 to the correct settings on Save.
 
-These warnings are tested in `MailchimpApiIntegrationMockTest::testCheckGroupsConfig()`.
+These warnings are tested in `MailchimpApiMockTest::testCheckGroupsConfig()`.
 
 
 # "Titanics": Duplicate contacts that can't be sunk!
