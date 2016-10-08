@@ -25,6 +25,25 @@ class CRM_Mailchimp_Utils {
   public static $post_hook_enabled = TRUE;
 
   /**
+   * Returns the group IDs corresponding to the group information returned
+   * by the CiviCRM API.
+   *
+   * The behaviour of the API changed in CiviCRM 4.7.11, see issue #240.
+   *
+   * @param string $api_group_result As output by the CiviCRM api for a contact
+   * when you request the 'group' output (which comes in a key called 'groups').
+   * @param array $group_details As from CRM_Mailchimp_Utils::getGroupsToSync
+   * but only including groups you're interested in.
+   * @return array CiviCRM groupIds.
+   */
+  public static function getGroupIds($api_group_result, $group_details) {
+    if (version_compare(CRM_Utils_System::version(), '4.7.11', '<')) {
+      return self::splitGroupTitles($api_group_result, $group_details);
+    }
+    return array_filter(explode(',', $api_group_result));
+  }
+
+  /**
    * Split a string of group titles into an array of groupIds.
    *
    * The Contact:get API is the only place you can get a list of all the groups
