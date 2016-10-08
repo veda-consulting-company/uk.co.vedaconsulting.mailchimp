@@ -7,7 +7,7 @@
 
 require 'integration-test-bootstrap.php';
 
-class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
+class MailchimpApiIntegrationTest extends CRM_Mailchimp_IntegrationTestBase {
   /**
    * Connect to API and create test fixtures in Mailchimp and CiviCRM.
    */
@@ -515,6 +515,8 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
   }
 
   /**
+   * @throws \CRM_Mailchimp_Exception
+   * @throws \Exception
    */
   public function testPushDoesNotUnsubscribeDuplicates() {
     try {
@@ -1123,7 +1125,8 @@ class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
    * collectMailchimp and collectCiviCrm work as expected.
    *
    *
-   * This uses the posthook, which in turn uses syncSingleContact.
+   * This uses the posthook, which in turn uses
+   * updateMailchimpFromCiviSingleContact.
    *
    * If all is working then at that point both collections should match.
    *

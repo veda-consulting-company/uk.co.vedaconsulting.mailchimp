@@ -91,8 +91,7 @@ function civicrm_api3_mailchimp_getinterests($params) {
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_pushsync($params) {
-	
-	// Do push from CiviCRM to mailchimp 
+  // Do push from CiviCRM to mailchimp
   $runner = CRM_Mailchimp_Form_Sync::getRunner($skipEndUrl = TRUE);
   if ($runner) {
     $result = $runner->runAll();
@@ -102,7 +101,10 @@ function civicrm_api3_mailchimp_pushsync($params) {
     return civicrm_api3_create_success();
   }
   else {
-    return civicrm_api3_create_error();
+    if (isset($result['exception']) && $result['exception'] instanceof Exception) {
+      return civicrm_api3_create_error($result['exception']->getMessage());
+    }
+    return civicrm_api3_create_error('Unknown error');
   }
 }
 /**
@@ -117,8 +119,7 @@ function civicrm_api3_mailchimp_pushsync($params) {
  * @throws API_Exception
  */ 
 function civicrm_api3_mailchimp_pullsync($params) {
-	
-	// Do push from CiviCRM to mailchimp 
+  // Do push from CiviCRM to mailchimp
   $runner = CRM_Mailchimp_Form_Pull::getRunner($skipEndUrl = TRUE);
   if ($runner) {
     $result = $runner->runAll();
@@ -128,7 +129,10 @@ function civicrm_api3_mailchimp_pullsync($params) {
     return civicrm_api3_create_success();
   }
   else {
-    return civicrm_api3_create_error();
+    if (isset($result['exception']) && $result['exception'] instanceof Exception) {
+      return civicrm_api3_create_error($result['exception']->getMessage());
+    }
+    return civicrm_api3_create_error('Unknown error');
   }
 }
 

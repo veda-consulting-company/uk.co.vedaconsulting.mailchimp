@@ -536,18 +536,6 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
     // There is also the case that somone's been put into an interest group, but
     // is not in the membership group, which should not result in them being
     // subscribed at MC.
-    //
-    // Finally this hook is useful for small changes only; if you just added
-    // thousands of people to a group then this is NOT the way to tell Mailchimp
-    // about it as it would require thousands of separate API calls. This would
-    // probably cause big problems (like hitting the API rate limits, or
-    // crashing CiviCRM due to PHP max execution times etc.). Such updates must
-    // happen in the more controlled bulk update (push).
-
-    if (count($objectRef) > 1) {
-      // Limit application to one contact only.
-      return;
-    }
 
     if ($groups[$objectId]['interest_id']) {
       // This is a change to an interest grouping.
@@ -564,8 +552,23 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
       }
     }
 
+    // Finally this hook is useful for small changes only; if you just added
+    // thousands of people to a group then this is NOT the way to tell Mailchimp
+    // about it as it would require thousands of separate API calls. This would
+    // probably cause big problems (like hitting the API rate limits, or
+    // crashing CiviCRM due to PHP max execution times etc.). Such updates must
+    // happen in the more controlled bulk update (push).
+    if (count($objectRef) > 1) {
+      // Limit application to one contact only.
+      CRM_Core_Session::setStatus(
+        ts('You have made a bulk update that means CiviCRM contacts and Mailchimp are no longer in sync. You should do an "Update Mailchimp from CiviCRM" sync to ensure the changes you have made are applied at Mailchimp.'),
+        ts('Update Mailchimp from CiviCRM required.')
+      );
+      return;
+    }
+
     // Trigger mini sync for this person and this list.
     $sync = new CRM_Mailchimp_Sync($groups[$objectId]['list_id']);
-    $sync->syncSingleContact($objectRef[0]);
+    $sync->updateMailchimpFromCiviSingleContact($objectRef[0]);
 	}
 }

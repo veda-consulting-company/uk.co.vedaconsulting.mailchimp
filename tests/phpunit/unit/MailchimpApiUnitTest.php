@@ -1,10 +1,4 @@
 <?php
-$classes_root =  implode(DIRECTORY_SEPARATOR,[dirname(dirname(__DIR__)), 'CRM', 'Mailchimp', '']);
-require $classes_root . 'Exception.php';
-require $classes_root . 'NetworkErrorException.php';
-require $classes_root . 'RequestErrorException.php';
-require $classes_root . 'Api3.php';
-
 /**
  * Unit tests for Mailchimp API.
  */
@@ -190,7 +184,7 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
     }
     catch (CRM_Mailchimp_RequestErrorException $e) {
       // Good.
-      $this->assertEquals("Mailchimp API said: Invalid Resource", $e->getMessage());
+      $this->assertEquals("Mailchimp API said: Invalid Resource (looks like a duffer)", $e->getMessage());
     }
 
     // Now test that it's not thrown if in a batch.

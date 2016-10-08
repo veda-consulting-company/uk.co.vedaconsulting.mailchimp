@@ -192,6 +192,7 @@ class CRM_Mailchimp_Sync {
     $db->freePrepared($insert);
     return $collected;
   }
+
   /**
    * Collect CiviCRM data into temporary working table.
    *
@@ -430,7 +431,7 @@ class CRM_Mailchimp_Sync {
     if ($stats['failures']) {
       // Copy errors into the mailchimp_log table.
       CRM_Core_DAO::executeQuery(
-        "INSERT INTO mailchimp_log (group_id, message)
+        "INSERT INTO mailchimp_log (group_id, email, name, message)
          SELECT %1 group_id,
           email,
           CONCAT_WS(' ', first_name, last_name) name,
@@ -560,7 +561,7 @@ class CRM_Mailchimp_Sync {
       else {
         // Add the operation to the batch.
         $params['status'] = 'subscribed';
-        $operations []= ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
+        $operations[] = ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
       }
 
       if ($dao->m_email) {
@@ -586,11 +587,13 @@ class CRM_Mailchimp_Sync {
     else {
       // For real, not dry run.
       foreach ($removals as $email) {
-        $operations []= ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
+        $operations[] = ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
       }
-      if ($operations) {
-        $result = $api->batchAndWait($operations);
-      }
+    }
+
+    if (!$this->dry_run && !empty($operations)) {
+      CRM_Mailchimp_Utils::checkDebug("Batching operations: " . print_r($operations, 1));
+      $result = $api->batchAndWait($operations);
     }
 
     return ['additions' => $additions, 'updates' => $changes, 'unsubscribes' => $unsubscribes];
@@ -914,31 +917,7 @@ class CRM_Mailchimp_Sync {
    * @return array CiviCRM group IDs.
    */
   public function splitMailchimpWebhookGroupsToCiviGroupIds($group_input) {
-    // Create a map of Mailchimp interest names to Civi Groups.
-    $map = [];
-    foreach ($this->interest_group_details as $group_id => $details) {
-      if ($details['is_mc_update_grouping'] == 1) {
-        // This group is configured to allow updates from Mailchimp to CiviCRM.
-        $map[$details['interest_name']] = $group_id;
-      }
-    }
-
-    // Sort longest strings first.
-    uksort($map, function($a, $b) { return strlen($a) - strlen($b); });
-
-    // Remove the found titles longest first.
-    $groups = [];
-    $group_input = ", $group_input,";
-    foreach ($map as $interest_name => $civi_group_id) {
-      $i = strpos($group_input, ", $interest_name,");
-      if ($i !== FALSE) {
-        $groups[] = $civi_group_id;
-        // Remove this from the string.
-        $group_input = substr($group_input, 0, $i + 1) . substr($group_input, $i + strlen(", $interest_group_details,"));
-      }
-    }
-
-    return $groups;
+    return CRM_Mailchimp_Utils::splitGroupTitlesFromMailchimp($group_input, $this->interest_group_details);
   }
 
   /**
@@ -988,9 +967,8 @@ class CRM_Mailchimp_Sync {
    * Sync a single contact's membership and interests for this list from their
    * details in CiviCRM.
    *
-   * @todo rename as push
    */
-  public function syncSingleContact($contact_id) {
+  public function updateMailchimpFromCiviSingleContact($contact_id) {
 
     // Get all the groups related to this list that the contact is currently in.
     // We have to use this dodgy API that concatenates the titles of the groups
@@ -1050,7 +1028,7 @@ class CRM_Mailchimp_Sync {
         ],
     ];
     // Do interest groups.
-    $data['interests'] = $this->getComparableInterestsFromCiviCrmGroups($contact['groups']);
+    $data['interests'] = $this->getComparableInterestsFromCiviCrmGroups($contact['groups'], 'push');
     if (empty($data['interests'])) {
       unset($data['interests']);
     }
@@ -1354,10 +1332,10 @@ class CRM_Mailchimp_Sync {
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
         email VARCHAR(200) NOT NULL,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        hash CHAR(32) NOT NULL,
-        interests VARCHAR(4096) NOT NULL,
+        first_name VARCHAR(100) NOT NULL DEFAULT '',
+        last_name VARCHAR(100) NOT NULL DEFAULT '',
+        hash CHAR(32) NOT NULL DEFAULT '',
+        interests VARCHAR(4096) NOT NULL DEFAULT '',
         cid_guess INT(10) DEFAULT NULL,
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
@@ -1377,10 +1355,10 @@ class CRM_Mailchimp_Sync {
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
         email VARCHAR(200) NOT NULL,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        hash CHAR(32) NOT NULL,
-        interests VARCHAR(4096) NOT NULL,
+        first_name VARCHAR(100) NOT NULL DEFAULT '',
+        last_name VARCHAR(100) NOT NULL DEFAULT '',
+        hash CHAR(32) NOT NULL DEFAULT '',
+        interests VARCHAR(4096) NOT NULL DEFAULT '',
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )
@@ -1402,7 +1380,6 @@ class CRM_Mailchimp_Sync {
    * @return array changes in format required by Mailchimp API.
    */
   public static function updateMailchimpFromCiviLogic($merge_fields, $civi_details, $mailchimp_details) {
-
     $params = [];
     // I think possibly some installations don't have Multibyte String Functions
     // installed?

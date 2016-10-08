@@ -53,6 +53,14 @@ class CRM_Mailchimp_Utils {
    * @return array CiviCRM groupIds.
    */
   public static function splitGroupTitles($group_titles, $group_details) {
+    if (preg_match('/^[0-9,]+$/', $group_titles)) {
+      // Extract the group Ids, ensure that they match those found as keys in
+      // $group_details as these are the only ones we're interested in.
+      return array_intersect(array_keys($group_details), array_filter(explode(',', $group_titles)));
+    }
+    // @todo The rest of this code will not be needed once everyone is using
+    // 4.7.11 or later. https://issues.civicrm.org/jira/browse/CRM-19426
+
     $groups = [];
 
     // Sort the group titles by length, longest first.
@@ -61,13 +69,36 @@ class CRM_Mailchimp_Utils {
     });
     // Remove the found titles longest first.
     $group_titles = ",$group_titles,";
-
     foreach ($group_details as $civi_group_id => $detail) {
       $i = strpos($group_titles, ",$detail[civigroup_title],");
       if ($i !== FALSE) {
         $groups[] = $civi_group_id;
         // Remove this from the string.
         $group_titles = substr($group_titles, 0, $i+1) . substr($group_titles, $i + strlen(",$detail[civigroup_title],"));
+      }
+    }
+    return $groups;
+  }
+  /**
+   * Split a string of group titles from Mailchimp into an array of groupIds.
+   *
+   * @param string $group_titles As output by the Mailchimp api.
+   * @param array $group_details As from CRM_Mailchimp_Utils::getGroupsToSync
+   * but only including groups you're interested in.
+   * @return array CiviCRM groupIds.
+   */
+  public static function splitGroupTitlesFromMailchimp($group_input, $group_details) {
+    // Split on commas, excluding those escaped with backslash.
+    $interest_names = array_map(function($_) { return str_replace('\\,', ',', $_); },
+      preg_split('/(?<!\\\\), /', $group_input));
+
+    $groups = [];
+    foreach ($group_details as $civi_group_id => $details) {
+      if ($details['is_mc_update_grouping'] == 1) {
+        // This group is configured to allow updates from Mailchimp to CiviCRM.
+        if (in_array($details['interest_name'], $interest_names)) {
+          $groups[] = $civi_group_id;
+        }
       }
     }
     return $groups;
@@ -232,7 +263,7 @@ class CRM_Mailchimp_Utils {
     $verb = $dry_run ? 'Need to change ' : 'Changed ';
     try {
       $result = $api->get("/lists/$list_id/webhooks");
-      $webhooks = $result->data->webhooks;
+      $webhooks = empty($result->data->webhooks) ? NULL : $result->data->webhooks;
       //$webhooks = $api->get("/lists/$list_id/webhooks")->data->webhooks;
 
       if (empty($webhooks)) {

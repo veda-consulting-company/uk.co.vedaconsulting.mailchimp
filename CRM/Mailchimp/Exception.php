@@ -15,7 +15,8 @@ abstract class CRM_Mailchimp_Exception extends Exception {
     $this->response = isset($api->response) ? clone($api->response) : NULL;
 
     if (isset($this->response->data->title)) {
-      $message = $message_prefix . 'Mailchimp API said: ' . $this->response->data->title;
+      $message = $message_prefix . 'Mailchimp API said: ' . $this->response->data->title
+        . (empty($this->response->data->detail) ? '' : " (" . $this->response->data->detail . ")");
     }
     else {
       $message = $message_prefix . 'No data received, possibly a network timeout';

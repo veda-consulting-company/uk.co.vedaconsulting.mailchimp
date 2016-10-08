@@ -3,7 +3,7 @@
  * @file
  * Contains code for generating fixtures shared between tests.
  */
-class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
+class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
   const
     MC_TEST_LIST_NAME = 'Mailchimp-CiviCRM Integration Test List',
     MC_INTEREST_CATEGORY_TITLE = 'Test Interest Category',
@@ -213,6 +213,13 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     // Now set up the CiviCRM fixtures.
     //
 
+    // Ensure we have a security key configured.
+    $key = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+    if (!$key) {
+      // Create a random key.
+      CRM_Core_BAO_Setting::setItem( md5(time() . 'Something unique'), CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
+    }
+
     // Need to know field Ids for mailchimp fields.
     $result = civicrm_api3('CustomField', 'get', ['label' => array('LIKE' => "%mailchimp%")]);
     $custom_ids = [];
@@ -254,7 +261,6 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     static::$civicrm_group_id_interest_1 = (int) static::createMappedInterestGroup($custom_ids, static::C_TEST_INTEREST_GROUP_NAME_1, static::$test_interest_id_1);
     static::$civicrm_group_id_interest_2 = (int) static::createMappedInterestGroup($custom_ids, static::C_TEST_INTEREST_GROUP_NAME_2, static::$test_interest_id_2);
 
-
     // Now create test contacts
     // Re-set their names.
     static::$civicrm_contact_1 = [
@@ -282,10 +288,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     $url_parts = parse_url(CIVICRM_UF_BASEURL);
     $contact['email'] = strtolower($contact['first_name'] . '.' . $contact['last_name']) . '@' . $url_parts['host'];
     $contact['subscriber_hash'] = md5(strtolower($contact['email']));
-    $domain = preg_replace('@^https?://([^/]+).*$@', '$1', CIVICRM_UF_BASEURL);
 
-    $contact['email'] = $email;
-    $contact['subscriber_hash'] = md5(strtolower($email));
     $result = civicrm_api3('Contact', 'get', ['sequential' => 1,
       'first_name' => $contact['first_name'],
       'last_name'  => $contact['last_name'],
@@ -523,6 +526,15 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
    *              static::$civicrm_group_id_interest_{1,2}
    */
   public function joinGroup($contact, $group_id, $disable_post_hooks=FALSE) {
+    // Subscription at Mailchimp happens via the post hook. As that hook is also
+    // run in user contexts it errors with CRM_Core_Session::setMessage(),
+    // rather than an exception which may cause problems for the user. So we
+    // have to look for and catch these errors via the session.
+
+    // Ensure we have no session status message.
+    $session = CRM_Core_Session::singleton();
+    $session->getStatus(TRUE);
+
     if ($disable_post_hooks) {
       $original_state = CRM_Mailchimp_Utils::$post_hook_enabled;
       CRM_Mailchimp_Utils::$post_hook_enabled = FALSE;
@@ -535,6 +547,11 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     ]);
     if ($disable_post_hooks) {
       CRM_Mailchimp_Utils::$post_hook_enabled = $original_state;
+    }
+    $errors = $session->getStatus(TRUE);
+    if ($errors) {
+      // Throw it to break the tests.
+      throw new Exception($errors[0]['text']);
     }
     return $result;
   }
@@ -588,7 +605,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
    * Assert that a contact exists in the given CiviCRM group.
    */
   public function assertContactIsInGroup($contact_id, $group_id) {
-    $result = civicrm_api3('Contact', 'getsingle', ['group' => $this->membership_group_id, 'id' => $contact_id]);
+    $result = civicrm_api3('Contact', 'getsingle', ['group' => $group_id, 'id' => $contact_id]);
     $this->assertEquals($contact_id, $result['contact_id']);
   }
   /**

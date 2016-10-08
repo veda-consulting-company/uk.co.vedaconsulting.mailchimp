@@ -1,4 +1,7 @@
 <?php
+
+use Civi\Test\HeadlessInterface;
+
 /**
  * @file
  * Tests of CRM_Mailchimp_Sync methods that do not need the Mailchimp API.
@@ -12,10 +15,10 @@
  * - MailchimpApiIntegrationMockTest
  * - MailchimpApiIntegrationTest
  *
+ * @group headless
  */
-require 'integration-test-bootstrap.php';
 
-class SyncIntegrationTest extends MailchimpApiIntegrationBase {
+class SyncIntegrationTest extends CRM_Mailchimp_IntegrationTestBase implements HeadlessInterface {
 
   /**
    * If set false then the test method ended cleanly, which saves some teardown/setup
@@ -23,6 +26,14 @@ class SyncIntegrationTest extends MailchimpApiIntegrationBase {
    * that leaves the fixture in the same state as it was at the start.
    */
   public static $fixture_should_be_reset = TRUE;
+
+  public function setUpHeadless() {
+    // Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
+    // See: https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
+    return \Civi\Test::headless()
+      ->installMe(__DIR__)
+      ->apply();
+  }
 
   public static function setUpBeforeClass() {
   }
@@ -170,7 +181,7 @@ class SyncIntegrationTest extends MailchimpApiIntegrationBase {
 
     $result = CRM_Mailchimp_Sync::guessContactIdsByUniqueEmail();
     $this->assertEquals(0, $result);
-    // Check the matched record did indeed match.
+    // Check that the email that belongs to the deleted contact did not match.
     $dao = CRM_Core_DAO::executeQuery('SELECT COUNT(*) c FROM tmp_mailchimp_push_m WHERE email = %1 AND cid_guess = ' . static::$civicrm_contact_1['contact_id'],[
       1 => [static::$civicrm_contact_1['email'], 'String'],
     ]);
@@ -178,32 +189,13 @@ class SyncIntegrationTest extends MailchimpApiIntegrationBase {
     $this->assertEquals(0, $dao->c);
     $dao->free();
 
-    // Check the other one did not.
+    // Check the other one did not match either.
     $dao = CRM_Core_DAO::executeQuery('SELECT COUNT(*) c FROM tmp_mailchimp_push_m WHERE email = "notfound@example.com" AND cid_guess IS NULL');
     $dao->fetch();
     $this->assertEquals(1, $dao->c);
     $dao->free();
 
-    //
-    // Test 2: Secondary case: match an email unique to one person.
-    //
-    // Start again, this time the email will be unique to a contact, but not
-    // unique in the email table, e.g. it's in twice, but for the same contact.
-    //
-    civicrm_api3('Email', 'create', [
-      'contact_id' => static::$civicrm_contact_1['contact_id'],
-      'email' => static::$civicrm_contact_1['email'],
-      'is_billing' => 1,
-      ]);
-    CRM_Mailchimp_Sync::dropTemporaryTables();
-    CRM_Mailchimp_Sync::createTemporaryTableForMailchimp();
-    CRM_Core_DAO::executeQuery("INSERT INTO tmp_mailchimp_push_m (email) VALUES (%1);",[
-      1 => [static::$civicrm_contact_1['email'], 'String'],
-    ]);
-    $result = CRM_Mailchimp_Sync::guessContactIdsByUniqueEmail();
-    $this->assertEquals(0, $result);
-
-    // Test 3: the email belongs to two separate contacts, but one is deleted.
+    // Test 2: the email belongs to two separate contacts, but one is deleted.
     // so there's only one non-deleted unique contact.
     //
     civicrm_api3('Email', 'create', [
