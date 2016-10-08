@@ -263,7 +263,7 @@ class CRM_Mailchimp_Utils {
     $verb = $dry_run ? 'Need to change ' : 'Changed ';
     try {
       $result = $api->get("/lists/$list_id/webhooks");
-      $webhooks = $result->data->webhooks;
+      $webhooks = empty($result->data->webhooks) ? NULL : $result->data->webhooks;
       //$webhooks = $api->get("/lists/$list_id/webhooks")->data->webhooks;
 
       if (empty($webhooks)) {

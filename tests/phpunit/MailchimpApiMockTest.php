@@ -1,14 +1,13 @@
 <?php
+
+use Civi\Test\HeadlessInterface;
+use \Prophecy\Argument;
+
 /**
- * @file
  * These tests run with a mocked Mailchimp API.
  *
  * They test that expected calls are made (or not made) based on changes in
  * CiviCRM.
- *
- */
-/**
- * This tests CiviCRM using mocked Mailchimp API responses.
  *
  * It does not depend on a live Mailchimp account. However it is not a unit test
  * because it does depend on and make changes to the CiviCRM database.
@@ -18,12 +17,19 @@
  * - It is much faster to run
  * - It can be run without a Mailchimp account/api_key, and makes no changes to
  *   a mailchimp account, so could be seen as safer.
+ *
+ * @group headless
  */
-require_once 'integration-test-bootstrap.php';
+class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements HeadlessInterface {
 
-use \Prophecy\Argument;
+  public function setUpHeadless() {
+    // Civi\Test has many helpers, like install(), uninstall(), sql(), and sqlFile().
+    // See: https://github.com/civicrm/org.civicrm.testapalooza/blob/master/civi-test.md
+    return \Civi\Test::headless()
+      ->installMe(__DIR__)
+      ->apply();
+  }
 
-class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
 
   /**
    * If set false then the test method ended cleanly, which saves some teardown/setup
@@ -110,7 +116,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Also ensure we have this in cache:
     $api_prophecy->get("/lists", Argument::any())
       ->shouldBeCalled()
-      ->willReturn(json_decode('{"http_code":200,"data":{"lists":[{"id":"dummylistid","title":"'. static::MC_TEST_LIST_NAME . '"}]}}'));
+      ->willReturn(json_decode('{"http_code":200,"data":{"lists":[{"id":"dummylistid","name":"'. static::MC_TEST_LIST_NAME . '"}]}}'));
     CRM_Mailchimp_Utils::getMCListName('dummylistid');
   }
 
@@ -144,7 +150,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       "" => ['interestId1'=> FALSE,'interestId2'=>FALSE],
       ];
     foreach ($cases as $input=>$expected) {
-      $ints = $sync->getComparableInterestsFromCiviCrmGroups($input);
+      $ints = $sync->getComparableInterestsFromCiviCrmGroups($input, 'push');
       $this->assertEquals($expected, $ints, "mapping failed for test '$input'");
     }
 
@@ -175,7 +181,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
       ];
     foreach ($cases as $i=>$_) {
       list($input, $expected) = $_;
-      $ints = $sync->getComparableInterestsFromMailchimp($input);
+      $ints = $sync->getComparableInterestsFromMailchimp($input, 'push');
       $this->assertEquals($expected, $ints, "mapping failed for test '$i'");
     }
 
@@ -500,7 +506,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     civicrm_api3('Email', 'create', [
       'id' => $second_email['id'],
       // the API requires email to be passed, otherwise it deletes the record!
-      'email' => $second_email['email'],
+      'email' => $second_email['values'][0]['email'],
       'on_hold' => 1,
     ]);
     $sync->collectCiviCrm('push');
@@ -574,7 +580,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     civicrm_api3('Email', 'create', [
       'id' => $second_email['id'],
       // the API requires email to be passed, otherwise it deletes the record!
-      'email' => $second_email['email'],
+      'email' => $second_email['values'][0]['email'],
       'on_hold' => 1
     ]);
     $sync->collectCiviCrm('push');
@@ -588,7 +594,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     civicrm_api3('Email', 'create', [
       'id' => $second_email['id'],
       // the API requires email to be passed, otherwise it deletes the record!
-      'email' => $second_email['email'],
+      'email' => $second_email['values'][0]['email'],
       'on_hold' => 0,
     ]);
     civicrm_api3('Contact', 'create', [
@@ -1227,6 +1233,15 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // Prepare the mock for the subscription the post hook will do.
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
     CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
+    $api_prophecy->get('/lists/dummylistid/interest-categories', Argument::any() )
+      ->willReturn(json_decode('{"http_code":200,"data":{"categories":[{"id":"categoryid","title":"'. static::MC_INTEREST_CATEGORY_TITLE . '"}]}}'));
+    $api_prophecy->get("/lists/dummylistid/interest-categories/categoryid/interests", Argument::any())
+      ->willReturn(json_decode('{"http_code":200,"data":{"interests":[{"id":"interestId1","name":"' . static::MC_INTEREST_NAME_1 . '"},{"id":"interestId2","name":"' . static::MC_INTEREST_NAME_2 . '"}]}}'));
+    $api_prophecy->get('/lists', ['fields' => 'lists.id,lists.name','count'=>10000])
+      ->willReturn(json_decode(json_encode([
+          'http_code' => 200,
+          'data' => [ 'lists' => [] ],
+        ])));
     $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
 
     // Test 1.
@@ -1341,7 +1356,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
     // We do not change anything on the fixture.
     static::$fixture_should_be_reset = FALSE;
     $w = new CRM_Mailchimp_Page_WebHook();
-    list($code, $response) = $w->processRequest('wrongkey', []);
+    list($code, $response) = $w->processRequest('wrongkey', '', []);
   }
   /**
    * Test the webhook checks the key exists locally.
@@ -1558,7 +1573,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
           'LNAME' => static::$civicrm_contact_1['last_name'],
-          'INTERESTS' => [],
+          'INTERESTS' => '',
           ],
         'email' => static::$civicrm_contact_1['email'],
       ]]);
@@ -1588,7 +1603,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
           'LNAME' => static::$civicrm_contact_1['last_name'],
-          'INTERESTS' => [],
+          'INTERESTS' => '',
           ],
         'email' => static::$civicrm_contact_1['email'],
       ]]);
@@ -1672,7 +1687,7 @@ class MailchimpApiIntegrationMockTest extends MailchimpApiIntegrationBase {
         'merges' => [
           'FNAME' => static::$civicrm_contact_1['first_name'],
           'LNAME' => static::$civicrm_contact_1['last_name'],
-          'INTERESTS' => [],
+          'INTERESTS' => '',
           ],
         'email' => static::$civicrm_contact_1['email'],
       ]]);

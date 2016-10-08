@@ -7,7 +7,7 @@
 
 require 'integration-test-bootstrap.php';
 
-class MailchimpApiIntegrationTest extends MailchimpApiIntegrationBase {
+class MailchimpApiIntegrationTest extends CRM_Mailchimp_IntegrationTestBase {
   /**
    * Connect to API and create test fixtures in Mailchimp and CiviCRM.
    */

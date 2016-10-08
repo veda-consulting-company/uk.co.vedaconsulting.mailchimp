@@ -1028,7 +1028,7 @@ class CRM_Mailchimp_Sync {
         ],
     ];
     // Do interest groups.
-    $data['interests'] = $this->getComparableInterestsFromCiviCrmGroups($contact['groups']);
+    $data['interests'] = $this->getComparableInterestsFromCiviCrmGroups($contact['groups'], 'push');
     if (empty($data['interests'])) {
       unset($data['interests']);
     }
@@ -1332,10 +1332,10 @@ class CRM_Mailchimp_Sync {
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
         email VARCHAR(200) NOT NULL,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        hash CHAR(32) NOT NULL,
-        interests VARCHAR(4096) NOT NULL,
+        first_name VARCHAR(100) NOT NULL DEFAULT '',
+        last_name VARCHAR(100) NOT NULL DEFAULT '',
+        hash CHAR(32) NOT NULL DEFAULT '',
+        interests VARCHAR(4096) NOT NULL DEFAULT '',
         cid_guess INT(10) DEFAULT NULL,
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
@@ -1355,10 +1355,10 @@ class CRM_Mailchimp_Sync {
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
         email VARCHAR(200) NOT NULL,
-        first_name VARCHAR(100) NOT NULL,
-        last_name VARCHAR(100) NOT NULL,
-        hash CHAR(32) NOT NULL,
-        interests VARCHAR(4096) NOT NULL,
+        first_name VARCHAR(100) NOT NULL DEFAULT '',
+        last_name VARCHAR(100) NOT NULL DEFAULT '',
+        hash CHAR(32) NOT NULL DEFAULT '',
+        interests VARCHAR(4096) NOT NULL DEFAULT '',
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )

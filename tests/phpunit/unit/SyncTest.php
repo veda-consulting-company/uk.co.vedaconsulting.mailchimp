@@ -2,8 +2,6 @@
 /**
  * Test CRM_Mailchimp_Sync.
  */
-$classes_root =  implode(DIRECTORY_SEPARATOR,[dirname(dirname(__DIR__)), 'CRM', 'Mailchimp', '']);
-require $classes_root . 'Sync.php';
 
 class SyncTest extends \PHPUnit_Framework_TestCase {
 

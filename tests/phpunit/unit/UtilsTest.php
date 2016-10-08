@@ -1,7 +1,4 @@
 <?php
-$classes_root =  implode(DIRECTORY_SEPARATOR,[dirname(dirname(__DIR__)), 'CRM', 'Mailchimp', '']);
-require $classes_root . 'Utils.php';
-
 class UtilsTest extends \PHPUnit_Framework_TestCase {
 
   /**

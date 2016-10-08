@@ -3,7 +3,7 @@
  * @file
  * Contains code for generating fixtures shared between tests.
  */
-class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
+class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
   const
     MC_TEST_LIST_NAME = 'Mailchimp-CiviCRM Integration Test List',
     MC_INTEREST_CATEGORY_TITLE = 'Test Interest Category',
@@ -212,6 +212,13 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
     //
     // Now set up the CiviCRM fixtures.
     //
+
+    // Ensure we have a security key configured.
+    $key = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+    if (!$key) {
+      // Create a random key.
+      CRM_Core_BAO_Setting::setItem( md5(time() . 'Something unique'), CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
+    }
 
     // Need to know field Ids for mailchimp fields.
     $result = civicrm_api3('CustomField', 'get', ['label' => array('LIKE' => "%mailchimp%")]);
@@ -598,7 +605,7 @@ class MailchimpApiIntegrationBase extends \PHPUnit_Framework_TestCase {
    * Assert that a contact exists in the given CiviCRM group.
    */
   public function assertContactIsInGroup($contact_id, $group_id) {
-    $result = civicrm_api3('Contact', 'getsingle', ['group' => $this->membership_group_id, 'id' => $contact_id]);
+    $result = civicrm_api3('Contact', 'getsingle', ['group' => $group_id, 'id' => $contact_id]);
     $this->assertEquals($contact_id, $result['contact_id']);
   }
   /**

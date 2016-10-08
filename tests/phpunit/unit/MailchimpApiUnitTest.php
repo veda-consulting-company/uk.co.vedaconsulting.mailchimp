@@ -1,10 +1,4 @@
 <?php
-$classes_root =  implode(DIRECTORY_SEPARATOR,[dirname(dirname(__DIR__)), 'CRM', 'Mailchimp', '']);
-require $classes_root . 'Exception.php';
-require $classes_root . 'NetworkErrorException.php';
-require $classes_root . 'RequestErrorException.php';
-require $classes_root . 'Api3.php';
-
 /**
  * Unit tests for Mailchimp API.
  */
