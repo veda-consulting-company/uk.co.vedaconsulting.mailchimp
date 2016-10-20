@@ -289,7 +289,7 @@ class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
    */
   public static function createTestContact(&$contact) {
     $url_parts = parse_url(CIVICRM_UF_BASEURL);
-    $contact['email'] = strtolower($contact['first_name'] . '.' . $contact['last_name']) . '@' . $url_parts['host'];
+    $contact['email'] = strtolower($contact['first_name'] . '.' . $contact['last_name']) . '.' . time() . '@' . $url_parts['host'];
     $contact['subscriber_hash'] = md5(strtolower($contact['email']));
 
     $result = civicrm_api3('Contact', 'get', ['sequential' => 1,
