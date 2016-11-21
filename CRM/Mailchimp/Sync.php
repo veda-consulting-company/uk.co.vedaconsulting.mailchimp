@@ -313,7 +313,29 @@ class CRM_Mailchimp_Sync {
       // $hash = md5($email . $contact['first_name'] . $contact['last_name'] . $info);
       $hash = md5($contact['first_name'] . $contact['last_name'] . $info);
       // run insert prepared statement
-      $db->execute($insert, array($contact['id'], $email, $contact['first_name'], $contact['last_name'], $hash, $info));
+      try {
+        $db->execute($insert, array(
+          $contact['id'],
+          $email,
+          $contact['first_name'],
+          $contact['last_name'],
+          $hash,
+          $info
+        ));
+      }
+      catch (PEAR_Exception $e) {
+        if (get_class($e->getCause()) == 'DB_Error') {
+          // Oops, issue #225.
+          // https://github.com/veda-consulting/uk.co.vedaconsulting.mailchimp/issues/225
+          // I have no time to fix this right now, but we can at least log it
+          // instead of crashing the sync.
+          CRM_Mailchimp_Utils::checkDebug("Issue #225 for {$contact['first_name']} {$contact['last_name']} ({$email}), list ID: {$this->list_id}.");
+        }
+        else {
+          // Something else. Rethrow.
+          throw $e;
+        }
+      }
       $collected++;
     }
 
