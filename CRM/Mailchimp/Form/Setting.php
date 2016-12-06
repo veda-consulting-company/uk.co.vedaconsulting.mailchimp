@@ -39,15 +39,20 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
 
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
 
-    $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', 'reset=1',  TRUE, NULL, FALSE, TRUE);
-    $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
+    try {
+      $webhook_url = CRM_Mailchimp_Utils::getWebhookUrl($with_key=FALSE);
+      $this->assign( 'webhook_url', "Webhook URL: " . $webhook_url);
+    }
+    catch (InvalidArgumentException $e) {
+      $this->assign( 'webhook_url', "There was an error generating the webhook URL: " . htmlspecialchars($e->getMessage()));
+    }
 
     // Add the API Key Element
     $this->addElement('text', 'api_key', ts('API Key'), array(
       'size' => 48,
-    ));    
+    ));
 
-    // Add the User Security Key Element    
+    // Add the User Security Key Element
     $this->addElement('text', 'security_key', ts('Security Key'), array(
       'size' => 24,
     ));

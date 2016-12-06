@@ -125,18 +125,38 @@ class CRM_Mailchimp_Utils {
   /**
    * Returns the webhook URL.
    */
-  public static function getWebhookUrl() {
+  public static function getWebhookUrl($with_key=TRUE) {
     $security_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
     if (empty($security_key)) {
       // @Todo what exception should this throw?
       throw new InvalidArgumentException("You have not set a security key for your Mailchimp integration. Please do this on the settings page at civicrm/mailchimp/settings");
     }
-    $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook',
-      $query = 'reset=1&key=' . urlencode($security_key),
-      $absolute = TRUE,
-      $fragment = NULL,
-      $htmlize = FALSE,
-      $fronteend = TRUE);
+
+    if (CIVICRM_UF == 'WordPress') {
+      // Wordpress can't cope with Mailchimp's data because mailchimp uses some
+      // of Wordpress's reserved keys in its data.  So there's a whole
+      // independent wrapper script for the webhook.
+      // Get the dir that holds this extension.
+      $extension_root = dirname(dirname(__DIR__));
+      // Remove the absolute path to the root of the WP install
+      if (empty($_SERVER['DOCUMENT_ROOT'])) {
+        throw new InvalidArgumentException("No DOCUMENT_ROOT set.");
+      }
+      $extension_root = substr($extension_root, strlen($_SERVER['DOCUMENT_ROOT']));
+      // I'm not 100% sure about use of WP_HOME?
+      $webhook_url = WP_HOME . $extension_root . '/webhook-wrapper.php?';
+    }
+    else {
+      $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook',
+        $query = 'reset=1&',
+        $absolute = TRUE,
+        $fragment = NULL,
+        $htmlize = FALSE,
+        $fronteend = TRUE);
+    }
+    if ($with_key) {
+      $webhook_url .= 'key=' . urlencode($security_key);
+    }
 
     return $webhook_url;
   }
