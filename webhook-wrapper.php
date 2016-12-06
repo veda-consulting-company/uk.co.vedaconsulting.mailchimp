@@ -2,7 +2,8 @@
 /**
  * @file
  * Wordpress has an issue receiving data from Mailchimp because Mailchimp uses
- * some of Wordpress's reserved keys.
+ * some of Wordpress's reserved keys (https://codex.wordpress.org/Reserved_Terms), 
+ * namely, $_POST['type'].
  *
  * To get around this problem, Wordpress users can point Mailchimp at this file
  * instead, which will act as a proxy but wrap the payload from Mailchimp in a
