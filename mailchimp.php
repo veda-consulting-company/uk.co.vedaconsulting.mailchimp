@@ -1,9 +1,6 @@
 <?php
 
 require_once 'mailchimp.civix.php';
-require_once 'vendor/mailchimp/Mailchimp.php';
-require_once 'vendor/mailchimp/Mailchimp/Lists.php';
-
 
 /**
  * Implementation of hook_civicrm_config

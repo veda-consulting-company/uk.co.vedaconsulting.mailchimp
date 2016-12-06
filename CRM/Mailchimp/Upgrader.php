@@ -80,6 +80,14 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
    * Also change cronjobs.
    */
   public function upgrade_20() {
+    // CRM/Mailchimp
+    if (!class_exists('Mailchimp')) {
+      // Other mailchimp extensions might already have the old Mailchimp classes included.
+      $extension_root = dirname(dirname(__DIR__)) . DIRECTORY_SEPARATOR;
+      require_once $extension_root . 'legacy_mailchimp/mailchimp/Mailchimp.php';
+      require_once $extension_root . 'legacy_mailchimp/mailchimp/Mailchimp/Lists.php';
+    }
+
     $this->ctx->log->info('Applying update to v2.0 Updating Mailchimp Interest Ids to fit their new API');
     // New
     $api = CRM_Mailchimp_Utils::getMailchimpApi();
