@@ -31,11 +31,18 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
   public function run() {
 
     CRM_Mailchimp_Utils::checkDebug("Webhook POST: " . serialize($_POST));
+    if (isset($_POST['civicrm_mailchimp'])) {
+      // Unwrap it.
+      $data = $_POST['civicrm_mailchimp'];
+    }
+    else {
+      $data = $_POST;
+    }
     // Empty response object, default response code.
     try {
       $expected_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
       $given_key = isset($_GET['key']) ? $_GET['key'] : null;
-      list($response_code, $response_object) = $this->processRequest($expected_key, $given_key, $_POST);
+      list($response_code, $response_object) = $this->processRequest($expected_key, $given_key, $data);
       CRM_Mailchimp_Utils::checkDebug("Webhook response code $response_code (200 = ok)");
     }
     catch (RuntimeException $e) {

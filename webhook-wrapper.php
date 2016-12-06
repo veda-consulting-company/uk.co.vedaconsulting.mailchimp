@@ -49,8 +49,6 @@ header(
   . " "
   . $response->getReasonPhrase()
 );
-foreach ($response->getHeaders() as $h => $v) {
-  header("$h: $v");
-}
+// We return JSON
+header('Content-type: application/json');
 echo $response->getBody();
-
