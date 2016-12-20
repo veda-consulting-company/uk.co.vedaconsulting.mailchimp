@@ -132,8 +132,11 @@ class CRM_Mailchimp_Api3 {
    *
    * It quicker to run small ops directly for <15 items.
    *
+   * @param array $batch - operations to batch. By reference to save memory.
+   * @param string $method
+   * @return the result of the last Mailchimp API call.
    */
-  public function batchAndWait(Array $batch, $method=NULL) {
+  public function batchAndWait(Array &$batch, $method=NULL) {
     // This can take a long time...
     set_time_limit(0);
 
@@ -198,9 +201,12 @@ class CRM_Mailchimp_Api3 {
    * Sends a batch request.
    *
    * @param array batch array of arrays which contain three values: the method,
-   * the path (e.g. /lists) and the data describing a set of requests.
+   *   the path (e.g. /lists) and the data describing a set of requests.
+   *   We pass it by reference to save memory.
+   *
+   * @return array The result of the Mailchimp API call.
    */
-  public function makeBatchRequest(Array $batch) {
+  public function makeBatchRequest(Array &$batch) {
     $ops = [];
     foreach ($batch as $request) {
       $op = ['method' => strtoupper($request[0]), 'path' => $request[1]];
@@ -214,7 +220,8 @@ class CRM_Mailchimp_Api3 {
       }
       $ops []= $op;
     }
-    $result = $this->post('/batches', ['operations' => $ops]);
+    // Reference to $ops to save memory.
+    $result = $this->post('/batches', ['operations' => &$ops]);
 
     return $result;
   }

@@ -592,8 +592,16 @@ class CRM_Mailchimp_Sync {
     }
 
     if (!$this->dry_run && !empty($operations)) {
-      CRM_Mailchimp_Utils::checkDebug("Batching operations: " . print_r($operations, 1));
-      $result = $api->batchAndWait($operations);
+      // Don't print_r all operations in the debug, because deserializing
+      // allocates way too much memory if you have thousands of operations.
+      // Also split batches in blocks of MAILCHIMP_MAX_REQUEST_BATCH_SIZE to
+      // avoid memory limit problems.
+      $batches = array_chunk($operations, MAILCHIMP_MAX_REQUEST_BATCH_SIZE, TRUE);
+      foreach ($batches as &$batch) {
+        CRM_Mailchimp_Utils::checkDebug("Batching " . count($batch) . " operations. ");
+        $api->batchAndWait($batch);
+      }
+      unset($batch);
     }
 
     return ['additions' => $additions, 'updates' => $changes, 'unsubscribes' => $unsubscribes];
