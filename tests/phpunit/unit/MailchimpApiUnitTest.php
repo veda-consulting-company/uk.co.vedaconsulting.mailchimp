@@ -3,6 +3,7 @@
  * Unit tests for Mailchimp API.
  */
 
+require_once 'CRM/Mailchimp/Api3.php';
 class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
 
   protected $mock_api_key = 'shhhhhhhhhhhhhh-uk1';
@@ -201,10 +202,12 @@ class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
       }
       throw new Exception("no mock for request: " . json_encode($request));
     });
-    $result = $api->batchAndWait([
+
+    $batch = [
       ['get', '/success'],
       ['put', '/invalid/request'],
-      ]);
+    ];
+    $result = $api->batchAndWait($batch);
   }
 }
 
