@@ -51,6 +51,8 @@ are also sensible practise.
 
 ## How to Install
 
+Non-developers should use the packaged .zip or .tgz files. Developers see below.
+
 1. Download extension from https://github.com/veda-consulting/uk.co.vedaconsulting.mailchimp/releases/latest.
 2. Unzip / untar the package and place it in your configured extensions directory.
 3. When you reload the Manage Extensions page the new “Mailchimp” extension should be listed with an Install link.
@@ -65,6 +67,16 @@ Once you’ve setup your Mailchimp API key it can be added to CiviCRM through
 `https://<<your_site>>/civicrm/mailchimp/settings?reset=1`. Using “Save & Test”
 button will test that a connection can be made to your Mailchimp account, and if
 your API settings are correct.
+
+### Developers' install
+
+The .zip and .tgz files include bundled dependencies, primarily Guzzle, and
+exclude the tests/ and bin/ directory. If you want to develop this extension
+(thanks!) then you'll want to clone the repo, then run `composer install` from
+within the extension's directory. This should create and populate the `vendor/`
+directory for you. If you'd new to composer, it's very easily obtained and used,
+please see https://getcomposer.org/
+
 
 ## Basic Use Example
 

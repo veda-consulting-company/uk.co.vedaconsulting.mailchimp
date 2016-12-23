@@ -45,7 +45,7 @@
 
 <script type="text/javascript">
  cj(document).ready(function(){
-    var URL = "{/literal}{$webhook_url}{literal}" + '&key=';
+    var URL = "{/literal}{$webhook_url}{literal}" + 'key=';
     var content = cj('#security_key').val();
     cj('#webhook_url').text(URL + content);
     cj("#security_key").on('keyup', function() {

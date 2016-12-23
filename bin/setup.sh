@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+#
+# @todo this needs documenting.
+#
 EXTROOT=$(cd `dirname $0`/..; pwd)
 CIVIROOT="$1"
 XMLBUILD="$EXTROOT/build/xml/schema"

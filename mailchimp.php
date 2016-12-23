@@ -1,8 +1,6 @@
 <?php
 
 require_once 'mailchimp.civix.php';
-require_once 'vendor/mailchimp/Mailchimp.php';
-require_once 'vendor/mailchimp/Mailchimp/Lists.php';
 
 // Limit the size of a request batch to mailchimp, to avoid memory
 // problems.
