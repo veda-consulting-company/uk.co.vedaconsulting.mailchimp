@@ -10,33 +10,26 @@ Additionally, if you use Mailchimp's *Interests* feature, you can map particular
 Mailchimp interests to a CiviCRM group. You can choose whether this is a group
 that the subscriber can edit (using Mailchimp's forms), or not.
 
-Some updates happen in near-real time. So once set-up, if someone new subscribes
-using a Mailchimp embedded sign-up form, they will be added to CiviCRM (if not
-already found) and joined to the appropriate group. Likewise, if you use the
-"Add to Group" widget on a contact's Groups tab to add someone to a group that
-is sync-ed with a Mailchimp List, they will be immediately added. Likewise with
-individual unsubscribes/removals.
+Some updates happen in real time. For example, if someone new subscribes
+using a Mailchimp embedded sign-up form, they will immediately be added to CiviCRM (if not already found) and joined to the appropriate group. Likewise, if you use the "Add to Group" widget on a contact's Groups tab to add someone to a group that is sync-ed with a Mailchimp List, they will be immediately added to that list. Likewise with individual unsubscribes/removals.
 
-However not all updates are possible (or desireable) this way, and to cope with
-these there's two mechanisms offered:
+Other updates take longer to propogate. For example, bulk updates of contacts in CiviCRM are not reported immediately to Mailchimp - instead they are queued until the next Push Sync happens. Similarly changes made by subscribers in Mailchimp are not always reported back to CiviCRM immediately. It can take up to 20 minutes for them to arrive.
+
+As well as the real time updates, this extension offers two tasks that can be run to help with synchronisation.
 
 1. **Pull Sync: updates CiviCRM from Mailchimp**, assuming Mailchimp is correct.
    You'd do this if you had just made a bulk change at Mailchimp, e.g. you'd
    just imported a new list of contacts to a list and you wanted to make sure
    that these contacts were in CiviCRM.
 
+   Typically day-to-day changes made at Mailchimp (poeple clicking unsubscribe, or individuals subscribing or updating their preferences) are all done right away, so apart from when you make bulk changes that you do to your Mailchimp lists, you usually do not need to use the **Pull**.
+
 2. **Push Sync: updates Mailchimp from CiviCRM**, assuming CiviCRM is correct.
    You'd do this if you'd just made a bulk change at CiviCRM, e.g. added/removed
    a load of contacts to one or more sync-ed groups, or changed records such
    that now they qualify (or cease to qualify) for membership of a Smart Group.
 
-Typically day-to-day changes made at Mailchimp (poeple clicking unsubscribe, or
-individuals subscribing or updating their preferences) are all done right away,
-so except for bulk changes that you do to your list deliberately, you usually do
-not need to use the **Pull**.
-
-You can set up the **Push** to run at scheduled intervals, if you find that's
-useful, otherwise do it after a change, or at least before you send out an email.
+   You can set up the **Push** to run at scheduled intervals, if you find that's useful, otherwise do it after a change, or at least before you send out an email.
 
 **Note: syncing works best when done regularly**. If changes are made at both
 ends there's no way to figure out which way is correct and you'll be forced to
