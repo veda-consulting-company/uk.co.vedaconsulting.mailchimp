@@ -1274,7 +1274,7 @@ class CRM_Mailchimp_Sync {
           SELECT email, c.id AS contact_id
           FROM civicrm_email e
           JOIN civicrm_contact c ON e.contact_id = c.id AND c.is_deleted = 0
-          GROUP BY email
+          GROUP BY email, c.id
           HAVING COUNT(DISTINCT c.id)=1
           ) uniques ON m.email = uniques.email
         SET m.cid_guess = uniques.contact_id
@@ -1302,7 +1302,7 @@ class CRM_Mailchimp_Sync {
           SELECT email, first_name, last_name, c.id AS contact_id
           FROM civicrm_email e
           JOIN civicrm_contact c ON e.contact_id = c.id AND c.is_deleted = 0
-          GROUP BY email, first_name, last_name
+          GROUP BY email, first_name, last_name, c.id
           HAVING COUNT(DISTINCT c.id)=1
           ) uniques ON m.email = uniques.email AND m.first_name = uniques.first_name AND m.last_name = uniques.last_name
         SET m.cid_guess = uniques.contact_id
