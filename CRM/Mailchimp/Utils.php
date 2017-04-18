@@ -158,7 +158,7 @@ class CRM_Mailchimp_Utils {
 
     // Singleton pattern.
     if (!isset(static::$mailchimp_api)) {
-      $params = ['api_key' => self::getSettingValue('security_key')];
+      $params = ['api_key' => self::getSettingValue('api_key')];
       $debugging = self::getSettingValue('enable_debugging');
       if ($debugging == 1) {
         // We want debugging. Inject a logging callback.
