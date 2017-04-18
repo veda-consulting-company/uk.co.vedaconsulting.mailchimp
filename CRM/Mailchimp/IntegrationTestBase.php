@@ -216,7 +216,7 @@ class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
     //
 
     // Ensure we have a security key configured.
-    $key = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+    $key = CRM_Mailchimp_Utils::getSettingValue('security_key');
     if (!$key) {
       // Create a random key.
       CRM_Core_BAO_Setting::setItem( md5(time() . 'Something unique'), CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
