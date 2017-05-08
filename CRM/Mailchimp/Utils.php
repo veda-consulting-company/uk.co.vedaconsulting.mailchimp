@@ -126,7 +126,7 @@ class CRM_Mailchimp_Utils {
    * Returns the webhook URL.
    */
   public static function getWebhookUrl() {
-    $security_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+    $security_key = self::getSettingValue('security_key');
     if (empty($security_key)) {
       // @Todo what exception should this throw?
       throw new InvalidArgumentException("You have not set a security key for your Mailchimp integration. Please do this on the settings page at civicrm/mailchimp/settings");
@@ -158,8 +158,8 @@ class CRM_Mailchimp_Utils {
 
     // Singleton pattern.
     if (!isset(static::$mailchimp_api)) {
-      $params = ['api_key' => CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key')];
-      $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
+      $params = ['api_key' => self::getSettingValue('api_key')];
+      $debugging = self::getSettingValue('enable_debugging');
       if ($debugging == 1) {
         // We want debugging. Inject a logging callback.
         $params['log_facility'] = function($message) {
@@ -603,7 +603,7 @@ class CRM_Mailchimp_Utils {
    * Log a message and optionally a variable, if debugging is enabled.
    */
   public static function checkDebug($description, $variable='VARIABLE_NOT_PROVIDED') {
-    $debugging = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'enable_debugging', NULL, FALSE);
+    $debugging = self::getSettingValue('enable_debugging');
 
     if ($debugging == 1) {
       if ($variable === 'VARIABLE_NOT_PROVIDED') {
@@ -625,10 +625,27 @@ class CRM_Mailchimp_Utils {
    * deprecated (soon!) v1, v2 API
    */
   public static function mailchimp() {
-    $apiKey   = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'api_key');
+    $apiKey   = self::getSettingValue('api_key');
     $mcClient = new Mailchimp($apiKey);
     //CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Utils mailchimp $mcClient', $mcClient);
     return $mcClient;
+  }
+
+  /**
+   * Function retrieve values from civicrm_setting using api.
+   *
+   * @param string $settingName
+   */
+  public static function getSettingValue($settingName) {
+    try {
+      $setting = civicrm_api3('Setting', 'getSingle', array(
+        'return' => $settingName,
+      ));
+      return CRM_Utils_Array::value($settingName, $setting);
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      return NULL;
+    }
   }
 
 }

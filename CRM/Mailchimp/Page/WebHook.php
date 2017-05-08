@@ -33,7 +33,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     CRM_Mailchimp_Utils::checkDebug("Webhook POST: " . serialize($_POST));
     // Empty response object, default response code.
     try {
-      $expected_key = CRM_Core_BAO_Setting::getItem(self::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+      $expected_key = CRM_Mailchimp_Utils::getSettingValue('security_key');
       $given_key = isset($_GET['key']) ? $_GET['key'] : null;
       list($response_code, $response_object) = $this->processRequest($expected_key, $given_key, $_POST);
       CRM_Mailchimp_Utils::checkDebug("Webhook response code $response_code (200 = ok)");

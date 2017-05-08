@@ -13,7 +13,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   function preProcess() {
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
-      $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+      $stats = CRM_Mailchimp_Utils::getSettingValue('pull_stats');
 
       $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only=TRUE);
       if (!$groups) {
@@ -283,7 +283,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
    * Update the pull stats setting.
    */
   public static function updatePullStats($updates) {
-    $stats = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'pull_stats');
+    $stats = CRM_Mailchimp_Utils::getSettingValue('pull_stats');
     foreach ($updates as $list_id=>$settings) {
       if ($list_id == 'dry_run') {
         continue;
