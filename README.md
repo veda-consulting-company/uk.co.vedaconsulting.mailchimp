@@ -48,6 +48,7 @@ are also sensible practise.
 2. Unzip / untar the package and place it in your configured extensions directory.
 3. When you reload the Manage Extensions page the new “Mailchimp” extension should be listed with an Install link.
 4. Proceed with install.
+5. Grant the 'Mailchimp: allow webhook posts' for the the anonymous user so that Mailchimp can webhooks can be properly configured.
 
 Before the extension can be used you must set up your API keys. To get your
 Mailchimp account's API you should follow [Mailchimp's
