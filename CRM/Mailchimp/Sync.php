@@ -282,7 +282,7 @@ class CRM_Mailchimp_Sync {
     $start = microtime(TRUE);
 
     $collected = 0;
-    $insert = $db->prepare('INSERT INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
+    $insert = $db->prepare('INSERT IGNORE INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
     // Loop contacts:
     foreach ($result['values'] as $id=>$contact) {
       // Which email to use?
@@ -295,6 +295,10 @@ class CRM_Mailchimp_Sync {
             : NULL));
       if (!$email) {
         // Hmmm.
+        continue;
+      }
+
+      if (!(filter_var($email, FILTER_VALIDATE_EMAIL))) { 
         continue;
       }
 
@@ -311,12 +315,12 @@ class CRM_Mailchimp_Sync {
       //          email,           first name,      last name,      groupings
       // See note above about why we don't include email in the hash.
       // $hash = md5($email . $contact['first_name'] . $contact['last_name'] . $info);
-      $hash = md5($contact['first_name'] . $contact['last_name'] . $info);
+      $hash = md5($contact['first_name'] . $contact['last_name'] . $info . $contact['id']);
       // run insert prepared statement
       try {
         $db->execute($insert, array(
           $contact['id'],
-          $email,
+          trim($email),
           $contact['first_name'],
           $contact['last_name'],
           $hash,
@@ -540,7 +544,7 @@ class CRM_Mailchimp_Sync {
       m.interests m_interests, m.first_name m_first_name, m.last_name m_last_name,
       m.email m_email
       FROM tmp_mailchimp_push_c c
-      LEFT JOIN tmp_mailchimp_push_m m ON c.contact_id = m.cid_guess;");
+      LEFT JOIN tmp_mailchimp_push_m m ON c.email = m.email;");
 
     $url_prefix = "/lists/$this->list_id/members/";
     $changes = $additions = 0;
@@ -1153,6 +1157,10 @@ class CRM_Mailchimp_Sync {
     $result = civicrm_api3('Contact', 'get', [
       'group' => $this->membership_group_id,
       'contact_id' => ['IN' => array_keys($candidates)],
+      'is_opt_out' => 0,
+      'do_not_email' => 0,
+      'on_hold' => 0,
+      'is_deceased' => 0,
       'return' => 'contact_id',
       ]);
     $in_group = $result['values'];
@@ -1274,10 +1282,12 @@ class CRM_Mailchimp_Sync {
           SELECT email, c.id AS contact_id
           FROM civicrm_email e
           JOIN civicrm_contact c ON e.contact_id = c.id AND c.is_deleted = 0
+          AND c.do_not_email = 0 AND c.do_not_mail = 0 AND c.is_opt_out = 0 AND e.on_hold = 0
           GROUP BY email, c.id
           HAVING COUNT(DISTINCT c.id)=1
           ) uniques ON m.email = uniques.email
         SET m.cid_guess = uniques.contact_id
+        WHERE m.cid_guess IS NULL
         ");
   }
   /**
@@ -1302,11 +1312,12 @@ class CRM_Mailchimp_Sync {
           SELECT email, first_name, last_name, c.id AS contact_id
           FROM civicrm_email e
           JOIN civicrm_contact c ON e.contact_id = c.id AND c.is_deleted = 0
+          AND c.do_not_email = 0 AND c.do_not_mail = 0 AND c.is_opt_out = 0 AND e.on_hold = 0
           GROUP BY email, first_name, last_name, c.id
           HAVING COUNT(DISTINCT c.id)=1
           ) uniques ON m.email = uniques.email AND m.first_name = uniques.first_name AND m.last_name = uniques.last_name
         SET m.cid_guess = uniques.contact_id
-        WHERE m.first_name != '' AND m.last_name != ''
+        WHERE m.first_name != '' AND m.last_name != ''  AND m.cid_guess IS NULL
         ");
   }
   /**
