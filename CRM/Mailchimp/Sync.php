@@ -42,16 +42,16 @@ class CRM_Mailchimp_Sync {
     $this->list_id = $list_id;
     $this->group_details = CRM_Mailchimp_Utils::getGroupsToSync($groupIDs=[], $list_id, $membership_only=FALSE);
     foreach ($this->group_details as $group_id => $group_details) {
-      if (empty($group_details['category_id'])) {
         $this->membership_group_id = $group_id;
-      }
     }
     if (empty($this->membership_group_id)) {
       throw new InvalidArgumentException("Failed to find mapped membership group for list '$list_id'");
     }
     // Also cache without the membership group, i.e. interest groups only.
     $this->interest_group_details = $this->group_details;
-    unset($this->interest_group_details[$this->membership_group_id]);
+    if (empty($group_details['category_id'])) {
+      unset($this->interest_group_details[$this->membership_group_id]);
+    }
   }
   /**
    * Getter.

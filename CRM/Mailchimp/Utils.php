@@ -394,10 +394,6 @@ class CRM_Mailchimp_Utils {
       $params[1] = array($mc_list_id, 'String');
     }
 
-    if ($membership_only) {
-      $whereClause .= " AND (mc_grouping_id IS NULL OR mc_grouping_id = '')";
-    }
-
     $query  = "
       SELECT  entity_id, mc_list_id, mc_grouping_id, mc_group_id, is_mc_update_grouping, cg.title as civigroup_title, cg.saved_search_id, cg.children
  FROM    civicrm_value_mailchimp_settings mcs
