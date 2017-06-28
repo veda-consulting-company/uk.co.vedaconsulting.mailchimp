@@ -1445,7 +1445,7 @@ class CRM_Mailchimp_Sync {
     }
 
     $name_changed = FALSE;
-    if ($civi_details['first_name'] && $civi_details['first_name'] != $mailchimp_details['first_name']) {
+    if ($civi_details['first_name'] && trim($civi_details['first_name']) != trim($mailchimp_details['first_name'])) {
       $name_changed = TRUE;
       // First name mismatch.
       if (isset($merge_fields['FNAME'])) {
@@ -1453,7 +1453,7 @@ class CRM_Mailchimp_Sync {
         $params['merge_fields']['FNAME'] = $civi_details['first_name'];
       }
     }
-    if ($civi_details['last_name'] && $civi_details['last_name'] != $mailchimp_details['last_name']) {
+    if ($civi_details['last_name'] && trim($civi_details['last_name']) != trim($mailchimp_details['last_name'])) {
       $name_changed = TRUE;
       if (isset($merge_fields['LNAME'])) {
         // LNAME field exists, so set it.
