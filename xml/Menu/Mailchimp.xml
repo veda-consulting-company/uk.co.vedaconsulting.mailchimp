@@ -26,4 +26,10 @@
     <title>Mailchimp Pull Sync: update CiviCRM from Mailchimp</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
+  <item>
+   <path>civicrm/mailchimp/generate/webhookkey</path>
+   <page_callback>CRM_Mailchimp_Utils::generateWebhookKey</page_callback>
+   <title>Generate webhook key</title>
+   <access_callback>1</access_callback>
+  </item>  
 </menu>

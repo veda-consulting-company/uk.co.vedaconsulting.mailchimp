@@ -62,6 +62,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         'type' => 'submit',
         'name' => ts('Save & Test'),
       ),
+      array(
+        'type' => 'cancel',
+        'name' => ts('Cancel'),
+      ),      
     );
 
     // Add the Buttons.
@@ -88,7 +92,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $apiKey = CRM_Mailchimp_Utils::getSettingValue('api_key');
 
     $securityKey = CRM_Mailchimp_Utils::getSettingValue('security_key');
-
+    if (empty($securityKey)) {
+      $securityKey = CRM_Mailchimp_Utils::generateWebhookKey();
+    }
+    
     $enableDebugging = CRM_Mailchimp_Utils::getSettingValue('enable_debugging');
     $defaults['api_key'] = $apiKey;
     $defaults['security_key'] = $securityKey;
