@@ -150,7 +150,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       CRM_Core_Session::setStatus($message);
 
       // Check CMS's permission for (presumably) anonymous users.
-      if (self::checkMailchimpPermission($params['security_key'])) {
+      if (!self::checkMailchimpPermission($params['security_key'])) {
         CRM_Core_Session::setStatus(ts("Mailchimp WebHook URL requires 'allow webhook posts' permission to be set for any user roles."));
       }      
     }
@@ -185,10 +185,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     ));
 
     $response = curl_exec($curl);
-    $err = curl_error($curl);
-
+    $info = curl_getinfo($curl);
     curl_close($curl);
-    return $err ? FALSE : TRUE;
+
+    return ($info['http_code'] != 200) ? FALSE : TRUE;
   }  
 }
 
