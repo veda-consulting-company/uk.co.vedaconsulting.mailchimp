@@ -3,15 +3,14 @@ var mailchimp_groups = {$mailchimp_groups};
 
 {literal}
 function mailchimpGroupsPageAlter() {
-  var rows = cj('table.crm-group-selector tbody tr');
-  if (rows.length == 0) {
-    // Not loaded yet, try in half a second.
-    window.setTimeout(mailchimpGroupsPageAlter, 500);
-    return;
+
+  // Add header only once
+  if (cj('table.crm-group-selector thead th.crm-mailchimp').length < 1) {
+    cj('table.crm-group-selector thead th.crm-group-visibility').after(
+       '<th class="crm-mailchimp">Mailchimp Sync</th>');
   }
-  // Add header.
-  cj('table.crm-group-selector thead th.crm-group-name').after(
-    '<th class="crm-mailchimp">Mailchimp Sync</th>');
+  
+  var rows = cj('table.crm-group-selector tbody tr');
   rows.each(function() {
     var row = cj(this);
     var group_id_index = 'id' + row.data('id');
@@ -19,13 +18,17 @@ function mailchimpGroupsPageAlter() {
     if (mailchimp_groups[group_id_index]) {
       mailchimp_td.text(mailchimp_groups[group_id_index]);
     }
-    row.find('td.crm-group-name').after(mailchimp_td);
+    row.find('td.crm-group-visibility').after(mailchimp_td);
   });
 }
 {/literal}
 {if $action eq 16}
 {* action 16 is VIEW, i.e. the Manage Groups page.*}
-CRM.$(mailchimpGroupsPageAlter);
+{literal}
+  cj('table.crm-group-selector').on( 'draw.dt', function () {
+    mailchimpGroupsPageAlter();
+  });
+{/literal}
 {/if}
 </script>
 
