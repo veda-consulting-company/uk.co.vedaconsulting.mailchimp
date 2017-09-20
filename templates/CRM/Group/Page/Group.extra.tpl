@@ -10,10 +10,8 @@ function mailchimpGroupsPageAlter() {
     return;
   }
   // Add header.
-  // FIX ME - adding mailchimp sync as second column causes issue when the datatable is updated using AJAX by newer version CiviCRM, hence appending mailchimp sync as last column
-  if(cj("table.crm-group-selector thead th.crm-mailchimp").length === 0) {
-    cj('table.crm-group-selector thead tr').append('<th class="crm-mailchimp">Mailchimp Sync</th>');
-  }
+  cj('table.crm-group-selector thead th.crm-group-name').after(
+    '<th class="crm-mailchimp">Mailchimp Sync</th>');
   rows.each(function() {
     var row = cj(this);
     var group_id_index = 'id' + row.data('id');
@@ -21,20 +19,13 @@ function mailchimpGroupsPageAlter() {
     if (mailchimp_groups[group_id_index]) {
       mailchimp_td.text(mailchimp_groups[group_id_index]);
     }
-    // FIX ME - adding mailchimp sync as second column causes issue when the datatable is updated using AJAX by newer version CiviCRM, hence appending mailchimp sync as last column
-    row.append(mailchimp_td);
+    row.find('td.crm-group-name').after(mailchimp_td);
   });
 }
 {/literal}
 {if $action eq 16}
 {* action 16 is VIEW, i.e. the Manage Groups page.*}
-{* GK03082017 Group search func uses Ajax to update the datatable, hence triggerring mailchimpGroupsPageAlter func everytime the table redraws to ensure mailchimp related columns are added*}
-  {literal}
-    var dataTable = cj('table.crm-group-selector');
-    dataTable.on( 'draw.dt', function () {
-      CRM.$(mailchimpGroupsPageAlter);
-    });
-  {/literal}
+CRM.$(mailchimpGroupsPageAlter);
 {/if}
 </script>
 
