@@ -648,4 +648,15 @@ class CRM_Mailchimp_Utils {
     }
   }
 
+  /**
+   * To Generate random webhook key 
+   */
+  public static function generateWebhookKey() {
+    $randomWebhookKey = md5(uniqid(rand(), true));
+    if ($_POST['ajaxurl'] == 1) {
+      echo $randomWebhookKey;
+      CRM_Utils_System::civiExit();
+    }
+    return $randomWebhookKey;
+  }  
 }

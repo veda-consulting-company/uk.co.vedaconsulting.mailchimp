@@ -16,7 +16,10 @@
         </tr>
           <tr class="crm-mailchimp-setting-security-key-block">
           <td class="label">{$form.security_key.label}</td>
-          <td>{$form.security_key.html}<br/>
+          <td>{$form.security_key.html}
+            &nbsp;&nbsp;
+            <input class="crm-button" type="button" name="generate_webhook_key" id="generate_webhook_key" onclick="generateWebhookKey();" value="{ts}Generate Key{/ts}" />
+            <br/>
             <span class="description">{ts}Define a security key to be used with
             webhooks. e.g. a 12+ character random string of upper- and
             lower-case letters and numbers. Note if you change this once lists
@@ -58,7 +61,19 @@
         cj('#webhook_url').text(URL + content);
     });
  });
-
+function generateWebhookKey() {
+  var sourceUrl = CRM.url('civicrm/mailchimp/generate/webhookkey');
+  var URL = "{/literal}{$webhook_url}{literal}" + '&key=';
+  cj.ajax({
+    url: sourceUrl,
+    type: 'post',
+    data: {ajaxurl : 1 },
+    success: function (response) {
+      cj('#security_key').val(response);
+      cj('#webhook_url').text(URL + response);
+    }
+  });
+} 
 </script>
 {/literal}
 {*end*}

@@ -43,14 +43,14 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
 
     // Add the API Key Element
-    $this->addElement('text', 'api_key', ts('API Key'), array(
+    $this->add('text', 'api_key', ts('API Key'), array(
       'size' => 48,
-    ));    
+    ), TRUE);    
 
     // Add the User Security Key Element    
-    $this->addElement('text', 'security_key', ts('Security Key'), array(
+    $this->add('text', 'security_key', ts('Security Key'), array(
       'size' => 24,
-    ));
+    ), TRUE);
 
     // Add Enable or Disable Debugging
     $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
@@ -62,6 +62,10 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
         'type' => 'submit',
         'name' => ts('Save & Test'),
       ),
+      array(
+        'type' => 'cancel',
+        'name' => ts('Cancel'),
+      ),      
     );
 
     // Add the Buttons.
@@ -88,6 +92,9 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $apiKey = CRM_Mailchimp_Utils::getSettingValue('api_key');
 
     $securityKey = CRM_Mailchimp_Utils::getSettingValue('security_key');
+    if (empty($securityKey)) {
+      $securityKey = CRM_Mailchimp_Utils::generateWebhookKey();
+    }
 
     $enableDebugging = CRM_Mailchimp_Utils::getSettingValue('enable_debugging');
     $defaults['api_key'] = $apiKey;
@@ -141,8 +148,48 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       </table>";
 
       CRM_Core_Session::setStatus($message);
+
+      // Check CMS's permission for (presumably) anonymous users.
+      if (!self::checkMailchimpPermission($params['security_key'])) {
+        CRM_Core_Session::setStatus(ts("Mailchimp WebHook URL requires 'allow webhook posts' permission to be set for any user roles."));
+      }      
     }
   }
+
+  public static function checkMailchimpPermission($securityKey) {
+    if (empty($securityKey)) {
+      return FALSE;
+    }
+
+    $urlParams = array(
+      'reset' => 1,
+      'key' => $securityKey,
+    );
+    $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', $urlParams,  TRUE, NULL, FALSE, TRUE);
+    
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $webhook_url,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 30,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_HTTPHEADER => array(
+        "cache-control: no-cache",
+        "content-type: application/x-www-form-urlencoded",
+        "postman-token: febcecbd-c6f6-6e2e-f0f1-36e1fdc9cafa"
+      ),
+    ));
+
+    $response = curl_exec($curl);
+    $info = curl_getinfo($curl);
+    curl_close($curl);
+
+    return ($info['http_code'] != 200) ? FALSE : TRUE;
+  }  
 }
 
 
