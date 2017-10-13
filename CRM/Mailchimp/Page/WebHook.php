@@ -74,7 +74,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * Methods may return data for mailchimp, or may throw RuntimeException
    * objects, the error code of which will be used for the response.
    * So you can throw a `RuntimeException("Invalid webhook configuration", 500);`
-   * to tell mailchimp the webhook failed, but you can equally throw a 
+   * to tell mailchimp the webhook failed, but you can equally throw a
    * `RuntimeException("soft fail", 200)` which will not tell Mailchimp there
    * was any problem. Mailchimp retries if there was a problem.
    *
@@ -431,7 +431,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
   public function updateInterestsFromMerges() {
 
     // Get a list of CiviCRM group Ids that this contact should be in.
-    $should_be_in = $this->sync->splitMailchimpWebhookGroupsToCiviGroupIds($this->request_data['merges']['INTERESTS']);
+    $should_be_in = $this->sync->convertMailchimpWebhookGroupsToCiviGroupIds($this->request_data['merges']['GROUPINGS']);
 
     // Now get a list of all the groups they *are* in.
     $result = civicrm_api3('Contact', 'getsingle', ['return' => 'group', 'contact_id' => $this->contact_id]);
