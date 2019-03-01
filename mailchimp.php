@@ -548,7 +548,15 @@ function mailchimp_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
       // find membership group, then find out if the contact is in that group.
       $membership_group_details = CRM_Mailchimp_Utils::getGroupsToSync(array(), $list_id, TRUE);
       $result = civicrm_api3('Contact', 'getsingle', ['return'=>'group','contact_id'=>$objectRef[0]]);
-      if (!CRM_Mailchimp_Utils::getGroupIds($result['groups'], $membership_group_details)) {
+      $group_ids = CRM_Mailchimp_Utils::getGroupIds($result['groups'], $membership_group_details);
+      $contact_is_in_membership_group = FALSE;
+      foreach ($membership_group_details as $group_id => $_) {
+        if (in_array($group_id, $group_ids)) {
+          $contact_is_in_membership_group = TRUE;
+          break;
+        }
+      }
+      if (!$contact_is_in_membership_group) {
         // This contact is not in the membership group, so don't bother telling
         // Mailchimp about a change in their interests.
         return;

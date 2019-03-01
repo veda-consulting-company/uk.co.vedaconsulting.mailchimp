@@ -2,27 +2,24 @@
 
 class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
 
-  const 
-    MC_SETTING_GROUP = 'MailChimp Preferences';
-
    /**
    * Function to pre processing
    *
    * @return None
    * @access public
    */
-  function preProcess() { 
+  function preProcess() {
     $currentVer = CRM_Core_BAO_Domain::version(TRUE);
     //if current version is less than 4.4 dont save setting
     if (version_compare($currentVer, '4.4') < 0) {
       CRM_Core_Session::setStatus("You need to upgrade to version 4.4 or above to work with extension Mailchimp","Version:");
     }
-  }  
+  }
 
   public static function formRule($params){
     $currentVer = CRM_Core_BAO_Domain::version(TRUE);
     $errors = array();
-    if (version_compare($currentVer, '4.4') < 0) {        
+    if (version_compare($currentVer, '4.4') < 0) {
       $errors['version_error'] = " You need to upgrade to version 4.4 or above to work with extension Mailchimp";
     }
     return empty($errors) ? TRUE : $errors;
@@ -43,18 +40,18 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
 
     // Add the API Key Element
-    $this->add('text', 'api_key', ts('API Key'), array(
+    $this->add('text', 'mailchimp_api_key', ts('API Key'), array(
       'size' => 48,
     ), TRUE);    
 
     // Add the User Security Key Element    
-    $this->add('text', 'security_key', ts('Security Key'), array(
+    $this->add('text', 'mailchimp_security_key', ts('Security Key'), array(
       'size' => 24,
     ), TRUE);
 
     // Add Enable or Disable Debugging
     $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
-    $this->addRadio('enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
+    $this->addRadio('mailchimp_enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
 
     // Create the Submit Button.
     $buttons = array(
@@ -89,17 +86,17 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
   public function setDefaultValues() {
     $defaults = $details = array();
 
-    $apiKey = CRM_Mailchimp_Utils::getSettingValue('api_key');
+    $apiKey = Civi::settings()->get('mailchimp_api_key');
 
-    $securityKey = CRM_Mailchimp_Utils::getSettingValue('security_key');
+    $securityKey = Civi::settings()->get('mailchimp_security_key');
     if (empty($securityKey)) {
       $securityKey = CRM_Mailchimp_Utils::generateWebhookKey();
     }
 
-    $enableDebugging = CRM_Mailchimp_Utils::getSettingValue('enable_debugging');
-    $defaults['api_key'] = $apiKey;
-    $defaults['security_key'] = $securityKey;
-    $defaults['enable_debugging'] = $enableDebugging;
+    $enableDebugging = Civi::settings()->get('mailchimp_enable_debugging');
+    $defaults['mailchimp_api_key'] = $apiKey;
+    $defaults['mailchimp_security_key'] = $securityKey;
+    $defaults['mailchimp_enable_debugging'] = $enableDebugging;
 
     return $defaults;
   }
@@ -116,18 +113,12 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $params = $this->controller->exportValues($this->_name);
 
     // Save the API Key & Save the Security Key
-    if (CRM_Utils_Array::value('api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
-      CRM_Core_BAO_Setting::setItem($params['api_key'],
-        self::MC_SETTING_GROUP,
-        'api_key'
-      );
+    if (CRM_Utils_Array::value('mailchimp_api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
 
-      CRM_Core_BAO_Setting::setItem($params['security_key'],
-        self::MC_SETTING_GROUP,
-        'security_key'
-      );
 
-      CRM_Core_BAO_Setting::setItem($params['enable_debugging'], self::MC_SETTING_GROUP, 'enable_debugging');
+      foreach (['mailchimp_api_key', 'mailchimp_enable_debugging', 'mailchimp_security_key'] as $_) {
+        Civi::settings()->set($_, $params[$_]);
+      }
 
       try {
         $mcClient = CRM_Mailchimp_Utils::getMailchimpApi(TRUE);

@@ -57,9 +57,7 @@ class CRM_Mailchimp_WebhookSecurityTest extends \PHPUnit_Framework_TestCase impl
   // }
 
   public static function getSecurityKey(){
-    $skey = CRM_Core_BAO_Setting::getItem("MailChimp Preferences",
-      'security_key', NULL, FALSE
-    );
+    $skey = Civi::settings()->get('mailchimp_security_key');
     if (empty($skey)) {
       $skey = CRM_Mailchimp_Utils::generateWebhookKey();
     }

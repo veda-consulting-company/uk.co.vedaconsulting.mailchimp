@@ -130,9 +130,9 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
   public function testGetComparableInterestsFromCiviCrmGroups() {
 
     $sync = new CRM_Mailchimp_Sync(static::$test_list_id);
-    $g = static::C_TEST_MEMBERSHIP_GROUP_NAME;
-    $i = static::C_TEST_INTEREST_GROUP_NAME_1;
-    $j = static::C_TEST_INTEREST_GROUP_NAME_2;
+    $g = static::$civicrm_group_id_membership;
+    $i = static::$civicrm_group_id_interest_1;
+    $j = static::$civicrm_group_id_interest_2;
     $cases = [
       // In both membership and interest1
       "$g,$i" => ['interestId1'=>TRUE,'interestId2'=>FALSE],
@@ -305,11 +305,9 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
       'status' => "Removed",
     ]);
 
-    // Test 'deleted':
-    $result = civicrm_api3('GroupContact', 'delete', [
-      'group_id' => static::$civicrm_group_id_membership,
-      'contact_id' => static::$civicrm_contact_1['contact_id'],
-    ]);
+    // Test 'deleted': (Nb. API action GroupContact.delete is deprecated and no longer exposes deletion!
+    $contact_ids = [static::$civicrm_contact_1['contact_id']];
+    CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contact_ids, static::$civicrm_group_id_membership, 'Admin', 'Deleted');
 
 
     // If we got here OK, then the fixture is unchanged.
@@ -335,10 +333,10 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
     // Test:
     //
     // Because this person is NOT on the membership list, nothing we do to their
-    // interest group membership should result in a Mailchimp update.
+    // interest group membership should result in a Mailchimp put.
     //
     // Prepare the mock for the updateMailchimpFromCiviSingleContact
-    $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash", Argument::any())->shouldNotBeCalled();
+    $api_prophecy->patch("/lists/dummylistid/members/$subscriber_hash", ['status' => 'unsubscribed']);
 
     $result = civicrm_api3('GroupContact', 'create', [
       'sequential' => 1,
@@ -352,11 +350,10 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
       'contact_id' => static::$civicrm_contact_1['contact_id'],
       'status' => "Removed",
     ]);
-    $result = civicrm_api3('GroupContact', 'delete', [
-      'sequential' => 1,
-      'group_id' => static::$civicrm_group_id_interest_1,
-      'contact_id' => static::$civicrm_contact_1['contact_id'],
-    ]);
+
+    // Test 'deleted': (Nb. API action GroupContact.delete is deprecated and no longer exposes deletion!
+    $contact_ids = [static::$civicrm_contact_1['contact_id']];
+    CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contact_ids, static::$civicrm_group_id_membership, 'Admin', 'Deleted');
 
     //
     // Test:
@@ -390,7 +387,7 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
     // Use new prophecy
     $api_prophecy = $this->prophesize('CRM_Mailchimp_Api3');
     CRM_Mailchimp_Utils::setMailchimpApi($api_prophecy->reveal());
-    $api_prophecy->put("/lists/dummylistid/members/$subscriber_hash", Argument::any())->shouldBeCalledTimes(3);
+    $api_prophecy->patch("/lists/dummylistid/members/$subscriber_hash", ['status' => 'unsubscribed']);
 
     $result = civicrm_api3('GroupContact', 'create', [
       'sequential' => 1,
@@ -404,11 +401,9 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
       'contact_id' => static::$civicrm_contact_1['contact_id'],
       'status' => "Removed",
     ]);
-    $result = civicrm_api3('GroupContact', 'delete', [
-      'sequential' => 1,
-      'group_id' => static::$civicrm_group_id_interest_1,
-      'contact_id' => static::$civicrm_contact_1['contact_id'],
-    ]);
+    // Test 'deleted': (Nb. API action GroupContact.delete is deprecated and no longer exposes deletion!
+    $contact_ids = [static::$civicrm_contact_1['contact_id']];
+    CRM_Contact_BAO_GroupContact::removeContactsFromGroup($contact_ids, static::$civicrm_group_id_membership, 'Admin', 'Deleted');
 
   }
   /**

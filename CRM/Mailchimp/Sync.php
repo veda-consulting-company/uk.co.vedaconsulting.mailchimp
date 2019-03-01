@@ -295,10 +295,11 @@ class CRM_Mailchimp_Sync {
             : NULL));
       if (!$email) {
         // Hmmm.
+        print "x1\n";
         continue;
       }
 
-      if (!(filter_var($email, FILTER_VALIDATE_EMAIL))) { 
+      if (!(filter_var($email, FILTER_VALIDATE_EMAIL))) {
         continue;
       }
 

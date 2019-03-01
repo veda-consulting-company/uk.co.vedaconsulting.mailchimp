@@ -216,10 +216,10 @@ class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
     //
 
     // Ensure we have a security key configured.
-    $key = CRM_Mailchimp_Utils::getSettingValue('security_key');
+    $key = Civi::settings()->get('mailchimp_security_key');
     if (!$key) {
       // Create a random key.
-      CRM_Core_BAO_Setting::setItem( md5(time() . 'Something unique'), CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
+      Civi::settings()->set('mailchimp_security_key', md5(time() . 'Something unique'));
     }
 
     // Need to know field Ids for mailchimp fields.
@@ -289,6 +289,10 @@ class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
    */
   public static function createTestContact(&$contact) {
     $url_parts = parse_url(CIVICRM_UF_BASEURL);
+    if ($url_parts['host'] == 'localhost') {
+      // Without this php's filter_var FILTER_VALIDATE_EMAIL fails.
+      $url_parts['host'] = 'localhost.localdomain';
+    }
     $contact['email'] = strtolower($contact['first_name'] . '.' . $contact['last_name']) . '.' . time() . '@' . $url_parts['host'];
     $contact['subscriber_hash'] = md5(strtolower($contact['email']));
 

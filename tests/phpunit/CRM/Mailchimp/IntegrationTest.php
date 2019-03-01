@@ -297,10 +297,10 @@ class CRM_Mailchimp_IntegrationTest extends \PHPUnit_Framework_TestCase implemen
     //
 
     // Ensure we have a security key configured.
-    $key = CRM_Core_BAO_Setting::getItem(CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key', NULL, FALSE);
+    $key = Civi::settings()->get('mailchimp_security_key');
     if (!$key) {
       // Create a random key.
-      CRM_Core_BAO_Setting::setItem( md5(time() . 'Something unique'), CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'security_key');
+      Civi::settings()->set('mailchimp_security_key', md5(time() . 'Something unique'));
     }
 
     // Need to know field Ids for mailchimp fields.
