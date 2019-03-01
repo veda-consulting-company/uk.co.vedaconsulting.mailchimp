@@ -1588,6 +1588,36 @@ class MailchimpApiMockTest extends CRM_Mailchimp_IntegrationTestBase implements 
     $this->assertEquals(static::$civicrm_contact_1['email'], $result['email']);
   }
   /**
+   * Test the 'subscribe' webhook works for adding a new contact even if we don't have a name (Issue 314)
+   *
+   * @depends testGetMCInterestGroupings
+   */
+  public function testWebhookSubscribeNewNoName() {
+
+    // Remove contact 1 from database.
+    $this->assertGreaterThan(0, static::$civicrm_contact_1['contact_id']);
+    $result = civicrm_api3('Contact', 'delete', ['id' => static::$civicrm_contact_1['contact_id'], 'skip_undelete' => 1]);
+
+    $api_prophecy = $this->prepMockForWebhookConfig();
+    $w = new CRM_Mailchimp_Page_WebHook();
+    list($code, $response) = $w->processRequest('key', 'key', [
+      'type' => 'subscribe',
+      'data' => [
+        'list_id' => 'dummylistid',
+        'merges' => [
+          'FNAME' => '',
+          'LNAME' => '',
+          'INTERESTS' => '',
+          ],
+        'email' => static::$civicrm_contact_1['email'],
+      ]]);
+    $this->assertEquals(200, $code);
+    // We ought to be able to find the email.
+    $result = civicrm_api3('Email', 'getsingle', ['email' => static::$civicrm_contact_1['email']]);
+    $this->assertGreaterThan(0, $result['contact_id']);
+    static::$civicrm_contact_1['contact_id'] = $result['contact_id'];
+  }
+  /**
    * Test the 'subscribe' webhook works for editing an existing contact.
    *
    * @depends testGetMCInterestGroupings
