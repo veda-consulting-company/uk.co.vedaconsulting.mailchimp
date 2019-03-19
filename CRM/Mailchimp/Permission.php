@@ -1,6 +1,6 @@
 <?php
 
-class CRM_Mailchimp_Permission extends CRM_Core_Permission {
+class CRM_Mailchimp_Permission {
 
   /**
    * Returns an array of permissions defined by this extension. Modeled off of
@@ -35,6 +35,6 @@ class CRM_Mailchimp_Permission extends CRM_Core_Permission {
         }
       });
     }
-    return parent::check($permissions);
+    return CRM_Core_Permission::check($permissions);
   }
 }
