@@ -9,15 +9,16 @@ class CRM_Mailchimp_Permission extends CRM_Core_Permission {
    * @return array Keyed by machine names with human-readable labels for values
    */
   public static function getMailchimpPermissions() {
- 
+
   $prefix = ts('Mailchimp') . ': '; // name of extension or module
   return array(
- 'allow webhook posts' => $prefix . ts('allow webhook posts'),
+  'allow webhook posts' => $prefix . ts('allow webhook posts'),
+  'allow Mailchimp sync' =>$prefix . ts('allow Mailchimp sync'),
   );
   }
 
   /**
-   * Given a permission string or array, check for access requirements. 
+   * Given a permission string or array, check for access requirements.
    * if this is a permissions-challenged Joomla instance, don't enforce
    * CiviMailchimp-defined permissions.
    *

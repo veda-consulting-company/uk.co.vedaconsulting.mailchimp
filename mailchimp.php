@@ -445,7 +445,7 @@ function mailchimp_civicrm_navigationMenu(&$params){
           'parentID'  => $parentId,
           'operator'  => NULL,
           'navID'     => $mailChimpsyncId,
-          'permission'=> 'administer CiviCRM',
+          'permission'=> 'administer CiviCRM,allow Mailchimp sync',
         ),
   );
   $params[$parentId]['child'][$mailChimpPullId] = array(
@@ -457,7 +457,7 @@ function mailchimp_civicrm_navigationMenu(&$params){
           'parentID'  => $parentId,
           'operator'  => NULL,
           'navID'     => $mailChimpPullId,
-          'permission'=> 'administer CiviCRM',
+          'permission'=> 'administer CiviCRM,allow Mailchimp sync',
         ),
   );
 }
