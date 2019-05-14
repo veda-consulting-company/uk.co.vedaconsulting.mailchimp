@@ -10,7 +10,7 @@
     <path>civicrm/mailchimp/sync</path>
     <page_callback>CRM_Mailchimp_Form_Sync</page_callback>
     <title>Mailchimp Push Sync: update Mailchimp from CiviCRM</title>
-    <access_arguments>administer CiviCRM</access_arguments>
+    <access_arguments>administer CiviCRM;allow Mailchimp sync</access_arguments>
   </item>
   <item>
     <path>civicrm/mailchimp/webhook</path>
@@ -23,7 +23,7 @@
     <path>civicrm/mailchimp/pull</path>
     <page_callback>CRM_Mailchimp_Form_Pull</page_callback>
     <title>Mailchimp Pull Sync: update CiviCRM from Mailchimp</title>
-    <access_arguments>administer CiviCRM</access_arguments>
+    <access_arguments>administer CiviCRM;allow Mailchimp sync</access_arguments>
   </item>
   <item>
    <path>civicrm/mailchimp/generate/webhookkey</path>
