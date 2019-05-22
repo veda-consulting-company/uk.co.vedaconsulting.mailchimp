@@ -9,14 +9,14 @@
       <table class="form-layout-compressed">
     	  <tr class="crm-mailchimp-setting-api-key-block">
           <td class="label">{$form.api_key.label}</td>
-          <td>{$form.api_key.html}<br/>
+          <td>{$form.mailchimp_api_key.html}<br/>
       	    <span class="description">{ts}API Key from Mail Chimp{/ts}
 	          </span>
           </td>
         </tr>
           <tr class="crm-mailchimp-setting-security-key-block">
-          <td class="label">{$form.security_key.label}</td>
-          <td>{$form.security_key.html}
+          <td class="label">{$form.mailchimp_security_key.label}</td>
+          <td>{$form.mailchimp_security_key.html}
             &nbsp;&nbsp;
             <input class="crm-button" type="button" name="generate_webhook_key" id="generate_webhook_key" onclick="generateWebhookKey();" value="{ts}Generate Key{/ts}" />
             <br/>
@@ -31,8 +31,8 @@
           </td>
         </tr>
         <tr class="crm-mailchimp-setting-enabledebugging-block">
-          <td class="label">{$form.enable_debugging.label}</td>
-          <td>{$form.enable_debugging.html}<br/>
+          <td class="label">{$form.mailchimp_enable_debugging.label}</td>
+          <td>{$form.mailchimp_enable_debugging.html}<br/>
           </td>
         </tr>
       </table>
