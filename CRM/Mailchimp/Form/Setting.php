@@ -113,7 +113,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $params = $this->controller->exportValues($this->_name);
 
     // Save the API Key & Save the Security Key
-    if (CRM_Utils_Array::value('mailchimp_api_key', $params) || CRM_Utils_Array::value('security_key', $params)) {
+    if (CRM_Utils_Array::value('mailchimp_api_key', $params) || CRM_Utils_Array::value('mailchimp_security_key', $params)) {
 
 
       foreach (['mailchimp_api_key', 'mailchimp_enable_debugging', 'mailchimp_security_key'] as $_) {
@@ -141,7 +141,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       CRM_Core_Session::setStatus($message);
 
       // Check CMS's permission for (presumably) anonymous users.
-      if (!self::checkMailchimpPermission($params['security_key'])) {
+      if (!self::checkMailchimpPermission($params['mailchimp_security_key'])) {
         CRM_Core_Session::setStatus(ts("Mailchimp WebHook URL requires 'allow webhook posts' permission to be set for any user roles."));
       }      
     }
