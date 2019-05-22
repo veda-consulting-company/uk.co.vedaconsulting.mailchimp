@@ -48,16 +48,17 @@
 
 <script type="text/javascript">
  cj(document).ready(function(){
+ // xxx
     var URL = "{/literal}{$webhook_url}{literal}" + '&key=';
-    var content = cj('#security_key').val();
+    var content = cj('#mailchimp_security_key').val();
     cj('#webhook_url').text(URL + content);
-    cj("#security_key").on('keyup', function() {
+    cj("#mailchimp_security_key").on('keyup', function() {
       var focusedValue = cj(this).val();
       cj('#webhook_url').text(URL + focusedValue);
     });
     
-    cj("#security_key").blur(function(){
-        var content = cj('#security_key').val();
+    cj("#mailchimp_security_key").blur(function(){
+        var content = cj('#mailchimp_security_key').val();
         cj('#webhook_url').text(URL + content);
     });
  });
@@ -69,7 +70,7 @@ function generateWebhookKey() {
     type: 'post',
     data: {ajaxurl : 1 },
     success: function (response) {
-      cj('#security_key').val(response);
+      cj('#mailchimp_security_key').val(response);
       cj('#webhook_url').text(URL + response);
     }
   });
