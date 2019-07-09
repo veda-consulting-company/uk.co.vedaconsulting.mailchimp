@@ -25,7 +25,7 @@ class CRM_Mailchimp_Permission extends CRM_Core_Permission {
    *        See parent class for examples.
    * @return boolean
    */
-  public static function check($permissions) {
+  public static function check($permissions, $contactId = NULL) {
     $permissions = (array) $permissions;
 
     if (!CRM_Core_Config::singleton()->userPermissionClass->isModulePermissionSupported()) {
