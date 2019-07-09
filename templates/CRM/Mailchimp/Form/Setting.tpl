@@ -9,14 +9,14 @@
       <table class="form-layout-compressed">
     	  <tr class="crm-mailchimp-setting-api-key-block">
           <td class="label">{$form.api_key.label}</td>
-          <td>{$form.api_key.html}<br/>
+          <td>{$form.mailchimp_api_key.html}<br/>
       	    <span class="description">{ts}API Key from Mail Chimp{/ts}
 	          </span>
           </td>
         </tr>
           <tr class="crm-mailchimp-setting-security-key-block">
-          <td class="label">{$form.security_key.label}</td>
-          <td>{$form.security_key.html}
+          <td class="label">{$form.mailchimp_security_key.label}</td>
+          <td>{$form.mailchimp_security_key.html}
             &nbsp;&nbsp;
             <input class="crm-button" type="button" name="generate_webhook_key" id="generate_webhook_key" onclick="generateWebhookKey();" value="{ts}Generate Key{/ts}" />
             <br/>
@@ -31,8 +31,8 @@
           </td>
         </tr>
         <tr class="crm-mailchimp-setting-enabledebugging-block">
-          <td class="label">{$form.enable_debugging.label}</td>
-          <td>{$form.enable_debugging.html}<br/>
+          <td class="label">{$form.mailchimp_enable_debugging.label}</td>
+          <td>{$form.mailchimp_enable_debugging.html}<br/>
           </td>
         </tr>
       </table>
@@ -48,16 +48,17 @@
 
 <script type="text/javascript">
  cj(document).ready(function(){
+ // xxx
     var URL = "{/literal}{$webhook_url}{literal}" + '&key=';
-    var content = cj('#security_key').val();
+    var content = cj('#mailchimp_security_key').val();
     cj('#webhook_url').text(URL + content);
-    cj("#security_key").on('keyup', function() {
+    cj("#mailchimp_security_key").on('keyup', function() {
       var focusedValue = cj(this).val();
       cj('#webhook_url').text(URL + focusedValue);
     });
     
-    cj("#security_key").blur(function(){
-        var content = cj('#security_key').val();
+    cj("#mailchimp_security_key").blur(function(){
+        var content = cj('#mailchimp_security_key').val();
         cj('#webhook_url').text(URL + content);
     });
  });
@@ -69,7 +70,7 @@ function generateWebhookKey() {
     type: 'post',
     data: {ajaxurl : 1 },
     success: function (response) {
-      cj('#security_key').val(response);
+      cj('#mailchimp_security_key').val(response);
       cj('#webhook_url').text(URL + response);
     }
   });

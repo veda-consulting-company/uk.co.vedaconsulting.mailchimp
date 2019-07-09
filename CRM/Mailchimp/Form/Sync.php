@@ -19,7 +19,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   function preProcess() {
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
-      $stats = CRM_Mailchimp_Utils::getSettingValue('push_stats');
+      $stats = Civi::settings()->get('mailchimp_push_stats');
       $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only=TRUE);
       if (!$groups) {
         return;
@@ -133,7 +133,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
 
     // reset push stats
     $stats = ['dry_run' => $dry_run];
-    CRM_Core_BAO_Setting::setItem($stats, CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
+    CRM_Mailchimp_Utils::cacheSet('mailchimp_push_stats', $stats);
 
     // We need to process one list at a time.
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
@@ -323,7 +323,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
   public static function updatePushStats($updates) {
     CRM_Mailchimp_Utils::checkDebug('Start-CRM_Mailchimp_Form_Sync updatePushStats $updates= ', $updates);
 
-    $stats = CRM_Mailchimp_Utils::getSettingValue('push_stats');
+    $stats = CRM_Mailchimp_Utils::cacheGet('mailchimp_push_stats', []);
     foreach ($updates as $listId=>$settings) {
       if ($listId == 'dry_run') {
         continue;
@@ -332,6 +332,6 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
         $stats[$listId][$key] = $val;
       }
     }
-    CRM_Core_BAO_Setting::setItem($stats, CRM_Mailchimp_Form_Setting::MC_SETTING_GROUP, 'push_stats');
+    CRM_Mailchimp_Utils::cacheSet('mailchimp_push_stats', $stats);
   }
 }

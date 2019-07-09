@@ -1,8 +1,6 @@
 <?php
 class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
 
-  const MC_SETTING_GROUP = 'MailChimp Preferences';
-
   /**
    * Holds a CRM_Mailchimp_Sync object for the list.
    *
@@ -33,7 +31,7 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
     CRM_Mailchimp_Utils::checkDebug("Webhook POST: " . serialize($_POST));
     // Empty response object, default response code.
     try {
-      $expected_key = CRM_Mailchimp_Utils::getSettingValue('security_key');
+      $expected_key = Civi::settings()->get('mailchimp_security_key');
       $given_key = isset($_GET['key']) ? $_GET['key'] : null;
       list($response_code, $response_object) = $this->processRequest($expected_key, $given_key, $_POST);
       CRM_Mailchimp_Utils::checkDebug("Webhook response code $response_code (200 = ok)");

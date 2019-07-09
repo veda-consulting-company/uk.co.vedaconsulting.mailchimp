@@ -200,6 +200,34 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
     return TRUE;
   }
   /**
+   * Migrate settings from generic names to a mailchimp_ prefix.
+   *
+   * Issue 317
+   */
+  public function upgrade_21() {
+    $this->ctx->log->info('Migrating settings to safer names.');
+
+    $settings = Civi::settings();
+
+    foreach ([
+      'security_key',
+      'api_key',
+      'enable_debugging',
+    ] as $setting) {
+
+      // Copy the settings to the new name.
+      $settings->set("mailchimp_$setting", $settings->get($setting));
+
+      // Revert the old setting. This is the nearest we get to deleting one.
+      $settings->set($setting, NULL);
+    }
+    // Remove push/pull stats.
+    $settings->set('push_stats', NULL);
+    $settings->set('pull_stats', NULL);
+
+    return TRUE;
+  }
+  /**
    * Example: Run an external SQL script
    *
    * @return TRUE on success
