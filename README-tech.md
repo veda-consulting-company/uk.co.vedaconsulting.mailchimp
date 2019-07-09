@@ -78,6 +78,15 @@ available (i.e. not "on hold") email in this order:
    program to bootstrap Civi in a way that would work for Wordpress and Drupal,
    currently the boostrapping is hackish. PRs welcome :-)
 
+
+To run tests, install a Civi Build Kit installation, then from the extension's dir, run one of these:
+
+    phpunit5 tests/phpunit/unit/
+    phpunit5 tests/phpunit/MailchimpApiMockTest.php
+    phpunit5 tests/phpunit/SyncIntegrationTest.php
+    phpunit5 tests/phpunit/CRM/Mailchimp/IntegrationTest.php
+    phpunit5 tests/phpunit/CRM/Mailchimp/WebhookSecurityTest.php
+
 # Push CiviCRM to Mailchimp Sync for a list.
 
 The Push Sync is done by the `CRM_Mailchimp_Sync` class. The steps are:

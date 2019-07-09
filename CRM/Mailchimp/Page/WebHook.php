@@ -398,23 +398,43 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       );
       if (!$this->contact_id) {
         // New contact, create now.
-        $result = civicrm_api3('Contact', 'create', [
-          'contact_type' => 'Individual',
-          'first_name' => $this->request_data['merges']['FNAME'],
-          'last_name'  => $this->request_data['merges']['LNAME'],
-        ]);
-        if (!$result['id']) {
-          throw new RuntimeException("Failed to create contact", 500);
-        }
-        $this->contact_id = $result['id'];
-        // Create bulk email.
-        $result = civicrm_api3('Email', 'create', [
-          'contact_id' => $this->contact_id,
-          'email' => $this->request_data['email'],
-          'is_bulkmail' => 1,
+
+        // Issue 314: The CiviCRM API will fail if first and last name are missing.
+        if (empty($this->request_data['merges']['FNAME']) && empty($this->request_data['merges']['LNAME'])) {
+          // Just create a contact for the email.
+          $result = civicrm_api3('Contact', 'create', [
+            'contact_type' => 'Individual',
+            'email' => $this->request_data['email'],
           ]);
-        if (!$result['id']) {
-          throw new RuntimeException("Failed to create contact's email", 500);
+          if (!empty($result['id'])) {
+            $this->contact_id = $result['id'];
+            // reload the email we just created and set it to bulk.
+            $result = civicrm_api3('Email', 'getsingle', ['contact_id' => $this->contact_id, 'email' => $this->request_data['email']]);
+            civicrm_api3('Email', 'Create', ['id' => $result['id'], 'is_bulkmail' => 1]);
+          }
+        }
+        else {
+          // Normal create contact (with name).
+          $result = civicrm_api3('Contact', 'create', [
+            'contact_type' => 'Individual',
+            'first_name' => $this->request_data['merges']['FNAME'],
+            'last_name'  => $this->request_data['merges']['LNAME'],
+          ]);
+          if (!empty($result['id'])) {
+            $this->contact_id = $result['id'];
+            // Create bulk email.
+            $result = civicrm_api3('Email', 'create', [
+              'contact_id'  => $this->contact_id,
+              'email'       => $this->request_data['email'],
+              'is_bulkmail' => 1,
+              ]);
+            if (!$result['id']) {
+              throw new RuntimeException("Failed to create contact's email", 500);
+            }
+          }
+        }
+        if (!$this->contact_id) {
+          throw new RuntimeException("Failed to create contact", 500);
         }
       }
     }
