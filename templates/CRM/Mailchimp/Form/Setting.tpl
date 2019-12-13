@@ -8,7 +8,7 @@
 
       <table class="form-layout-compressed">
     	  <tr class="crm-mailchimp-setting-api-key-block">
-          <td class="label">{$form.api_key.label}</td>
+          <td class="label">{$form.mailchimp_api_key.label}</td>
           <td>{$form.mailchimp_api_key.html}<br/>
       	    <span class="description">{ts}API Key from Mail Chimp{/ts}
 	          </span>
