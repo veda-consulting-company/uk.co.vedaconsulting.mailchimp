@@ -34,32 +34,6 @@ function mailchimp_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function mailchimp_civicrm_install() {
-
-  // Create a cron job to do sync data between CiviCRM and MailChimp.
-  $params = array(
-    'sequential' => 1,
-    'name'          => 'Mailchimp Push Sync',
-    'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
-    'run_frequency' => 'Daily',
-    'api_entity'    => 'Mailchimp',
-    'api_action'    => 'pushsync',
-    'is_active'     => 0,
-  );
-  $result = civicrm_api3('job', 'create', $params);
-  
-
-  // Create Pull Sync job.
-  $params = array(
-    'sequential' => 1,
-    'name'          => 'Mailchimp Pull Sync',
-    'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
-    'run_frequency' => 'Daily',
-    'api_entity'    => 'Mailchimp',
-    'api_action'    => 'pullsync',
-    'is_active'     => 0,
-  );
-  $result = civicrm_api3('job', 'create', $params);
-
   return _mailchimp_civix_civicrm_install();
 }
 
