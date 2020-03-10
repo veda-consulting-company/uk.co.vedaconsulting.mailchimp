@@ -32,6 +32,10 @@ class CRM_Mailchimp_Sync {
    */
   protected $interest_group_details;
   /**
+   * As above but groupep by category.
+   */
+  protected $interest_group_details_by_category;
+  /**
    * The CiviCRM group id responsible for membership at Mailchimp.
    */
   protected $membership_group_id;
@@ -52,6 +56,16 @@ class CRM_Mailchimp_Sync {
     // Also cache without the membership group, i.e. interest groups only.
     $this->interest_group_details = $this->group_details;
     unset($this->interest_group_details[$this->membership_group_id]);
+
+    // for mailchimp API v3, we need a hierarchized interest group details (group by mailchimp id)
+    $group_details_by_category = array();
+    foreach ($this->interest_group_details as $civi_group_id => $details) {
+      if (!array_key_exists($details['category_id'], $group_details_by_category)) {
+        $group_details_by_category[$details['category_id']] = array();
+      }
+      $group_details_by_category[$details['category_id']][$civi_group_id] = $details;
+    }
+    $this->interest_group_details_by_category = $group_details_by_category;
   }
   /**
    * Getter.
@@ -953,6 +967,10 @@ class CRM_Mailchimp_Sync {
    */
   public function splitMailchimpWebhookGroupsToCiviGroupIds($group_input) {
     return CRM_Mailchimp_Utils::splitGroupTitlesFromMailchimp($group_input, $this->interest_group_details);
+  }
+
+  public function convertMailchimpWebhookGroupsToCiviGroupIds($group_input) {
+    return CRM_Mailchimp_Utils::convertMailchimpWebhookGroupsToCiviGroupIds($group_input, $this->interest_group_details_by_category);
   }
 
   /**
