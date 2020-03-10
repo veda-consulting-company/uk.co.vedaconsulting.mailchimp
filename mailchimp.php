@@ -410,18 +410,6 @@ function mailchimp_civicrm_navigationMenu(&$params){
           'permission'=> 'administer CiviCRM',
         ),
   );
-  $params[$parentId]['child'][$mailChimpsyncId] = array(
-        'attributes' => array(
-          'label'     => ts('Sync Civi Contacts To Mailchimp'),
-          'name'      => 'Mailchimp_Sync',
-          'url'       => CRM_Utils_System::url('civicrm/mailchimp/sync', 'reset=1', TRUE),
-          'active'    => 1,
-          'parentID'  => $parentId,
-          'operator'  => NULL,
-          'navID'     => $mailChimpsyncId,
-          'permission'=> 'administer CiviCRM,allow Mailchimp sync',
-        ),
-  );
   $params[$parentId]['child'][$mailChimpPullId] = array(
         'attributes' => array(
           'label'     => ts('Sync Mailchimp Contacts To Civi‏'),
