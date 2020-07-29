@@ -1534,7 +1534,7 @@ return;
         cid_guess INT(10) DEFAULT NULL,
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
-        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
+        ENGINE=InnoDB;");
 
     // Convenience in collectMailchimp.
     return $dao;
@@ -1557,7 +1557,7 @@ return;
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )
-        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
+        ENGINE=InnoDB ;");
     return $dao;
   }
   /**
