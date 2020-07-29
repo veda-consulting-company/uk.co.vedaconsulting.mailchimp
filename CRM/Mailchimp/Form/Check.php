@@ -18,8 +18,14 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
       $data = CRM_Mailchimp_Utils::cacheGet(C::CACHE_KEY);
+      // Add links to group settings.
+      foreach ($data as $groupId => $groupData) {
+        $data[$groupId]['url'] = $this->groupPageUrl($groupId);
+        foreach ($groupData['sub_groups'] as $subId => $subData) {
+           $data[$groupId]['sub_groups'][$subId]['url'] = $this->groupPageUrl($subId);
+        }
+      }
       $this->assign('groupData', $data);
-      
     }
     else {
 
@@ -34,6 +40,23 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
     
     // export form elements
     parent::buildQuickForm();
+  }
+  
+  protected function groupPageUrl($gid) {
+    $groupUrl = 'civicrm/group';
+    $urlParams = [
+      'action' => 'update',
+      'reset' => 1,
+      'id' => $gid,
+    ];
+    return CRM_Utils_System::url(
+        $groupUrl,
+        $urlParams,
+        TRUE,
+        NULL,
+        FALSE,
+        FALSE
+     );
   }
 
   public function postProcess() {

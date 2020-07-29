@@ -9,6 +9,9 @@
         {ts} Linked to a list not available on Mailchimp ({$group.list_id}){/ts}
         {/if}
         </p>
+        <p>
+         <a href="{$group.url}" class="crm-popup">Edit Group</a>
+        </p>
        </div>
       <table class="form-layout-compressed">
         <tr><td><strong>{ts}Total Members{/ts}</strong></td><td>{$group.stats.total_members}</td><td></td></tr>
@@ -37,6 +40,9 @@
         <div>
         <p>
         Linked to interest group: <em>{$subGroup.interest_name}</em> 
+        </p>
+        <p>
+         <a href="{$subGroup.url}" class="crm-popup">Edit Group</a>
         </p>
         </div>
         <table class="form-layout-compressed">
