@@ -392,10 +392,12 @@ function mailchimp_civicrm_navigationMenu(&$params){
   $mailchimpSettings  = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Settings', 'id', 'name');
   $mailchimpSync      = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Sync', 'id', 'name');
   $mailchimpPull      = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Pull', 'id', 'name');
+  $mailchimpCheck     = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Mailchimp_Check', 'id', 'name');
   $maxId              = max(array_keys($params));
   $mailChimpMaxId     = empty($mailchimpSettings) ? $maxId+1           : $mailchimpSettings;
   $mailChimpsyncId    = empty($mailchimpSync)     ? $mailChimpMaxId+1  : $mailchimpSync;
   $mailChimpPullId    = empty($mailchimpPull)     ? $mailChimpsyncId+1 : $mailchimpPull;
+  $mailChimpCheckId    = empty($mailchimpCheck)     ? $mailChimpPullId+1 : $mailchimpCheck;
 
 
   $params[$parentId]['child'][$mailChimpMaxId] = array(
@@ -432,6 +434,18 @@ function mailchimp_civicrm_navigationMenu(&$params){
           'operator'  => NULL,
           'navID'     => $mailChimpPullId,
           'permission'=> 'administer CiviCRM,allow Mailchimp sync',
+        ),
+  );
+  $params[$parentId]['child'][$mailChimpCheckId] = array(
+        'attributes' => array(
+          'label'     => ts('Check Mailchimp-enabled Groups‏'),
+          'name'      => 'Mailchimp_Pull',
+          'url'       => CRM_Utils_System::url('civicrm/mailchimp/check', 'reset=1', TRUE),
+          'active'    => 1,
+          'parentID'  => $parentId,
+          'operator'  => NULL,
+          'navID'     => $mailChimpCheckId,
+          'permission'=> 'administer CiviCRM',
         ),
   );
 }
