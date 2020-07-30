@@ -137,16 +137,21 @@ class CRM_Mailchimp_Check {
   
   public function checkCiviSubGroups() {
     $returnData = []; 
+    $clauses = [
+      'members_in_main_group'  => '',
+      'valid_members_in_main_group' => " AND tmp.invalid != 1 AND tmp.is_duplicate != 1",
+      'is_duplicate' => " AND tmp.is_duplicate = 1",
+      'invalid' => " AND tmp.invalid = 1",
+      'on_hold' => " AND tmp.on_hold = 1",
+      'do_not_email' => " AND tmp.do_not_email = 1",
+      'is_deceased' => " AND tmp.is_deceased = 1",
+    ];
     foreach ($this->subGroupDetails as $groupId => $details) {
       $data = $details;
       $tmpTable = $this->getTempTableName('c');
       $data['stats']['total_members'] = $this->getGroupContacts($groupId, TRUE);
       
       $table = !empty($details['civigroup_uses_cache']) ? 'civicrm_group_contact_cache' : 'civicrm_group_contact';
-      $clauses = [
-        'members_in_main_group'  => '',
-        'valid_members_in_main_group' => " AND tmp.invalid != 1 AND tmp.is_duplicate != 1"
-      ];
       if ($details['civigroup_uses_cache']) {
         $query = "
           SELECT COUNT(*) FROM civicrm_group_contact_cache g 
@@ -164,11 +169,13 @@ class CRM_Mailchimp_Check {
         ";
         
       }
-      foreach ($clauses as $key => $sql) {
-        $query .= $sql;
-        $dao = CRM_Core_DAO::executeQuery($query, [1 => [$groupId, 'Integer']]);
+      foreach ($clauses as $key => $clause) {
+        $newQuery = $query . $clause;
+        $dao = CRM_Core_DAO::executeQuery($newQuery, [1 => [$groupId, 'Integer']]);
         $data['stats'][$key] = $dao->fetchValue();
+CRM_Core_Error::debug_var('checkmailchimpquery', $newQuery);
       }
+CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
       $returnData[$groupId] = $data;      
     }
     return $returnData;
@@ -246,13 +253,16 @@ class CRM_Mailchimp_Check {
     }
     $emails = $this->crm('Email', 'get', [
       'on_hold' => 0,
-      'return' => 'contact_id,email,is_bulkmail,is_primary',
+      'return' => ['contact_id', 'email', 'is_bulkmail', 'is_primary', 'on_hold'],
       'contact_id' => ['IN' => array_keys($members)],
       'options' => ['limit' => 0],
     ]);
     
     
     foreach ($emails['values'] as $email) {
+      if ($email['on_hold'] || empty($email['email']) || !filter_var($email['email'], FILTER_VALIDATE_EMAIL)) {
+        continue;
+      }
       if ($email['is_bulkmail']) {
         $members[$email['contact_id']]['bulk_email'] = $email['email'];
       }
@@ -272,13 +282,13 @@ class CRM_Mailchimp_Check {
     $dao = $this->createTempTable($tableName);
     $db = $dao->getDatabaseConnection();    
    
-    $insert = $db->prepare("INSERT IGNORE INTO $tableName VALUES(?, ?, ?, ?)");
+    $insert = $db->prepare("INSERT IGNORE INTO $tableName VALUES(?, ?, ?, ?, ?, ?, ?)");
     
     foreach ($members as $contact) {
       $email = '';
       // Which email to use?
       foreach (['bulk_email', 'primary_email', 'other_email'] as $emailKey) {
-        if (!empty($contact[$emailKey]) && filter_var($contact[$emailKey], FILTER_VALIDATE_EMAIL)) {
+        if (!empty($contact[$emailKey])) {
           $email = $contact[$emailKey];
           break;
         }
@@ -305,7 +315,15 @@ class CRM_Mailchimp_Check {
       if ($invalid || $isDuplicate) {
         $resultData['total_invalid']++;
       }
-      $db->execute($insert, [intval($contact['id']), $email, intval($invalid), intval($isDuplicate)]);
+      $db->execute($insert, [
+         intval($contact['id']), 
+         $email,
+         intval($invalid),
+         intval($isDuplicate),
+         intval($contact['on_hold']),
+         intval($contact['do_not_email']),
+         intval($contact['is_deceased'])
+       ]);
       
     }
     $db->freePrepared($insert);
@@ -330,6 +348,9 @@ class CRM_Mailchimp_Check {
         email VARCHAR(200) NOT NULL,
         invalid TINYINT DEFAULT 0,
         is_duplicate TINYINT DEFAULT 0,
+        on_hold TINYINT DEFAULT 0,
+        do_not_email TINYINT DEFAULT 0,
+        is_deceased TINYINT DEFAULT 0,
         PRIMARY KEY (contact_id),
         KEY (email))
         ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");

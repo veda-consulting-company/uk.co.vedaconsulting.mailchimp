@@ -49,6 +49,10 @@
          <tr><td><strong>{ts}Total members{/ts}</strong></td><td>{$subGroup.stats.total_members}</td></tr>
          <tr><td><strong>{ts}Members also in <em>{$group.civigroup_title}</em>{/ts}</strong></td><td>{$subGroup.stats.members_in_main_group}</td></tr>
          <tr><td><strong>{ts}Valid members{/ts}</strong></td><td>{$subGroup.stats.valid_members_in_main_group}</td></tr>
+        <tr><td><strong>{ts}Do not email{/ts}</strong></td><td>{$subGroup.stats.do_not_email}</td><td></td></tr>
+        <tr><td><strong>{ts}Is Deceased{/ts}</strong></td><td>{$subGroup.stats.is_deceased}</td><td></td></tr>
+        <tr><td><strong>{ts}No valid email{/ts}</strong></td><td>{$subGroup.stats.invalid}</td><td></td></tr>
+        <tr><td><strong>{ts}Duplicated email{/ts}</strong></td><td>{$subGroup.stats.is_duplicate}</td><td></td></tr>
          <tr><td><strong>{ts}Subscribed to {/ts}</strong><em>{$subGroup.interest_name}</em></td><td>{$group.mailchimp.sub_groups.$k.stats.subscriber_count}</td></tr>
         </table>
        {/foreach}
