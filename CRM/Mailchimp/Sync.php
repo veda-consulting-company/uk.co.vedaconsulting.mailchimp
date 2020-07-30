@@ -295,6 +295,9 @@ class CRM_Mailchimp_Sync {
     $groupsByEmail = [];
     // Index emails by contact_id.
     foreach ($emails['values'] as $email) {
+      if (empty($email['email']) || !filter_var($email['email'], FILTER_VALIDATE_EMAIL)) {
+        continue;
+      }
       if ($email['is_bulkmail']) {
         $result['values'][$email['contact_id']]['bulk_email'] = $email['email'];
       }
@@ -320,7 +323,7 @@ class CRM_Mailchimp_Sync {
             ? $contact['other_email']
             : NULL));
 
-      if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL) || empty($contact['groups'])) {
+      if (!$email || empty($contact['groups'])) {
         continue;
       }
       // Add email to contact.
