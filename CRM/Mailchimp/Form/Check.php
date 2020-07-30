@@ -9,11 +9,11 @@ use CRM_Mailchimp_Check as C;
  * @see https://wiki.civicrm.org/confluence/display/CRMDOC/QuickForm+Reference
  */
 class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
-  
+
   const QUEUE_NAME = 'mc-check';
   const END_URL    = 'civicrm/mailchimp/check';
   const END_PARAMS = 'state=done';
-  
+
   public function buildQuickForm() {
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
@@ -37,11 +37,11 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
         ),
       ));
     }
-    
+
     // export form elements
     parent::buildQuickForm();
   }
-  
+
   protected function groupPageUrl($gid) {
     $groupUrl = 'civicrm/group';
     $urlParams = [
@@ -79,7 +79,7 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
       'type'  => 'Sql',
       'reset' => TRUE,
     ));
-    
+
     // reset stats
     CRM_Mailchimp_Utils::cacheSet(C::CACHE_KEY, []);
     $task  = new CRM_Queue_Task(
@@ -87,28 +87,28 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
           [],
           "Preparing tasks."
           );
-      
+
     // Add the Task to the Queue
     $queue->createItem($task);
-        
+
     // Setup the Runner
     $runnerParams = array(
       'title' =>  ts('Mailchimp Check'),
       'queue' => $queue,
       'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
-    );    
-    
+    );
+
     // Each list is a task.
     $runner = new CRM_Queue_Runner($runnerParams);
     return $runner;
   }
-  
+
   public static function addQueueTasks(CRM_Queue_TaskContext $ctx, $params = []) {
     $listCount = 0;
     $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
     foreach ($groups as $group_id => $details) {
-      
+
       $details['civicrm_group_id'] = $group_id;
       $identifier = "List " . $listCount++ . " " . $details['civigroup_title'];
       $tasks = [];
@@ -122,13 +122,13 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
           [$details['list_id']],
           "$identifier: Checking list data from Mailchimp."
           );
-      
+
       // Add the Task to the Queue
       foreach ($tasks as $task) {
         $ctx->queue->createItem($task);
       }
     }
-    return CRM_Queue_Task::TASK_SUCCESS; 
+    return CRM_Queue_Task::TASK_SUCCESS;
   }
-  
+
 }
