@@ -240,6 +240,7 @@ CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
       'total_members' => 0,
       'total_invalid' => 0,
       'on_hold' => 0,
+      'is_opt_out' => 0,
       'do_not_email' => 0,
       'is_deceased' => 0,
       'no_valid_email' => 0,
@@ -306,7 +307,7 @@ CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
       else {
         $emailDupes[$email] = 1;
       }
-      foreach (['on_hold', 'do_not_email', 'is_deceased'] as $validKey) {
+      foreach (['is_opt_out', 'on_hold', 'do_not_email', 'is_deceased'] as $validKey) {
         if (!empty($contact[$validKey])) {
           $resultData[$validKey]++;
           $invalid = TRUE;
