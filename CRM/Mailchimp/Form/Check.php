@@ -14,7 +14,12 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
   const END_URL    = 'civicrm/mailchimp/check';
   const END_PARAMS = 'state=done';
 
+  /**
+   * @inherit
+   */
   public function buildQuickForm() {
+    CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
+    CRM_Utils_System::setTitle(ts('Mailchimp Group Statistics'));
     $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
       $data = CRM_Mailchimp_Utils::cacheGet(C::CACHE_KEY);
@@ -28,11 +33,10 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
       $this->assign('groupData', $data);
     }
     else {
-
       $this->addButtons(array(
         array(
           'type' => 'submit',
-          'name' => E::ts('Check'),
+          'name' => E::ts('Generate Report'),
           'isDefault' => TRUE,
         ),
       ));
@@ -42,6 +46,12 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
     parent::buildQuickForm();
   }
 
+  /**
+   * Get a url for group edit page.
+   *
+   * @var int $gid
+   *  Group ID
+   */
   protected function groupPageUrl($gid) {
     $groupUrl = 'civicrm/group';
     $urlParams = [
@@ -62,7 +72,6 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
   public function postProcess() {
     parent::postProcess();
     $runner = self::getQueueRunner();
-    // Clear out log table.
     if ($runner) {
       // Run Everything in the Queue via the Web.
       $runner->runAllViaWeb();
@@ -93,7 +102,7 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
 
     // Setup the Runner
     $runnerParams = array(
-      'title' =>  ts('Mailchimp Check'),
+      'title' =>  ts('Mailchimp Group Statistics'),
       'queue' => $queue,
       'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),

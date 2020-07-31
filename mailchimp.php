@@ -438,7 +438,7 @@ function mailchimp_civicrm_navigationMenu(&$params){
   );
   $params[$parentId]['child'][$mailChimpCheckId] = array(
         'attributes' => array(
-          'label'     => ts('Check Mailchimp-enabled Groups‏'),
+          'label'     => ts('Mailchimp Group Stats'),
           'name'      => 'Mailchimp_Pull',
           'url'       => CRM_Utils_System::url('civicrm/mailchimp/check', 'reset=1', TRUE),
           'active'    => 1,
