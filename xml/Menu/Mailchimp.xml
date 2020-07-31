@@ -34,7 +34,7 @@
   <item>
     <path>civicrm/mailchimp/check</path>
     <page_callback>CRM_Mailchimp_Form_Check</page_callback>
-    <title>Mailchimp Check</title>
+    <title>Mailchimp Group Stats</title>
     <access_arguments>administer CiviCRM</access_arguments>
   </item>
 </menu>

@@ -8,3 +8,34 @@ and open the template in the editor.
     background-color:green;
     border-collapse: collapse;
 }
+.mailchimp-group-stats {
+ padding: 25px;
+ margin-top: 25px;
+}
+.mailchimp-group-stats .highlight {
+ padding: 10px;
+ border: #ccc 1px solid;
+}
+.mailchimp-group-stats .group-container {
+  position: relative;
+  padding: 20px;
+}
+.mailchimp-group-stats .subgroup-container {
+  position: relative;
+  border-top: #999 1px solid;
+  margin-top: 20px;
+  padding-top: 20px;
+  padding: 20px;
+}
+.group-edit {
+ position: absolute;
+ right: 20px;
+ top: 20px;
+}
+.mailchimp-group-stats container:last-child {
+ border-bottom: none;
+}
+
+.mailchimp-group-stats h3.subgroup-title {
+  padding-left: 0;
+}

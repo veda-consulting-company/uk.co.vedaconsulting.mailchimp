@@ -41,15 +41,6 @@ class CRM_Mailchimp_Check {
     return CRM_Queue_Task::TASK_SUCCESS;   
   }
   
-  public static function cleanUpTask(CRM_Queue_TaskContext $ctx, $listID) {
-    $listCheck = new self($listID);
-    $listCheck->cleanUp();
-    return CRM_Queue_Task::TASK_SUCCESS;
-  }
-  
-  protected function cleanUp() {
-  }
-  
   /**
    * Create an instance.
    * 
@@ -145,6 +136,7 @@ class CRM_Mailchimp_Check {
       'on_hold' => " AND tmp.on_hold = 1",
       'do_not_email' => " AND tmp.do_not_email = 1",
       'is_deceased' => " AND tmp.is_deceased = 1",
+      'is_opt_out' => " AND tmp.is_opt_out = 1",
     ];
     foreach ($this->subGroupDetails as $groupId => $details) {
       $data = $details;
@@ -173,9 +165,7 @@ class CRM_Mailchimp_Check {
         $newQuery = $query . $clause;
         $dao = CRM_Core_DAO::executeQuery($newQuery, [1 => [$groupId, 'Integer']]);
         $data['stats'][$key] = $dao->fetchValue();
-CRM_Core_Error::debug_var('checkmailchimpquery', $newQuery);
       }
-CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
       $returnData[$groupId] = $data;      
     }
     return $returnData;
@@ -283,7 +273,7 @@ CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
     $dao = $this->createTempTable($tableName);
     $db = $dao->getDatabaseConnection();    
    
-    $insert = $db->prepare("INSERT IGNORE INTO $tableName VALUES(?, ?, ?, ?, ?, ?, ?)");
+    $insert = $db->prepare("INSERT IGNORE INTO $tableName VALUES(?, ?, ?, ?, ?, ?, ?, ?)");
     
     foreach ($members as $contact) {
       $email = '';
@@ -323,7 +313,8 @@ CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
          intval($isDuplicate),
          intval($contact['on_hold']),
          intval($contact['do_not_email']),
-         intval($contact['is_deceased'])
+         intval($contact['is_deceased']),
+         intval($contact['is_opt_out']),
        ]);
       
     }
@@ -352,12 +343,11 @@ CRM_Core_Error::debug_var('checkmailchimpsubstats', $data['stats']);
         on_hold TINYINT DEFAULT 0,
         do_not_email TINYINT DEFAULT 0,
         is_deceased TINYINT DEFAULT 0,
+        is_opt_out TINYINT DEFAULT 0,
         PRIMARY KEY (contact_id),
         KEY (email))
         ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
      return $dao;
   }
-  
-  
   
 }
