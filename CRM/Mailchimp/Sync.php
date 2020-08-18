@@ -206,6 +206,21 @@ class CRM_Mailchimp_Sync {
     $db->freePrepared($insert);
     return $collected;
   }
+  
+  /**
+   * Determine whether to push interest groups for any contacts sharing an email.
+   * @return boolean
+   */
+  public function isCollectGroupsByEmail() {
+    foreach ($this->interest_group_details as $civi_group_id => $details) {
+      if ($details['is_mc_update_grouping'] == 1) {
+        // If any interest group is configured to sallow updates from Mailchimp to
+        // CiviCRM, then aggregating will  
+        return FALSE;
+      }
+    }
+    return TRUE;
+  }
 
   /**
    * Collect CiviCRM data into temporary working table.
@@ -277,8 +292,12 @@ class CRM_Mailchimp_Sync {
       'contact_id' => ['IN' => array_keys($result['values'])],
       'options' => ['limit' => 0],
     ]);
+    $groupsByEmail = [];
     // Index emails by contact_id.
     foreach ($emails['values'] as $email) {
+      if (empty($email['email']) || !filter_var($email['email'], FILTER_VALIDATE_EMAIL)) {
+        continue;
+      }
       if ($email['is_bulkmail']) {
         $result['values'][$email['contact_id']]['bulk_email'] = $email['email'];
       }
@@ -289,16 +308,12 @@ class CRM_Mailchimp_Sync {
         $result['values'][$email['contact_id']]['other_email'] = $email['email'];
       }
     }
-    /**
-     * We have a contact that has no other deets.
-     */
-
-    $start = microtime(TRUE);
-
-    $collected = 0;
-    $insert = $db->prepare('INSERT IGNORE INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
-    // Loop contacts:
-    foreach ($result['values'] as $id=>$contact) {
+    // Determine which email to use in mailchimp subscription.
+    // If this is a push, collect groups  by email so we can preserve interest groups for contacts sharing an email address.
+    // mailchimp contacts are identified by email.
+    $groupsByEmail = [];
+    $isGroupByEmail = $this->isCollectGroupsByEmail();
+    foreach ($result['values'] as $id => $contact) {
       // Which email to use?
       $email = isset($contact['bulk_email'])
         ? $contact['bulk_email']
@@ -307,19 +322,45 @@ class CRM_Mailchimp_Sync {
           : (isset($contact['other_email'])
             ? $contact['other_email']
             : NULL));
-      if (!$email) {
-        // Hmmm.
-        print "x1\n";
+
+      if (!$email || empty($contact['groups'])) {
         continue;
       }
-
-      if (!(filter_var($email, FILTER_VALIDATE_EMAIL))) {
+      // Add email to contact.
+      $result['values'][$id]['email'] = $email;
+      
+      
+      if ($mode != 'push' || !$isGroupByEmail) {
         continue;
       }
+      if (empty($groupsByEmail[$email])) {
+        // Groups are comma, separated string.
+        $groupsByEmail[$email] = $contact['groups'];
+      }
+      else {
+        $groupsByEmail[$email] .= ',' . $contact['groups'];
+      }
+    }
+    
+    // Add data to temp table for comparison with mailchimp data.
+    $start = microtime(TRUE);
 
-      // Find out the ID's of the groups the $contact belongs to, and
-      // save in $info.
-      $info = $this->getComparableInterestsFromCiviCrmGroups($contact['groups'], $mode);
+    $collected = 0;
+    $insert = $db->prepare('INSERT IGNORE INTO tmp_mailchimp_push_c VALUES(?, ?, ?, ?, ?, ?)');
+    // Note hashes being inserted to prevent db duplicate errors.
+    $hashes = [];
+    // Loop contacts:
+    foreach ($result['values'] as $id => $contact) {
+      if (empty($contact['email'])) {
+        continue;
+      }
+      $email = $contact['email'];
+      
+      // Use the groups by email or use only the contact's groups.
+      $groups = !empty($groupsByEmail[$email]) 
+        ? implode(',', array_unique(explode(',', $groupsByEmail[$email]))) 
+        : $contact['groups'];
+      $info = $this->getComparableInterestsFromCiviCrmGroups($groups, $mode);
 
       // OK we should now have all the info we need.
       // Serialize the grouping array for SQL storage - this is the fastest way.
@@ -331,6 +372,14 @@ class CRM_Mailchimp_Sync {
       // See note above about why we don't include email in the hash.
       // $hash = md5($email . $contact['first_name'] . $contact['last_name'] . $info);
       $hash = md5($contact['first_name'] . $contact['last_name'] . $info . $contact['id']);
+      
+      // Prevent duplicate rows db error.
+      if (!empty($hashes[$hash . $email])) {
+        continue;
+      }
+      else {
+        $hashes[$hash . $email] = 1;
+      }
       // run insert prepared statement
       try {
         $db->execute($insert, array(
@@ -486,6 +535,81 @@ class CRM_Mailchimp_Sync {
   }
 
   /**
+   * Merges the interest groups for contacts with the same email address.
+   */
+  public function mergeCiviInterestGroupsForDuplicateEmails() {
+    // Retrieve duplicate emails with their interest groups.
+    $sql = "SELECT c1.contact_id, c1.first_name, c1.last_name, c1.email, c1.interests, c1.contact_id, m.cid_guess
+      FROM tmp_mailchimp_push_c c1 
+      LEFT JOIN mailchimp_push_m m ON c.contact_id = m.cid_guess
+      WHERE c1.email IN (
+       SELECT c2.email FROM tmp_mailchimp_push_c c2 GROUP BY c2.email HAVING COUNT(distinct c2.interests) > 1)
+       ORDER BY c1.email ASC;";
+    $dao = CRM_Core_DAO::executeQuery($sql);
+    // Groups keyed by email.
+    $groupsByEmail = [];
+    // Contact representing the email (where a contact has already been mapped in mailchimp).
+    // We need these details to rebuild the hash with any group changes. 
+    $emailContacts = [];
+    
+    // Interest Group subscriptions for a contact is stored in the temp table as 
+    // an associative array of boolean values, keyed by the id of mc interest group.
+    // To merge 2 sets of group, take the  OR of each group.
+    $mergeGroups = function ($g1, $g2) {
+      $merged = [];
+      foreach ($g1 as $groupID => $value) {
+        $merged[$groupID] = $value || !empty($g2[$groupID]);
+      }
+      return $merged;
+    };
+    
+    // Collect the group data. 
+    while ($dao->fetch()) {
+      if (!empty($dao->cid_guess)) {
+        $emailContacts[$dao->email] = [
+          'first_name' => $dao->first_name,
+          'last_name' => $dao->last_name,
+          'contact_id' => $dao->contact_id,
+        ];
+      }
+      $emailGroups = !empty($groupsByEmail[$dao->email]) ? $groupsByEmail[$dao->email] : [];
+      $contactGroups = unserialize($dao->interests);
+      if ($contactGroups && is_array($contactGroups)) {
+        $groupsByEmail[$dao->email] = $mergeGroups($emailGroups, $contactGroups);
+      }
+    }
+    // Save to temp table.
+    foreach ($groupsByEmail as $email => $groups) {  
+      // Format the interests to store.
+      $interests = serialize($groups);
+      ksort($interests);
+      $params = [];
+      // There is already a subscriber in mailchimp. 
+      if (!empty($contactGroups[$email]['contact_id'])) {
+        // Rebuild the hash.
+        $contact = $contactGroups[$email];
+        $hash = md5($contact['first_name'] . $contact['last_name'] . $interests);
+        // Save to the contact row.
+        $query = "UPDATE mailchimp_push_c SET hash = %1, interests = %2 WHERE contact_id = %3";
+        $params = [
+          1 => [$hash, 'String'],
+          2 => [$interests, 'String'],
+          3 => [$contact['contact_id'], 'Integer'],
+        ];
+      }
+      else {
+        // Save interest groups 
+        $query = "UPDATE mailchimp_push_c SET interests = %1 WHERE email = %2";
+        $params = [
+          1 => [$interests, 'String'],
+          2 => [$email, 'String'],
+        ];
+      }      
+      CRM_Core_DAO::executeQuery($query, $params);
+    }
+  }
+
+  /**
    * Removes from the temporary tables those records that do not need processing
    * because they are identical.
    *
@@ -511,6 +635,8 @@ class CRM_Mailchimp_Sync {
     // In push mode, delete duplicate CiviCRM contacts.
     $doubles = 0;
     if ($mode == 'push') {
+      $all_groups_by_email = [];
+      
       $doubles = CRM_Mailchimp_Sync::runSqlReturnAffectedRows(
         'DELETE c
          FROM tmp_mailchimp_push_c c
@@ -1022,7 +1148,7 @@ class CRM_Mailchimp_Sync {
    *
    */
   public function updateMailchimpFromCiviSingleContact($contact_id) {
-
+return;
     // Get all the groups related to this list that the contact is currently in.
     // We have to use this dodgy API that concatenates the titles of the groups
     // with a comma (making it unsplittable if a group title has a comma in it).
@@ -1265,7 +1391,8 @@ class CRM_Mailchimp_Sync {
    *
    * If collectCiviCrm has been run, then we can identify matching contacts very
    * easily. This avoids problems with multiple contacts in CiviCRM having the
-   * same email address but only one of them is subscribed. :-)
+   * same email address but only one of them is subscribed. On push, the interest
+   * groups of the other contacts will be carried through.
    *
    * **WARNING** it would be dangerous to run this if collectCiviCrm() had been run
    * on a different list(!). For this reason, these conditions are checked by
@@ -1276,7 +1403,18 @@ class CRM_Mailchimp_Sync {
    * @return int affected rows.
    */
   public static function guessContactIdsBySubscribers() {
-    return static::runSqlReturnAffectedRows(
+   // First try matching on name and email.
+   $r1 = static::runSqlReturnAffectedRows(
+        "UPDATE tmp_mailchimp_push_m m
+        INNER JOIN tmp_mailchimp_push_c c 
+         ON m.email = c.email 
+         AND m.first_name = c.first_name
+         AND m.last_name = c.last_name
+        SET m.cid_guess = c.contact_id
+        WHERE m.cid_guess IS NULL");
+    
+    // Now just email.
+    return $r1 + static::runSqlReturnAffectedRows(
        "UPDATE tmp_mailchimp_push_m m
         INNER JOIN tmp_mailchimp_push_c c ON m.email = c.email
         SET m.cid_guess = c.contact_id
@@ -1399,7 +1537,7 @@ class CRM_Mailchimp_Sync {
         cid_guess INT(10) DEFAULT NULL,
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
-        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
+        ENGINE=InnoDB;");
 
     // Convenience in collectMailchimp.
     return $dao;
@@ -1422,7 +1560,7 @@ class CRM_Mailchimp_Sync {
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )
-        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
+        ENGINE=InnoDB ;");
     return $dao;
   }
   /**
