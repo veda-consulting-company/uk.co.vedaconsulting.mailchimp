@@ -13,7 +13,7 @@
       <tr><td>{ts}Contacts that were in sync already{/ts}:</td><td>{$group.stats.in_sync}</td></tr>
       <tr><td>{ts}Contacts updated at Mailchimp{/ts}:</td><td>{$group.stats.updates}</td></tr>
       <tr><td>{ts}Contacts Subscribed{/ts}:</td><td>{$group.stats.additions}</td></tr>
-      <tr><td>{ts}Contacts Unsubscribed from Mailchimp{/ts}:</td><td>{$group.stats.unsubscribes}</td></tr>
+      <tr><td>{ts}Contacts need to be unsubscribed from Mailchimp{/ts}:</td><td>{$group.stats.unsubscribes}</td></tr>
       </table>
       {/foreach}
     </div>
@@ -38,7 +38,7 @@
     supposed to be subscribed to the Mailchimp list is correct.{/ts}</p>
     <p>{ts}Points to know:{/ts}</p>
     <ul>
-      <li>{ts}If a contact is not in the membership group at CiviCRM, they will be unsubscribed from Mailchimp (assuming they are currently subscribed at Mailchimp).{/ts}</li>
+      <li>{ts}If a contact is not in the membership group at CiviCRM and currently subscribed at Mailchimp, they will need to be unsubscribed from Mailchimp manually.{/ts}</li>
       <li>{ts}If a contact is in the membership group, they will be subscribed at Mailchimp. <strong>This could cost you money if adding subscribers exceeds your current tariff.</strong>
       Check the numbers of contacts in each group and/or do a Dry Run first.{/ts}</li>
       <li>{ts}Any and all CiviCRM groups set up to sync to Mailchimp Interests will be consulted and changes made to members' interests at Mailchimp, as needed.{/ts}</li>

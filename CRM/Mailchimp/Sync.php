@@ -745,7 +745,7 @@ class CRM_Mailchimp_Sync {
     if ($this->dry_run) {
       // Just log.
       if ($unsubscribes) {
-        CRM_Mailchimp_Utils::checkDebug("Would unsubscribe " . count($unsubscribes) . " Mailchimp members: " . implode(', ', $removals));
+        CRM_Mailchimp_Utils::checkDebug("Total of " . count($unsubscribes) . " Mailchimp members are not in CiviCRM: " . implode(', ', $removals));
       }
       else {
         CRM_Mailchimp_Utils::checkDebug("No Mailchimp members would be unsubscribed.");
@@ -753,9 +753,12 @@ class CRM_Mailchimp_Sync {
     }
     else {
       // For real, not dry run.
+	  // we are not unsubcribing Mailchimp members from CiviCRM now.
+	  /*
       foreach ($removals as $email) {
         $operations[] = ['PATCH', $url_prefix . md5(strtolower($email)), ['status' => 'unsubscribed']];
       }
+	  */
     }
 
     if (!$this->dry_run && !empty($operations)) {
@@ -1169,13 +1172,17 @@ return;
     $api = CRM_Mailchimp_Utils::getMailchimpApi();
 
     if (!$currently_a_member) {
+
       // They are not currently a member.
-      //
+      // We are not unsubscribing Mailchimp members from CiviCRM now.
+      CRM_Core_Session::setStatus(ts('This email is not in CiviCRM group now but exists in Mailchimp list; any differences will remain until this is unsubscribed in Mailchimp.'));
+      return;
       // We should ensure they are unsubscribed from Mailchimp. They might
       // already be, but as we have no way of telling exactly what just changed
       // at our end, we have to make sure.
       //
       // Nb. we don't bother updating their interests for unsubscribes.
+	  /*
       try {
         $result = $api->patch("/lists/$this->list_id/members/$subscriber_hash",
           ['status' => 'unsubscribed']);
@@ -1191,6 +1198,7 @@ return;
       catch (CRM_Mailchimp_NetworkErrorException $e) {
         CRM_Core_Session::setStatus(ts('There was a network problem trying to unsubscribe this contact at Mailchimp; any differences will remain until a CiviCRM to Mailchimp Sync is done.'));
       }
+	  */
       return;
     }
 
