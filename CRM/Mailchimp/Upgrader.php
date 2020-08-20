@@ -227,21 +227,6 @@ class CRM_Mailchimp_Upgrader extends CRM_Mailchimp_Upgrader_Base {
 
     return TRUE;
   }
-
-  /**
-   * Remove unused jobs
-   *
-   * @throws \CiviCRM_API3_Exception
-   */
-  public function upgrade_22() {
-    $result = civicrm_api3('Job', 'get', [
-      'sequential' => 1,
-      'name' => ['IN' => ["Mailchimp Push Sync", "Mailchimp Pull Sync"]],
-      'api.Job.delete' => ['id' => "\$value.id"],
-    ]);
-
-    return TRUE;
-  }
   /**
    * Example: Run an external SQL script
    *
