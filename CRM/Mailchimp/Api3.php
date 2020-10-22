@@ -56,7 +56,7 @@ class CRM_Mailchimp_Api3 {
    *  Nb. a CiviCRM_Core_Error::debug_log_message facility is injected if you
    *  enable debugging on the Mailchimp settings screen. But you can inject
    *  something different, e.g. for testing.
-   */ 
+   */
   protected $log_facility;
   /**
    * @param array $settings contains key 'api_key', possibly other settings.
@@ -69,10 +69,10 @@ class CRM_Mailchimp_Api3 {
     }
     $this->api_key = $settings['api_key'];
 
-    // Set URL based on datacentre identifier at end of api key.                                       
+    // Set URL based on datacentre identifier at end of api key.
     preg_match('/^.*-([^-]+)$/', $this->api_key, $matches);
     if (empty($matches[1])) {
-      throw new InvalidArgumentException("Invalid API key - could not extract datacentre from given API key.");      
+      throw new InvalidArgumentException("Invalid API key - could not extract datacentre from given API key.");
     }
 
     if (!empty($settings['log_facility'])) {
@@ -87,7 +87,7 @@ class CRM_Mailchimp_Api3 {
    */
   public function setLogFacility($callback) {
     if (!is_callable($callback)) {
-      throw new InvalidArgumentException("Log facility callback is not callable.");      
+      throw new InvalidArgumentException("Log facility callback is not callable.");
     }
     $this->log_facility = $callback;
   }
@@ -234,7 +234,7 @@ class CRM_Mailchimp_Api3 {
   /**
    * Provide mock for curl.
    *
-   * The callback will be called with the 
+   * The callback will be called with the
    * request object in $this->request. It must return an array with optional
    * keys:
    *
@@ -299,7 +299,7 @@ class CRM_Mailchimp_Api3 {
       if ($this->request->method == 'GET') {
         // For GET requests, data must be added as query string.
         // Append if there's already a query string.
-        $query_string = http_build_query($data);
+        $query_string = http_build_query($data, '', '&');
         if ($query_string) {
           $this->request->url .= ((strpos($this->request->url, '?')===false) ? '?' : '&')
             . $query_string;
