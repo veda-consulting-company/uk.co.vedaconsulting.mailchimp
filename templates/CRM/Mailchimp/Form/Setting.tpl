@@ -44,9 +44,10 @@
         <tr class="crm-mailchimp-setting-sync-profile-block">
           <td class="label">{$form.mailchimp_sync_profile.label}</td>
           <td>{$form.mailchimp_sync_profile.html}<br/>
-          <span class="description">Optionally select a profile to include in contact syncronization.
+          <span class="description">Optionally select a profile to include in contact push syncronization.
           These may be useful for segmentation, etc. on mailchimp. <br />Synchronizing custom fields will slow
           down the process so only do so if necessary and use a profile with only the fields you need.
+          Name, email and address fields will be synched by default so should not be included in the profile.
           </span>
           </td>
         </tr>
