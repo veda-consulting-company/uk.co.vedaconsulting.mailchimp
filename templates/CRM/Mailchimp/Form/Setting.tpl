@@ -35,6 +35,41 @@
           <td>{$form.mailchimp_enable_debugging.html}<br/>
           </td>
         </tr>
+        <tr class="crm-mailchimp-setting-sync-checksum-block">
+          <td class="label">{$form.mailchimp_sync_checksum.label}</td>
+          <td>{$form.mailchimp_sync_checksum.html}<br/>
+          </td>
+        </tr>
+        {if $form.mailchimp_sync_profile}
+        <tr class="crm-mailchimp-setting-sync-profile-block">
+          <td class="label">{$form.mailchimp_sync_profile.label}</td>
+          <td>{$form.mailchimp_sync_profile.html}<br/>
+          <span class="description">Optionally select a profile to include in contact syncronization.
+          These may be useful for segmentation, etc. on mailchimp. <br />Synchronizing custom fields will slow
+          down the process so only do so if necessary and use a profile with only the fields you need.
+          </span>
+          </td>
+        </tr>
+        <tr class="crm-mailchimp-setting-create-merge-fields-block">
+          <td class="label">{$form.mailchimp_create_merge_fields.label}</td>
+          <td>{$form.mailchimp_create_merge_fields.html}<br/>
+          <span class="description">Select yes here to create merge fields on lists when this form is submitted.
+          By default the fields will be non-public text fields.
+          </span>
+          </td>
+        </tr>
+        {/if}
+        <tr class="crm-mailchimp-setting-synctags-block">
+          <td class="label">{$form.mailchimp_sync_tags.label}</td>
+          <td>
+            {$form.mailchimp_sync_tags.html}<br/>
+            <span class="description">
+              {ts}Select 'Yes' here to sync CiviCRM contact tags with Mailchimp member tags during <strong>'Sync Civi Contacts to Mailchimp'</strong> operation.<br/>
+              If a tag doesn't exist in mailchimp, new tag will be created in mailchimp and the member record will be updated with the new tag.<br/>
+              Existing tag will be removed from mailchimp member record, if the CiviCRM contact doesn't have it.{/ts}
+            </span>
+          </td>
+        </tr>
       </table>
     </div>
     <div class="crm-submit-buttons">
