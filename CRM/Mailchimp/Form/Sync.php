@@ -313,7 +313,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
     // Finally, finish up by removing the two temporary tables
     //CRM_Mailchimp_Sync::dropTemporaryTables();
     static::updatePushStats($stats);
-
+    CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Form_Sync syncPushAdd $listID= ', $listID);
     return CRM_Queue_Task::TASK_SUCCESS;
   }
 

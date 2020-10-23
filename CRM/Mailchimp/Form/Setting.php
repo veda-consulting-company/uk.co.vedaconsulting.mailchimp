@@ -42,9 +42,9 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     // Add the API Key Element
     $this->add('text', 'mailchimp_api_key', ts('API Key'), array(
       'size' => 48,
-    ), TRUE);    
+    ), TRUE);
 
-    // Add the User Security Key Element    
+    // Add the User Security Key Element
     $this->add('text', 'mailchimp_security_key', ts('Security Key'), array(
       'size' => 24,
     ), TRUE);
@@ -53,6 +53,25 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
     $this->addRadio('mailchimp_enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
 
+
+    $result = civicrm_api3('UFGroup', 'get', array(
+      'sequential' => 1,
+      'group_type' => "Contact",
+      'is_active'  => 1,
+    ));
+    // Add profile selection for syncronization.
+    $profileOptions = array(0 => '-- None --');
+    if (!empty($result['values'])) {
+      foreach ($result['values'] as $profile) {
+        $profileOptions[$profile['id']] = $profile['title'];
+      }
+    }
+    $yesNo = array(1 => ts('Yes'), 0 => ts('No'));
+    $this->addRadio('mailchimp_sync_checksum', ts('Sync Checksum and Contact ID'), $yesNo, NULL);
+    $this->add('select', 'mailchimp_sync_profile', ts('Sync fields from profile'), $profileOptions);
+    // Not a setting.
+    $this->addRadio('mailchimp_create_merge_fields', ts('Create missing fields on mailchimp lists'), $yesNo, NULL);
+    $this->addRadio('mailchimp_sync_tags', ts('Sync Tags?'), $yesNo, NULL);
     // Create the Submit Button.
     $buttons = array(
       array(
@@ -62,7 +81,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       array(
         'type' => 'cancel',
         'name' => ts('Cancel'),
-      ),      
+      ),
     );
 
     // Add the Buttons.
@@ -94,9 +113,16 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     }
 
     $enableDebugging = Civi::settings()->get('mailchimp_enable_debugging');
+    $syncProfile = Civi::settings()->get('mailchimp_sync_profile');
+    $syncChecksum = Civi::settings()->get('mailchimp_sync_checksum');
+    $syncTags = Civi::settings()->get('mailchimp_sync_tags');
+
     $defaults['mailchimp_api_key'] = $apiKey;
     $defaults['mailchimp_security_key'] = $securityKey;
     $defaults['mailchimp_enable_debugging'] = $enableDebugging;
+    $defaults['mailchimp_sync_profile'] = $syncProfile;
+    $defaults['mailchimp_sync_checksum'] = $syncChecksum;
+    $defaults['mailchimp_sync_tags'] = $syncTags;
 
     return $defaults;
   }
@@ -116,7 +142,14 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     if (CRM_Utils_Array::value('mailchimp_api_key', $params) || CRM_Utils_Array::value('mailchimp_security_key', $params)) {
 
 
-      foreach (['mailchimp_api_key', 'mailchimp_enable_debugging', 'mailchimp_security_key'] as $_) {
+      foreach ([
+        'mailchimp_api_key',
+        'mailchimp_enable_debugging',
+        'mailchimp_security_key',
+        'mailchimp_sync_checksum',
+        'mailchimp_sync_tags',
+        'mailchimp_sync_profile',
+      ] as $_) {
         Civi::settings()->set($_, $params[$_]);
       }
 
@@ -143,7 +176,11 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       // Check CMS's permission for (presumably) anonymous users.
       if (!self::checkMailchimpPermission($params['mailchimp_security_key'])) {
         CRM_Core_Session::setStatus(ts("Mailchimp WebHook URL requires 'allow webhook posts' permission to be set for any user roles."));
-      }      
+      }
+      // Create Merge Fields from for each list.
+      if (!empty($params['mailchimp_sync_profile']) && !empty($params['mailchimp_create_merge_fields'])) {
+        $this->createMailchimpMergeFields($params['mailchimp_sync_profile']);
+      }
     }
   }
 
@@ -157,7 +194,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       'key' => $securityKey,
     );
     $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', $urlParams,  TRUE, NULL, FALSE, TRUE);
-    
+
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
@@ -180,7 +217,88 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     curl_close($curl);
 
     return ($info['http_code'] != 200) ? FALSE : TRUE;
-  }  
+  }
+
+  public function createMailchimpMergeFields($profileID, $includeChecksum=FALSE) {
+    // Get custom fields from profile and create data for creating on MC.
+    $ufFieldResult = civicrm_api3('UFField', 'get', ['uf_group_id' => $profileID]);
+    $mergeFields = $existingFields = array();
+    if (!empty($ufFieldResult['values'])) {
+      foreach ($ufFieldResult['values'] as $field) {
+        if (0 === strpos($field['field_name'],'custom_') && $field['is_active']) {
+          $mergeFields[$field['field_name']] = [
+            'tag' => strtoupper($field['field_name']),
+            'name' => $field['label'],
+            // By default make all fields type text and not public.
+            'type' => 'text',
+            'public' => FALSE,
+          ];
+        }
+      }
+    }
+    // Checksum and contact id.
+    if (Civi::settings()->get('mailchimp_sync_checksum')) {
+      $default = ['type' => 'text', 'public' => FALSE];
+      foreach ([
+        'contact_id' => 'Contact ID',
+        'checksum' => 'Checksum'
+
+      ] as $tag => $name) {
+        $mergeFields[$tag] = array_merge(['tag' => strtoupper($tag), 'name' => $name], $default);
+      }
+    }
+
+    // Get existing fields for each list.
+    $listResult = civicrm_api3('Mailchimp', 'getlists');
+    $msg = [];
+    if (!empty($listResult['values'])) {
+      foreach ($listResult['values'] as $listId => $listName) {
+        $listCreateFields = $mergeFields;
+        $existingFields = $this->getMergeFields($listId);
+        foreach($existingFields as $mergeField) {
+          $key = strtolower($mergeField->tag);
+          if (isset($listCreateFields[$key])) {
+            CRM_Core_Session::setStatus("Field $key exists on $listName, skipping");
+            unset($listCreateFields[$key]);
+          }
+        }
+        // Create the merge field for the list.
+        foreach ($listCreateFields as $createField) {
+          $response = $this->createMergeField($listId, $createField);
+          if ($response && $response->http_code == 200) {
+            $name = $response->data->name;
+            $tag = $response->data->tag;
+            CRM_Core_Session::setStatus( "$name ($tag) created for $listName.", "Created field On Mailchimp");
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Get Merge Field definitions for a Mailchimp Group.
+   * @param string $listId
+   * @return array
+   */
+  protected function getMergeFields($listId) {
+    $mcClient = CRM_Mailchimp_Utils::getMailchimpApi(TRUE);
+    $path = '/lists/' . $listId . '/merge-fields';
+    $response = $mcClient->get($path);
+    return $response->data->merge_fields;
+  }
+
+  protected function createMergeField($listId, $data) {
+    $mcClient = CRM_Mailchimp_Utils::getMailchimpApi(TRUE);
+    $path = '/lists/' . $listId . '/merge-fields';
+    try {
+      $response = $mcClient->post($path, $data);
+    }
+    catch (Exception $e) {
+      CRM_Core_Error::debug_log_message($e->getMessage());
+      CRM_Core_Error::debug_var(__CLASS__ . __FUNCTION__, $response);
+    }
+    return $response;
+  }
 }
 
 
