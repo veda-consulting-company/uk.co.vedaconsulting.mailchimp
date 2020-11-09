@@ -1400,6 +1400,7 @@ class CRM_Mailchimp_Sync {
       if (!empty($tagsParams)) {
         try {
           $result = $api->post("/lists/$this->list_id/members/$subscriber_hash/tags", array('tags' => $tagsParams));
+	  CRM_Mailchimp_Utils::checkDebug('Push tags on single sync.', $tagsParams);
         } catch (CRM_Mailchimp_RequestErrorException $e) {
           CRM_Core_Session::setStatus(ts('There was a problem trying to sync tags of this contact at Mailchimp:') . $e->getMessage());
         }
@@ -1734,7 +1735,7 @@ class CRM_Mailchimp_Sync {
         tags VARCHAR(4096) NOT NULL DEFAULT '',
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
-        ENGINE=InnoDB ;");
+        ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
 
     // Convenience in collectMailchimp.
     return $dao;
@@ -1766,7 +1767,7 @@ class CRM_Mailchimp_Sync {
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )
-        ENGINE=InnoDB ;");
+        ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ;");
     return $dao;
   }
   /**
