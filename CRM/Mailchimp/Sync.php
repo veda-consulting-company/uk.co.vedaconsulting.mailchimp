@@ -424,6 +424,10 @@ class CRM_Mailchimp_Sync {
           $contact_custom[$tag] = $contact[$name];
         }
       }
+
+      // Allow hook to modify data before inserted into the temp table
+      CRM_Mailchimp_Utils_Hook::alterCiviDataforMailchimp($contact['id'], $email, $contact, $contact_custom);
+
       $custom_data = $contact_custom ? serialize($contact_custom) : '';
 
       $tags = $contact['tags'] ? serialize($contact['tags']) : '';
