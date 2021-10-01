@@ -790,12 +790,39 @@ class CRM_Mailchimp_Sync {
         ['email' => $dao->c_email, 'first_name' => $dao->c_first_name, 'last_name' => $dao->c_last_name, 'interests' => $dao->c_interests, 'contact_id' => $dao->c_contact_id, 'checksum' => $dao->c_checksum, 'addr1' => $dao->c_addr1, 'addr2' => $dao->c_addr2, 'city' => $dao->c_city, 'state' => $dao->c_state, 'zip' => $dao->c_zip, 'country' => $dao->c_country, 'custom_fields' => $dao->c_custom_fields],
         ['email' => $dao->m_email, 'first_name' => $dao->m_first_name, 'last_name' => $dao->m_last_name, 'interests' => $dao->m_interests, 'checksum' => $dao->m_checksum, 'addr1' => $dao->m_addr1, 'addr2' => $dao->m_addr2, 'city' => $dao->m_city, 'state' => $dao->m_state, 'zip' => $dao->m_zip, 'country' => $dao->m_country, 'custom_fields' => $dao->c_custom_fields]);
 
-      if (!$params) {
+      if (!empty($params)) {
+
+        if ($this->dry_run) {
+          // Log the operation description.
+          $_ = "Would " . ($dao->m_email ? 'update' : 'create')
+            . " mailchimp member: $dao->m_email";
+          if (key_exists('email_address', $params)) {
+            $_ .= " change email to '$params[email_address]'";
+          }
+          if (key_exists('merge_fields', $params)) {
+            foreach ($params['merge_fields'] as $field=>$value) {
+              $_ .= " set $field = $value";
+            }
+          }
+          CRM_Mailchimp_Utils::checkDebug($_);
+        }
+        else {
+          // Add the operation to the batch.
+          $params['status'] = 'subscribed';
+          $operations[] = ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
+        }
+
+        if ($dao->m_email) {
+          $changes++;
+        } else {
+          $additions++;
+        }
+
+      } else {
         // This is the case if the changes could not be made due to policy
         // reasons, e.g. a missing name in CiviCRM should not overwrite a
         // provided name in Mailchimp; this is a difference but it's not one we
         // will correct.
-        continue;
       }
 
       /*
@@ -826,40 +853,17 @@ class CRM_Mailchimp_Sync {
           }
         }
       }
-      if ($this->dry_run) {
-        // Log the operation description.
-        $_ = "Would " . ($dao->m_email ? 'update' : 'create')
-          . " mailchimp member: $dao->m_email";
-        if (key_exists('email_address', $params)) {
-          $_ .= " change email to '$params[email_address]'";
-        }
-        if (key_exists('merge_fields', $params)) {
-          foreach ($params['merge_fields'] as $field=>$value) {
-            $_ .= " set $field = $value";
-          }
-        }
-        CRM_Mailchimp_Utils::checkDebug($_);
-        if (!empty($tagsParams)) {
+
+      if (!empty($tagsParams)) {
+        if ($this->dry_run) {
           $_tag = "Would update mailchimp member: $dao->m_email set tags = ";
           CRM_Mailchimp_Utils::checkDebug($_tag, $tagsParams);
-        }
-      }
-      else {
-        // Add the operation to the batch.
-        $params['status'] = 'subscribed';
-        $operations[] = ['PUT', $url_prefix . md5(strtolower($dao->c_email)), $params];
-
-        if ($syncTag == 1 && !empty($tagsParams)) {
+        } else {
           // Add POST tag operation to the batch.
           $operations[] = ['POST', $url_prefix . md5(strtolower($dao->c_email)) . '/tags', array('tags' => $tagsParams)];
         }
       }
 
-      if ($dao->m_email) {
-        $changes++;
-      } else {
-        $additions++;
-      }
     }
 
     // Now consider deletions of those not in membership group at CiviCRM but
