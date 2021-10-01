@@ -1735,7 +1735,7 @@ class CRM_Mailchimp_Sync {
         tags VARCHAR(4096) NOT NULL DEFAULT '',
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
-        ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+        ENGINE=InnoDB;");
 
     // Convenience in collectMailchimp.
     return $dao;
@@ -1767,7 +1767,7 @@ class CRM_Mailchimp_Sync {
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )
-        ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ;");
+        ENGINE=InnoDB;");
     return $dao;
   }
   /**
