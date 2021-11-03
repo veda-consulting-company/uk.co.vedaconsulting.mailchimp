@@ -1,6 +1,7 @@
 <?php
 
 // AUTO-GENERATED FILE -- Civix may overwrite any changes made to this file
+use CRM_Mailchimp_ExtensionUtil as E;
 
 /**
  * Base class which provides helpers to execute upgrade logic
@@ -8,9 +9,9 @@
 class CRM_Mailchimp_Upgrader_Base {
 
   /**
-   * @var varies, subclass of ttis
+   * @var CRM_Mailchimp_Upgrader_Base
    */
-  static $instance;
+  public static $instance;
 
   /**
    * @var CRM_Queue_TaskContext
@@ -18,29 +19,37 @@ class CRM_Mailchimp_Upgrader_Base {
   protected $ctx;
 
   /**
-   * @var string, eg 'com.example.myextension'
+   * @var string
+   *   eg 'com.example.myextension'
    */
   protected $extensionName;
 
   /**
-   * @var string, full path to the extension's source tree
+   * @var string
+   *   full path to the extension's source tree
    */
   protected $extensionDir;
 
   /**
-   * @var array(revisionNumber) sorted numerically
+   * @var array
+   *   sorted numerically
    */
   private $revisions;
 
   /**
+   * @var bool
+   *   Flag to clean up extension revision data in civicrm_setting
+   */
+  private $revisionStorageIsDeprecated = FALSE;
+
+  /**
    * Obtain a reference to the active upgrade handler.
    */
-  static public function instance() {
-    if (! self::$instance) {
-      // FIXME auto-generate
+  public static function instance() {
+    if (!self::$instance) {
       self::$instance = new CRM_Mailchimp_Upgrader(
         'uk.co.vedaconsulting.mailchimp',
-        realpath(__DIR__ .'/../../../')
+        E::path()
       );
     }
     return self::$instance;
@@ -52,19 +61,25 @@ class CRM_Mailchimp_Upgrader_Base {
    * Note: Each upgrader instance should only be associated with one
    * task-context; otherwise, this will be non-reentrant.
    *
-   * @code
+   * ```
    * CRM_Mailchimp_Upgrader_Base::_queueAdapter($ctx, 'methodName', 'arg1', 'arg2');
-   * @endcode
+   * ```
    */
-  static public function _queueAdapter() {
+  public static function _queueAdapter() {
     $instance = self::instance();
     $args = func_get_args();
     $instance->ctx = array_shift($args);
     $instance->queue = $instance->ctx->queue;
     $method = array_shift($args);
-    return call_user_func_array(array($instance, $method), $args);
+    return call_user_func_array([$instance, $method], $args);
   }
 
+  /**
+   * CRM_Mailchimp_Upgrader_Base constructor.
+   *
+   * @param $extensionName
+   * @param $extensionDir
+   */
   public function __construct($extensionName, $extensionDir) {
     $this->extensionName = $extensionName;
     $this->extensionDir = $extensionDir;
@@ -75,7 +90,8 @@ class CRM_Mailchimp_Upgrader_Base {
   /**
    * Run a CustomData file.
    *
-   * @param string $relativePath the CustomData XML file path (relative to this extension's dir)
+   * @param string $relativePath
+   *   the CustomData XML file path (relative to this extension's dir)
    * @return bool
    */
   public function executeCustomDataFile($relativePath) {
@@ -86,12 +102,12 @@ class CRM_Mailchimp_Upgrader_Base {
   /**
    * Run a CustomData file
    *
-   * @param string $xml_file  the CustomData XML file path (absolute path)
+   * @param string $xml_file
+   *   the CustomData XML file path (absolute path)
    *
    * @return bool
    */
-  protected static function executeCustomDataFileByAbsPath($xml_file) {
-    require_once 'CRM/Utils/Migrate/Import.php';
+  protected function executeCustomDataFileByAbsPath($xml_file) {
     $import = new CRM_Utils_Migrate_Import();
     $import->run($xml_file);
     return TRUE;
@@ -100,14 +116,38 @@ class CRM_Mailchimp_Upgrader_Base {
   /**
    * Run a SQL file.
    *
-   * @param string $relativePath the SQL file path (relative to this extension's dir)
+   * @param string $relativePath
+   *   the SQL file path (relative to this extension's dir)
    *
    * @return bool
    */
   public function executeSqlFile($relativePath) {
     CRM_Utils_File::sourceSQLFile(
       CIVICRM_DSN,
-      $this->extensionDir . '/' . $relativePath
+      $this->extensionDir . DIRECTORY_SEPARATOR . $relativePath
+    );
+    return TRUE;
+  }
+
+  /**
+   * Run the sql commands in the specified file.
+   *
+   * @param string $tplFile
+   *   The SQL file path (relative to this extension's dir).
+   *   Ex: "sql/mydata.mysql.tpl".
+   *
+   * @return bool
+   * @throws \CRM_Core_Exception
+   */
+  public function executeSqlTemplate($tplFile) {
+    // Assign multilingual variable to Smarty.
+    $upgrade = new CRM_Upgrade_Form();
+
+    $tplFile = CRM_Utils_File::isAbsolute($tplFile) ? $tplFile : $this->extensionDir . DIRECTORY_SEPARATOR . $tplFile;
+    $smarty = CRM_Core_Smarty::singleton();
+    $smarty->assign('domainID', CRM_Core_Config::domainID());
+    CRM_Utils_File::sourceSQLFile(
+      CIVICRM_DSN, $smarty->fetch($tplFile), NULL, TRUE
     );
     return TRUE;
   }
@@ -116,17 +156,19 @@ class CRM_Mailchimp_Upgrader_Base {
    * Run one SQL query.
    *
    * This is just a wrapper for CRM_Core_DAO::executeSql, but it
-   * provides syntatic sugar for queueing several tasks that
+   * provides syntactic sugar for queueing several tasks that
    * run different queries
+   *
+   * @return bool
    */
-  public function executeSql($query, $params = array()) {
+  public function executeSql($query, $params = []) {
     // FIXME verify that we raise an exception on error
     CRM_Core_DAO::executeQuery($query, $params);
     return TRUE;
   }
 
   /**
-   * Syntatic sugar for enqueuing a task which calls a function in this class.
+   * Syntactic sugar for enqueuing a task which calls a function in this class.
    *
    * The task is weighted so that it is processed
    * as part of the currently-pending revision.
@@ -138,11 +180,11 @@ class CRM_Mailchimp_Upgrader_Base {
     $args = func_get_args();
     $title = array_shift($args);
     $task = new CRM_Queue_Task(
-      array(get_class($this), '_queueAdapter'),
+      [get_class($this), '_queueAdapter'],
       $args,
       $title
     );
-    return $this->queue->createItem($task, array('weight' => -1));
+    return $this->queue->createItem($task, ['weight' => -1]);
   }
 
   // ******** Revision-tracking helpers ********
@@ -168,6 +210,8 @@ class CRM_Mailchimp_Upgrader_Base {
 
   /**
    * Add any pending revisions to the queue.
+   *
+   * @param CRM_Queue_Queue $queue
    */
   public function enqueuePendingRevisions(CRM_Queue_Queue $queue) {
     $this->queue = $queue;
@@ -175,23 +219,23 @@ class CRM_Mailchimp_Upgrader_Base {
     $currentRevision = $this->getCurrentRevision();
     foreach ($this->getRevisions() as $revision) {
       if ($revision > $currentRevision) {
-        $title = ts('Upgrade %1 to revision %2', array(
+        $title = E::ts('Upgrade %1 to revision %2', [
           1 => $this->extensionName,
           2 => $revision,
-        ));
+        ]);
 
         // note: don't use addTask() because it sets weight=-1
 
         $task = new CRM_Queue_Task(
-          array(get_class($this), '_queueAdapter'),
-          array('upgrade_' . $revision),
+          [get_class($this), '_queueAdapter'],
+          ['upgrade_' . $revision],
           $title
         );
         $this->queue->createItem($task);
 
         $task = new CRM_Queue_Task(
-          array(get_class($this), '_queueAdapter'),
-          array('setCurrentRevision', $revision),
+          [get_class($this), '_queueAdapter'],
+          ['setCurrentRevision', $revision],
           $title
         );
         $this->queue->createItem($task);
@@ -202,11 +246,12 @@ class CRM_Mailchimp_Upgrader_Base {
   /**
    * Get a list of revisions.
    *
-   * @return array(revisionNumbers) sorted numerically
+   * @return array
+   *   revisionNumbers sorted numerically
    */
   public function getRevisions() {
-    if (! is_array($this->revisions)) {
-      $this->revisions = array();
+    if (!is_array($this->revisions)) {
+      $this->revisions = [];
 
       $clazz = new ReflectionClass(get_class($this));
       $methods = $clazz->getMethods();
@@ -222,29 +267,53 @@ class CRM_Mailchimp_Upgrader_Base {
   }
 
   public function getCurrentRevision() {
-    // return CRM_Core_BAO_Extension::getSchemaVersion($this->extensionName);
+    $revision = CRM_Core_BAO_Extension::getSchemaVersion($this->extensionName);
+    if (!$revision) {
+      $revision = $this->getCurrentRevisionDeprecated();
+    }
+    return $revision;
+  }
+
+  private function getCurrentRevisionDeprecated() {
     $key = $this->extensionName . ':version';
-    return CRM_Core_BAO_Setting::getItem('Extension', $key);
+    if ($revision = \Civi::settings()->get($key)) {
+      $this->revisionStorageIsDeprecated = TRUE;
+    }
+    return $revision;
   }
 
   public function setCurrentRevision($revision) {
-    // We call this during hook_civicrm_install, but the underlying SQL
-    // UPDATE fails because the extension record hasn't been INSERTed yet.
-    // Instead, track revisions in our own namespace.
-    // CRM_Core_BAO_Extension::setSchemaVersion($this->extensionName, $revision);
-
-    $key = $this->extensionName . ':version';
-    CRM_Core_BAO_Setting::setItem($revision, 'Extension', $key);
+    CRM_Core_BAO_Extension::setSchemaVersion($this->extensionName, $revision);
+    // clean up legacy schema version store (CRM-19252)
+    $this->deleteDeprecatedRevision();
     return TRUE;
+  }
+
+  private function deleteDeprecatedRevision() {
+    if ($this->revisionStorageIsDeprecated) {
+      $setting = new CRM_Core_BAO_Setting();
+      $setting->name = $this->extensionName . ':version';
+      $setting->delete();
+      CRM_Core_Error::debug_log_message("Migrated extension schema revision ID for {$this->extensionName} from civicrm_setting (deprecated) to civicrm_extension.\n");
+    }
   }
 
   // ******** Hook delegates ********
 
+  /**
+   * @see https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_install
+   */
   public function onInstall() {
     $files = glob($this->extensionDir . '/sql/*_install.sql');
     if (is_array($files)) {
       foreach ($files as $file) {
         CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $file);
+      }
+    }
+    $files = glob($this->extensionDir . '/sql/*_install.mysql.tpl');
+    if (is_array($files)) {
+      foreach ($files as $file) {
+        $this->executeSqlTemplate($file);
       }
     }
     $files = glob($this->extensionDir . '/xml/*_install.xml');
@@ -253,17 +322,35 @@ class CRM_Mailchimp_Upgrader_Base {
         $this->executeCustomDataFileByAbsPath($file);
       }
     }
-    if (is_callable(array($this, 'install'))) {
+    if (is_callable([$this, 'install'])) {
       $this->install();
     }
+  }
+
+  /**
+   * @see https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_postInstall
+   */
+  public function onPostInstall() {
     $revisions = $this->getRevisions();
     if (!empty($revisions)) {
       $this->setCurrentRevision(max($revisions));
     }
+    if (is_callable([$this, 'postInstall'])) {
+      $this->postInstall();
+    }
   }
 
+  /**
+   * @see https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_uninstall
+   */
   public function onUninstall() {
-    if (is_callable(array($this, 'uninstall'))) {
+    $files = glob($this->extensionDir . '/sql/*_uninstall.mysql.tpl');
+    if (is_array($files)) {
+      foreach ($files as $file) {
+        $this->executeSqlTemplate($file);
+      }
+    }
+    if (is_callable([$this, 'uninstall'])) {
       $this->uninstall();
     }
     $files = glob($this->extensionDir . '/sql/*_uninstall.sql');
@@ -272,19 +359,24 @@ class CRM_Mailchimp_Upgrader_Base {
         CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, $file);
       }
     }
-    $this->setCurrentRevision(NULL);
   }
 
+  /**
+   * @see https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_enable
+   */
   public function onEnable() {
     // stub for possible future use
-    if (is_callable(array($this, 'enable'))) {
+    if (is_callable([$this, 'enable'])) {
       $this->enable();
     }
   }
 
+  /**
+   * @see https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_disable
+   */
   public function onDisable() {
     // stub for possible future use
-    if (is_callable(array($this, 'disable'))) {
+    if (is_callable([$this, 'disable'])) {
       $this->disable();
     }
   }
@@ -292,7 +384,7 @@ class CRM_Mailchimp_Upgrader_Base {
   public function onUpgrade($op, CRM_Queue_Queue $queue = NULL) {
     switch ($op) {
       case 'check':
-        return array($this->hasPendingRevisions());
+        return [$this->hasPendingRevisions()];
 
       case 'enqueue':
         return $this->enqueuePendingRevisions($queue);
@@ -300,4 +392,5 @@ class CRM_Mailchimp_Upgrader_Base {
       default:
     }
   }
+
 }
