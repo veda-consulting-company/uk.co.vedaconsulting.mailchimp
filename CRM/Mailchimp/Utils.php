@@ -684,5 +684,28 @@ class CRM_Mailchimp_Utils {
       CRM_Utils_System::civiExit();
     }
     return $randomWebhookKey;
-  }  
+  }
+
+  /**
+   * Get temp table schema
+   *
+   * @return collation & characterSet
+   */
+  public static function getTempTableSchema() {
+    $collation = 'utf8_unicode_ci';
+    $characterSet = 'utf8';
+
+    // check if getInUseCollation() exists and get the collation is use
+    if (method_exists(CRM_Core_BAO_SchemaHandler::class, 'getInUseCollation')) {
+      $collation = CRM_Core_BAO_SchemaHandler::getInUseCollation();
+    }
+    // check if getDBCharset() exists and get the Charset is use
+    if (method_exists(CRM_Core_BAO_SchemaHandler::class, 'getDBCharset')) {
+      $characterSet = CRM_Core_BAO_SchemaHandler::getDBCharset();
+    }
+
+    $tempTableSchema = "{$characterSet} COLLATE {$collation}";
+
+    return $tempTableSchema;
+  }
 }

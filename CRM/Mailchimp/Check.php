@@ -334,6 +334,7 @@ class CRM_Mailchimp_Check {
       return FALSE;
     }
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS $tableName;");
+    $tempTableSchema = CRM_Mailchimp_Utils::getTempTableSchema();
     $dao = CRM_Core_DAO::executeQuery(
     "CREATE TABLE $tableName (
         contact_id INT(10) NOT NULL,
@@ -346,7 +347,7 @@ class CRM_Mailchimp_Check {
         is_opt_out TINYINT DEFAULT 0,
         PRIMARY KEY (contact_id),
         KEY (email))
-        ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ;");
+        ENGINE=InnoDB DEFAULT CHARACTER SET {$tempTableSchema} ;");
      return $dao;
   }
   
