@@ -1724,6 +1724,7 @@ class CRM_Mailchimp_Sync {
    */
   public static function createTemporaryTableForMailchimp() {
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_m;");
+    $tempTableSchema = CRM_Mailchimp_Utils::getTempTableSchema();
     $dao = CRM_Core_DAO::executeQuery(
       "CREATE TABLE tmp_mailchimp_push_m (
         email VARCHAR(200) NOT NULL,
@@ -1743,7 +1744,7 @@ class CRM_Mailchimp_Sync {
         tags VARCHAR(4096) NOT NULL DEFAULT '',
         PRIMARY KEY (email, hash),
         KEY (cid_guess))
-        ENGINE=InnoDB;");
+        ENGINE=InnoDB DEFAULT CHARACTER SET {$tempTableSchema};");
 
     // Convenience in collectMailchimp.
     return $dao;
@@ -1756,6 +1757,7 @@ class CRM_Mailchimp_Sync {
    */
   public static function createTemporaryTableForCiviCRM() {
     CRM_Core_DAO::executeQuery( "DROP TABLE IF EXISTS tmp_mailchimp_push_c;");
+    $tempTableSchema = CRM_Mailchimp_Utils::getTempTableSchema();
     $dao = CRM_Core_DAO::executeQuery("CREATE TABLE tmp_mailchimp_push_c (
         contact_id INT(10) UNSIGNED NOT NULL,
         email VARCHAR(200) NOT NULL,
@@ -1775,7 +1777,7 @@ class CRM_Mailchimp_Sync {
         PRIMARY KEY (email, hash),
         KEY (contact_id)
         )
-        ENGINE=InnoDB;");
+        ENGINE=InnoDB DEFAULT CHARACTER SET {$tempTableSchema};");
     return $dao;
   }
   /**
