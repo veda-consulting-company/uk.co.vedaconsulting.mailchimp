@@ -50,6 +50,13 @@ abstract class CRM_Mailchimp_Utils_Hook {
    * @access public
    */
   static function alterCiviDataforMailchimp ($contactID,  $email, &$contactData, &$contactCustomData) {
-    return self::singleton( )->invoke( 4, $contactID, $email, $contactData, $contactCustomData, self::$_nullObject, self::$_nullObject, 'civicrm_alterCiviDataforMailchimp');
+    $civiVersion = CRM_Core_BAO_Domain::version();
+    //from CiviCRM 5.0 the invoke function expects array of parameter names as first param
+    if (version_compare($civiVersion, '5.0', '<')) {
+      $numParams = 4;
+    } else {
+      $numParams = array('contactID', 'email', 'contactData', 'contactCustomData');
+    }
+    return self::singleton( )->invoke( $numParams, $contactID, $email, $contactData, $contactCustomData, self::$_nullObject, self::$_nullObject, 'civicrm_alterCiviDataforMailchimp');
   }
 }
