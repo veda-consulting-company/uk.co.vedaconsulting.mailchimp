@@ -151,6 +151,8 @@ class CRM_Mailchimp_Sync {
     //
     // Main loop of all the records.
     $collected = 0;
+    // Note hashes being inserted to prevent db duplicate errors.
+    $hashes = [];
     while ($members = $fetch_batch()) {
       $start = microtime(TRUE);
       foreach ($members as $member) {
@@ -220,6 +222,13 @@ class CRM_Mailchimp_Sync {
         // email. So we don't count an email mismatch as a problem.
         // $hash = md5($member->email_address . $first_name . $last_name . $interests);
         $hash = md5($first_name . $last_name . $interests);
+        // Prevent duplicate rows db error.
+        if (!empty($hashes[$hash])) {
+          continue;
+        } else {
+          $hashes[$hash] = 1;
+        }
+
         // run insert prepared statement
         $result = $db->execute($insert, [
           $member->email_address,
