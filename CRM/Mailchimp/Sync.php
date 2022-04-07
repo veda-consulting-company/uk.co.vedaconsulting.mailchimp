@@ -848,12 +848,14 @@ class CRM_Mailchimp_Sync {
         $civiTags = $dao->c_tags ? explode(',', unserialize($dao->c_tags)) : array();
         $mailchimpTags = $dao->m_tags ? explode(',', unserialize($dao->m_tags)) : array();
 
-        // pushing all the tags from Civi to Mailchimp
+        // pushing only the new tags from Civi to Mailchimp
         foreach ($civiTags as $ignore => $tagName) {
-          $tagsParams[] = array(
-            'name' => $tagName,
-            'status' => 'active'
-          );
+          if (!in_array($tagName, $mailchimpTags)) {
+            $tagsParams[] = array(
+              'name' => $tagName,
+              'status' => 'active'
+            );
+          }
         }
 
         //Remove the tags in Mailchimp, if not in Civitags array (setting status inactive will remove the tag from the member)
