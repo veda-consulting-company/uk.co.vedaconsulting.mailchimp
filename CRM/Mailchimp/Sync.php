@@ -848,12 +848,14 @@ class CRM_Mailchimp_Sync {
         $civiTags = $dao->c_tags ? explode(',', unserialize($dao->c_tags)) : array();
         $mailchimpTags = $dao->m_tags ? explode(',', unserialize($dao->m_tags)) : array();
 
-        // pushing all the tags from Civi to Mailchimp
+        // pushing only the new tags from Civi to Mailchimp
         foreach ($civiTags as $ignore => $tagName) {
-          $tagsParams[] = array(
-            'name' => $tagName,
-            'status' => 'active'
-          );
+          if (!in_array($tagName, $mailchimpTags)) {
+            $tagsParams[] = array(
+              'name' => $tagName,
+              'status' => 'active'
+            );
+          }
         }
 
         //Remove the tags in Mailchimp, if not in Civitags array (setting status inactive will remove the tag from the member)
@@ -1865,12 +1867,24 @@ class CRM_Mailchimp_Sync {
     // Sync Address fields - addr1, city, state, zip, country are mandatory fields to update address in mailchimp. Passing 'n/a', if any of these fields are empty in CiviCRM
     // To Do: Add a setting in CiviCRM to enable/disable sync of address fields and to set the default empty value
     if (isset($merge_fields['ADDRESS'])) {
+      $address_changed = FALSE;
+      // Fix me: not having country in difference check, as the country value is in short format in Mailchimp
+      $addressFieldKeys = array('addr1', 'addr2', 'city', 'state', 'zip');
+      // update address in mailchimp only if there's any changes in any of the above fields
+      foreach ($addressFieldKeys as $addressFieldKey) {
+        if ( !empty($civi_details[$addressFieldKey]) && ($civi_details[$addressFieldKey] != $mailchimp_details[$addressFieldKey]) ) {
+          $address_changed = TRUE;
+        }
+      }
+
+      if ($address_changed) {
         $params['merge_fields']['ADDRESS']['addr1'] = !empty($civi_details['addr1']) ? $civi_details['addr1'] : 'n/a';
         $params['merge_fields']['ADDRESS']['addr2'] = !empty($civi_details['addr2']) ? $civi_details['addr2'] : 'n/a';
         $params['merge_fields']['ADDRESS']['city'] = !empty($civi_details['city']) ? $civi_details['city'] : 'n/a';
         $params['merge_fields']['ADDRESS']['state'] = !empty($civi_details['state']) ? $civi_details['state'] : 'n/a';
         $params['merge_fields']['ADDRESS']['zip'] = !empty($civi_details['zip']) ? $civi_details['zip'] : 'n/a';
         $params['merge_fields']['ADDRESS']['country'] = !empty($civi_details['country']) ? $civi_details['country'] : 'n/a';
+      }
     }
     $profileFields = self::getProfileFieldsToSync();
     if ($profileFields && !empty($civi_details['custom_fields'])) {
