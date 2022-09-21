@@ -165,12 +165,14 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
   public function unsubscribe() {
 
     try {
-      $this->contact_id = $this->sync->guessContactIdSingle(
-        $this->request_data['email'],
-        $this->request_data['merges']['FNAME'],
-        $this->request_data['merges']['LNAME'],
-        $must_be_in_group=TRUE
-      );
+      $this->contact_id = !empty($this->request_data['merges']['CONTACT_ID'])
+        ? $this->request_data['merges']['CONTACT_ID']
+        : $this->sync->guessContactIdSingle(
+          $this->request_data['email'],
+          $this->request_data['merges']['FNAME'],
+          $this->request_data['merges']['LNAME'],
+          $must_be_in_group=TRUE
+        );
       if (!$this->contact_id) {
         // Hmm. We don't think they *are* subscribed.
         // Nothing for us to do.
@@ -188,6 +190,8 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
       'group_id'   => $this->sync->membership_group_id,
       'status'     => 'Removed',
       ]);
+    // Handle interest groups.
+    $this->updateInterestsFromMerges(TRUE);
   }
   /**
    * Handle profile update requests.
@@ -445,11 +449,15 @@ class CRM_Mailchimp_Page_WebHook extends CRM_Core_Page {
    * Mailchimp still sends interests to webhooks in an old school way.
    *
    * So it's left to us to identify the interests and groups that they refer to.
+   *
+   * @param bool $isUnsubscribe
+   *  Whether we are processing an unsubscribe action, so should remove the contact from groups.
    */
-  public function updateInterestsFromMerges() {
+  public function updateInterestsFromMerges($isUnsubscribe = FALSE) {
 
     // Get a list of CiviCRM group Ids that this contact should be in.
-    $should_be_in = $this->sync->convertMailchimpWebhookGroupsToCiviGroupIds($this->request_data['merges']['GROUPINGS']);
+    // Empty if we are processing an unsubscribe action.
+    $should_be_in = $isUnsubscribe ? [] : $this->sync->convertMailchimpWebhookGroupsToCiviGroupIds($this->request_data['merges']['GROUPINGS']);
 
     // Now get a list of all the groups they *are* in.
     $result = civicrm_api3('Contact', 'getsingle', ['return' => 'group', 'contact_id' => $this->contact_id]);
