@@ -703,6 +703,13 @@ class CRM_Mailchimp_Utils {
     if (method_exists(CRM_Core_BAO_SchemaHandler::class, 'getDBCharset')) {
       $characterSet = CRM_Core_BAO_SchemaHandler::getDBCharset();
     }
+     // check if the getDBCharset() value is not same as collation charset
+     $collationsArray = explode('_', $collation);
+     if(!empty($collationsArray)){
+       if($collationsArray[0]!=$characterSet){
+         $characterSet =$collationsArray[0];
+       }
+     }
 
     $tempTableSchema = "{$characterSet} COLLATE {$collation}";
 
