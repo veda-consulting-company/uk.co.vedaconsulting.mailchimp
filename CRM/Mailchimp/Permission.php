@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Mailchimp_ExtensionUtil as E;
+
 class CRM_Mailchimp_Permission extends CRM_Core_Permission {
 
   /**
@@ -9,12 +11,17 @@ class CRM_Mailchimp_Permission extends CRM_Core_Permission {
    * @return array Keyed by machine names with human-readable labels for values
    */
   public static function getMailchimpPermissions() {
-
-  $prefix = ts('Mailchimp') . ': '; // name of extension or module
-  return array(
-  'allow webhook posts' => $prefix . ts('allow webhook posts'),
-  'allow Mailchimp sync' =>$prefix . ts('allow Mailchimp sync'),
-  );
+    $prefix = E::ts('Mailchimp') . ': ';
+    return [
+      'allow webhook posts' => [
+        'label' => $prefix . E::ts('allow webhook posts'),
+        'description' => E::ts('allow webhook posts'),
+      ],
+      'allow Mailchimp sync' => [
+        'label' => $prefix . E::ts('allow Mailchimp sync'),
+        'description' => E::ts('allow Mailchimp sync'),
+      ],
+    ];
   }
 
   /**
