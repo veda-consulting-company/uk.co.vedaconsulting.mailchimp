@@ -640,6 +640,20 @@ class CRM_Mailchimp_Utils {
   }
 
   /**
+   * Log the error message in mailchimp log file
+   */
+  /*
+   * Function to log Errors in ConfigLog
+   *
+   * @param string $description - description to print in log
+   * @param array  $variable - variable to print in log
+   *
+   */
+  public static function logErrors($description = 'No description', $variable = array()) {
+    CRM_Core_Error::debug_var("Error : " . $description, ts($variable), TRUE, TRUE, 'mailchimp');
+  }
+
+  /**
    * Access our cached data.
    */
   public static function cacheGet($key, $default=NULL) {
