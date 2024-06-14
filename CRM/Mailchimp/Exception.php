@@ -14,6 +14,10 @@ abstract class CRM_Mailchimp_Exception extends Exception {
     $this->request = isset($api->request) ? clone($api->request) : NULL;
     $this->response = isset($api->response) ? clone($api->response) : NULL;
 
+    // log the request & response in the error logs
+    CRM_Mailchimp_Utils::logErrors('Mailchimp Request', $this->request);
+    CRM_Mailchimp_Utils::logErrors('Mailchimp Response', $this->response);
+
     if (isset($this->response->data->title)) {
       $message = $message_prefix . 'Mailchimp API said: ' . $this->response->data->title
         . (empty($this->response->data->detail) ? '' : " (" . $this->response->data->detail . ")");
