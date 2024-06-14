@@ -650,7 +650,7 @@ class CRM_Mailchimp_Utils {
    *
    */
   public static function logErrors($description = 'No description', $variable = array()) {
-    CRM_Core_Error::debug_var("Error : " . $description, ts($variable), TRUE, TRUE, 'mailchimp');
+    CRM_Core_Error::debug_var("Error : " . $description, $variable, TRUE, TRUE, 'mailchimp');
   }
 
   /**
