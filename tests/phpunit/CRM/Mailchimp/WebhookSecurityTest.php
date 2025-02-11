@@ -21,7 +21,7 @@ use Civi\Test\EndToEndInterface;
  * @group e2e
  * @see cv
  */
-class CRM_Mailchimp_WebhookSecurityTest extends \PHPUnit_Framework_TestCase implements EndToEndInterface {
+class CRM_Mailchimp_WebhookSecurityTest extends \CivixPhar\PHPUnit\Framework\TestCase implements EndToEndInterface {
   
   protected static $security_key;
   protected static $user_role_id;

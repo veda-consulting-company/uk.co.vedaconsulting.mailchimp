@@ -1,5 +1,5 @@
 <?php
-class UtilsTest extends \PHPUnit_Framework_TestCase {
+class UtilsTest extends \CivixPhar\PHPUnit\Framework\TestCase {
 
   /**
    * Tests CRM_Mailchimp_Utils::splitGroupTitles.
