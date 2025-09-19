@@ -18,7 +18,7 @@
           <td class="label">{$form.mailchimp_security_key.label}</td>
           <td>{$form.mailchimp_security_key.html}
             &nbsp;&nbsp;
-            <input class="crm-button" type="button" name="generate_webhook_key" id="generate_webhook_key" onclick="generateWebhookKey();" value="{ts}Generate Key{/ts}" />
+            <input class="crm-button" type="button" name="generate_webhook_key" id="generate_webhook_key" onclick="generateWebhookKey();" value="{ts escape='htmlattribute'}Generate Key{/ts}" />
             <br/>
             <span class="description">{ts}Define a security key to be used with
             webhooks. e.g. a 12+ character random string of upper- and
