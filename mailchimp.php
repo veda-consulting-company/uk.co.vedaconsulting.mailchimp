@@ -242,8 +242,9 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
       }
       if (!empty($otherGroups)) {
         $otherGroup = reset($otherGroups);
-        $errors['mailchimp_list'] = ts('There is already a CiviCRM group tracking this List, called "'
-          . $otherGroup['civigroup_title'].'"');
+        $errors['mailchimp_list'] = ts('There is already a CiviCRM group tracking this List, called "%1".', [
+          1 => $otherGroup['civigroup_title'],
+        ]);
       }
     }
   }
@@ -274,8 +275,9 @@ function mailchimp_civicrm_validateForm( $formName, &$fields, &$files, &$form, &
           list($mc_grouping_id, $mc_group_id) = explode('|', $fields['mailchimp_group']);
           foreach($otherGroups as $otherGroup) {
             if ($otherGroup['group_id'] == $mc_group_id) {
-              $errors['mailchimp_group'] = ts('There is already a CiviCRM group tracking this interest grouping, called "'
-                . $otherGroup['civigroup_title'].'"');
+              $errors['mailchimp_group'] = ts('There is already a CiviCRM group tracking this interest grouping, called "%1".', [
+                1 => $otherGroup['civigroup_title'],
+              ]);
             }
           }
         }
