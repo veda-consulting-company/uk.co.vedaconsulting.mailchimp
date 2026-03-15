@@ -4,7 +4,7 @@
  */
 
 require_once 'CRM/Mailchimp/Api3.php';
-class MailchimpApiUnitTest extends \PHPUnit_Framework_TestCase {
+class MailchimpApiUnitTest extends \CivixPhar\PHPUnit\Framework\TestCase {
 
   protected $mock_api_key = 'shhhhhhhhhhhhhh-uk1';
   protected $api;

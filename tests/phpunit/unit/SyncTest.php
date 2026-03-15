@@ -3,7 +3,7 @@
  * Test CRM_Mailchimp_Sync.
  */
 
-class SyncTest extends \PHPUnit_Framework_TestCase {
+class SyncTest extends \CivixPhar\PHPUnit\Framework\TestCase {
 
   /**
    *

@@ -21,7 +21,7 @@ use Civi\Test\EndToEndInterface;
  * @group e2e
  * @see cv
  */
-class CRM_Mailchimp_IntegrationTest extends \PHPUnit_Framework_TestCase implements EndToEndInterface {
+class CRM_Mailchimp_IntegrationTest extends \CivixPhar\PHPUnit\Framework\TestCase implements EndToEndInterface {
 
   const
     MC_TEST_LIST_NAME = 'Mailchimp-CiviCRM Integration Test List',
