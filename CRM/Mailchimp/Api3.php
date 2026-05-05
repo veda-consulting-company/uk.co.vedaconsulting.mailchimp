@@ -345,7 +345,6 @@ class CRM_Mailchimp_Api3 {
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
       $result = curl_exec($curl);
       $info = curl_getinfo($curl);
-      curl_close($curl);
     }
     else {
       $callback = $this->mock_curl;

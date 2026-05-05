@@ -214,7 +214,6 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
 
     $response = curl_exec($curl);
     $info = curl_getinfo($curl);
-    curl_close($curl);
 
     return ($info['http_code'] != 200) ? FALSE : TRUE;
   }
