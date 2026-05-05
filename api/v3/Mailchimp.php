@@ -16,7 +16,7 @@
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getlists($params) {
   $api = CRM_Mailchimp_Utils::getMailchimpApi();
@@ -47,7 +47,7 @@ function civicrm_api3_mailchimp_getlists($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getinterests($params) {
   try {
@@ -88,7 +88,7 @@ function civicrm_api3_mailchimp_getinterests($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_pushsync($params) {
   // Do push from CiviCRM to mailchimp
@@ -116,7 +116,7 @@ function civicrm_api3_mailchimp_pushsync($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_pullsync($params) {
   // Do push from CiviCRM to mailchimp
@@ -145,7 +145,7 @@ function civicrm_api3_mailchimp_pullsync($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getmembercount($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -170,7 +170,7 @@ function civicrm_api3_mailchimp_getmembercount($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getgroups($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -200,7 +200,7 @@ function civicrm_api3_mailchimp_getgroups($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getgroupid($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -230,7 +230,7 @@ function civicrm_api3_mailchimp_getgroupid($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getlistsandgroups($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
@@ -259,7 +259,7 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
  * @return array API result descriptor
  * @see civicrm_api3_create_success
  * @see civicrm_api3_create_error
- * @throws API_Exception
+ * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
   $groupIds = empty($params['ids']) ? array() : explode(',', $params['ids']);

@@ -439,7 +439,7 @@ class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
             civicrm_api3('Contact', 'getsingle', ['id' => $contact_id]);
             $result = civicrm_api3('Contact', 'delete', ['id' => $contact_id, 'skip_undelete' => 1]);
           }
-          catch (CiviCRM_API3_Exception $e) {
+          catch (CRM_Core_Exception $e) {
             if ($e->getMessage() != 'Expected one Contact but found 0') {
               // That's OK, if it's already gone.
               throw $e;
@@ -643,7 +643,7 @@ class CRM_Mailchimp_IntegrationTestBase extends \PHPUnit_Framework_TestCase {
       }
       $this->fail($msg);
     }
-    catch (CiviCRM_API3_Exception $e) {
+    catch (CRM_Core_Exception $e) {
       $x=1;
     }
   }
