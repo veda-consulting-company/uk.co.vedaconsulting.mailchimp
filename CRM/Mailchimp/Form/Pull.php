@@ -102,7 +102,9 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
       // Run Everything in the Queue via the Web.
       $runner->runAllViaWeb();
     } else {
-      CRM_Core_Session::setStatus(ts('Nothing to pull. Make sure mailchimp settings are configured in the <a href='.$setting_url.'>setting page</a>.'));
+      CRM_Core_Session::setStatus(ts('Nothing to pull. Make sure mailchimp settings are configured in the <a %1>setting page</a>.', [
+        1 => "href='$setting_url'"
+      ]));
     }
   }
 
