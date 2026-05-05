@@ -289,8 +289,8 @@ function mailchimp_civicrm_pre( $op, $objectName, $id, &$params ) {
     // @todo Note: However, this will delete a subscriber and lose reporting
     // info, where what they might have wanted was to change their email
     // address.
-    $on_hold     = CRM_Utils_Array::value('on_hold', $params);
-    $is_bulkmail = CRM_Utils_Array::value('is_bulkmail', $params);
+    $on_hold     = $params['on_hold'] ?? NULL;
+    $is_bulkmail = $params['is_bulkmail'] ?? NULL;
     if( ($op == 'delete') ||
       ($op == 'edit' && $on_hold == 0 && $is_bulkmail == 0)
     ) {
