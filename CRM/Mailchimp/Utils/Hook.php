@@ -55,7 +55,7 @@ abstract class CRM_Mailchimp_Utils_Hook {
     if (version_compare($civiVersion, '5.0', '<')) {
       $numParams = 4;
     } else {
-      $numParams = array('contactID', 'email', 'contactData', 'contactCustomData');
+      $numParams = ['contactID', 'email', 'contactData', 'contactCustomData'];
     }
     return self::singleton( )->invoke( $numParams, $contactID, $email, $contactData, $contactCustomData, self::$_nullObject, self::$_nullObject, 'civicrm_alterCiviDataforMailchimp');
   }

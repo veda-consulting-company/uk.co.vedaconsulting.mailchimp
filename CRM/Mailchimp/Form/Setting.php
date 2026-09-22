@@ -18,7 +18,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
 
   public static function formRule($params){
     $currentVer = CRM_Core_BAO_Domain::version(TRUE);
-    $errors = array();
+    $errors = [];
     if (version_compare($currentVer, '4.4') < 0) {
       $errors['version_error'] = " You need to upgrade to version 4.4 or above to work with extension Mailchimp";
     }
@@ -32,7 +32,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
    * @access public
    */
   public function buildQuickForm() {
-    $this->addFormRule(array('CRM_Mailchimp_Form_Setting', 'formRule'), $this);
+    $this->addFormRule(['CRM_Mailchimp_Form_Setting', 'formRule'], $this);
 
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
 
@@ -40,49 +40,49 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
     $this->assign( 'webhook_url', 'Webhook URL - '.$webhook_url);
 
     // Add the API Key Element
-    $this->add('text', 'mailchimp_api_key', ts('API Key'), array(
+    $this->add('text', 'mailchimp_api_key', ts('API Key'), [
       'size' => 48,
-    ), TRUE);
+    ], TRUE);
 
     // Add the User Security Key Element
-    $this->add('text', 'mailchimp_security_key', ts('Security Key'), array(
+    $this->add('text', 'mailchimp_security_key', ts('Security Key'), [
       'size' => 24,
-    ), TRUE);
+    ], TRUE);
 
     // Add Enable or Disable Debugging
-    $enableOptions = array(1 => ts('Yes'), 0 => ts('No'));
+    $enableOptions = [1 => ts('Yes'), 0 => ts('No')];
     $this->addRadio('mailchimp_enable_debugging', ts('Enable Debugging'), $enableOptions, NULL);
 
 
-    $result = civicrm_api3('UFGroup', 'get', array(
+    $result = civicrm_api3('UFGroup', 'get', [
       'sequential' => 1,
       'group_type' => "Contact",
       'is_active'  => 1,
-    ));
+    ]);
     // Add profile selection for syncronization.
-    $profileOptions = array(0 => '-- None --');
+    $profileOptions = [0 => '-- None --'];
     if (!empty($result['values'])) {
       foreach ($result['values'] as $profile) {
         $profileOptions[$profile['id']] = $profile['title'];
       }
     }
-    $yesNo = array(1 => ts('Yes'), 0 => ts('No'));
+    $yesNo = [1 => ts('Yes'), 0 => ts('No')];
     $this->addRadio('mailchimp_sync_checksum', ts('Sync Checksum and Contact ID'), $yesNo, NULL);
     $this->add('select', 'mailchimp_sync_profile', ts('Sync fields from profile'), $profileOptions);
     // Not a setting.
     $this->addRadio('mailchimp_create_merge_fields', ts('Create missing fields on mailchimp lists'), $yesNo, NULL);
     $this->addRadio('mailchimp_sync_tags', ts('Sync Tags?'), $yesNo, NULL);
     // Create the Submit Button.
-    $buttons = array(
-      array(
+    $buttons = [
+      [
         'type' => 'submit',
         'name' => ts('Save & Test'),
-      ),
-      array(
+      ],
+      [
         'type' => 'cancel',
         'name' => ts('Cancel'),
-      ),
-    );
+      ],
+    ];
 
     // Add the Buttons.
     $this->addButtons($buttons);
@@ -103,7 +103,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
   }
 
   public function setDefaultValues() {
-    $defaults = $details = array();
+    $defaults = $details = [];
 
     $apiKey = Civi::settings()->get('mailchimp_api_key');
 
@@ -189,15 +189,15 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       return FALSE;
     }
 
-    $urlParams = array(
+    $urlParams = [
       'reset' => 1,
       'key' => $securityKey,
-    );
+    ];
     $webhook_url = CRM_Utils_System::url('civicrm/mailchimp/webhook', $urlParams,  TRUE, NULL, FALSE, TRUE);
 
     $curl = curl_init();
 
-    curl_setopt_array($curl, array(
+    curl_setopt_array($curl, [
       CURLOPT_URL => $webhook_url,
       CURLOPT_RETURNTRANSFER => true,
       CURLOPT_ENCODING => "",
@@ -205,12 +205,12 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
       CURLOPT_TIMEOUT => 30,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_HTTPHEADER => array(
+      CURLOPT_HTTPHEADER => [
         "cache-control: no-cache",
         "content-type: application/x-www-form-urlencoded",
         "postman-token: febcecbd-c6f6-6e2e-f0f1-36e1fdc9cafa"
-      ),
-    ));
+      ],
+    ]);
 
     $response = curl_exec($curl);
     $info = curl_getinfo($curl);
@@ -221,7 +221,7 @@ class CRM_Mailchimp_Form_Setting extends CRM_Core_Form {
   public function createMailchimpMergeFields($profileID, $includeChecksum=FALSE) {
     // Get custom fields from profile and create data for creating on MC.
     $ufFieldResult = civicrm_api3('UFField', 'get', ['uf_group_id' => $profileID]);
-    $mergeFields = $existingFields = array();
+    $mergeFields = $existingFields = [];
     if (!empty($ufFieldResult['values'])) {
       foreach ($ufFieldResult['values'] as $field) {
         if (0 === strpos($field['field_name'],'custom_') && $field['is_active']) {

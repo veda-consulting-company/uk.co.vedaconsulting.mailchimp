@@ -72,9 +72,9 @@ class CRM_Mailchimp_WebhookSecurityTest extends \CivixPhar\PHPUnit\Framework\Tes
   }
 
   public static function userPermissionAndEnableOrDisable($setPermission = TRUE) {
-    $permissionParams = array(
+    $permissionParams = [
       'allow webhook posts' => $setPermission,
-    );
+    ];
 
     user_role_change_permissions(static::$user_role_id, $permissionParams);
   }  

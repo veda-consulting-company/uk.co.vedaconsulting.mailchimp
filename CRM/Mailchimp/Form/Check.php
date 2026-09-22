@@ -33,13 +33,13 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
       $this->assign('groupData', $data);
     }
     else {
-      $this->addButtons(array(
-        array(
+      $this->addButtons([
+        [
           'type' => 'submit',
           'name' => E::ts('Generate Report'),
           'isDefault' => TRUE,
-        ),
-      ));
+        ],
+      ]);
     }
 
     // export form elements
@@ -83,11 +83,11 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
    */
   public static function getQueueRunner() {
     // Setup the Queue
-    $queue = CRM_Queue_Service::singleton()->create(array(
+    $queue = CRM_Queue_Service::singleton()->create([
       'name'  => self::QUEUE_NAME,
       'type'  => 'Sql',
       'reset' => TRUE,
-    ));
+    ]);
 
     // reset stats
     CRM_Mailchimp_Utils::cacheSet(C::CACHE_KEY, []);
@@ -101,12 +101,12 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
     $queue->createItem($task);
 
     // Setup the Runner
-    $runnerParams = array(
+    $runnerParams = [
       'title' =>  ts('Mailchimp Group Statistics'),
       'queue' => $queue,
       'errorMode'=> CRM_Queue_Runner::ERROR_ABORT,
       'onEndUrl' => CRM_Utils_System::url(self::END_URL, self::END_PARAMS, TRUE, NULL, FALSE),
-    );
+    ];
 
     // Each list is a task.
     $runner = new CRM_Queue_Runner($runnerParams);
@@ -115,7 +115,7 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
 
   public static function addQueueTasks(CRM_Queue_TaskContext $ctx, $params = []) {
     $listCount = 0;
-    $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+    $groups = CRM_Mailchimp_Utils::getGroupsToSync([], null, $membership_only = TRUE);
     foreach ($groups as $group_id => $details) {
 
       $details['civicrm_group_id'] = $group_id;

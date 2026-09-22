@@ -160,10 +160,10 @@ class CRM_Mailchimp_Upgrader extends CRM_Extension_Upgrader_Base {
     }
 
     // Now cron jobs. Delete all mailchimp ones.
-    $result = civicrm_api3('Job', 'get', array(
+    $result = civicrm_api3('Job', 'get', [
       'sequential' => 1,
       'api_entity' => "mailchimp",
-    ));
+    ]);
     if ($result['count']) {
       // Should only be one, but just in case...
       foreach ($result['values'] as $old) {
@@ -175,7 +175,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Extension_Upgrader_Base {
     }
 
     // Create Push Sync job.
-    $params = array(
+    $params = [
       'sequential' => 1,
       'name'          => 'Mailchimp Push Sync',
       'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming CiviCRM to be correct. Please understand the implications before using this.',
@@ -183,10 +183,10 @@ class CRM_Mailchimp_Upgrader extends CRM_Extension_Upgrader_Base {
       'api_entity'    => 'Mailchimp',
       'api_action'    => 'pushsync',
       'is_active'     => 0,
-    );
+    ];
     $result = civicrm_api3('job', 'create', $params);
     // Create Pull Sync job.
-    $params = array(
+    $params = [
       'sequential' => 1,
       'name'          => 'Mailchimp Pull Sync',
       'description'   => 'Sync contacts between CiviCRM and MailChimp, assuming Mailchimp to be correct. Please understand the implications before using this.',
@@ -194,7 +194,7 @@ class CRM_Mailchimp_Upgrader extends CRM_Extension_Upgrader_Base {
       'api_entity'    => 'Mailchimp',
       'api_action'    => 'pullsync',
       'is_active'     => 0,
-    );
+    ];
     $result = civicrm_api3('job', 'create', $params);
 
     return TRUE;

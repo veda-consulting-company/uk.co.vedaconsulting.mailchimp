@@ -224,7 +224,7 @@ class CRM_Mailchimp_Utils {
    */
   public static function checkGroupsConfig($groups=NULL) {
     if ($groups === NULL) {
-      $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only = TRUE);
+      $groups = CRM_Mailchimp_Utils::getGroupsToSync([], null, $membership_only = TRUE);
     }
     if (!is_array($groups)) {
       throw new InvalidArgumentException("expected array argument, if provided");
@@ -299,7 +299,7 @@ class CRM_Mailchimp_Utils {
       ],
     ];
     $verb = $dry_run ? 'Need to change ' : 'Changed ';
-    $messages = array();
+    $messages = [];
     try {
       $result = $api->get("/lists/$list_id/webhooks");
       $webhooks = empty($result->data->webhooks) ? NULL : $result->data->webhooks;
@@ -394,9 +394,9 @@ class CRM_Mailchimp_Utils {
    *         'group_id'
    *         'group_name'
    */
-  public static function getGroupsToSync($groupIDs = array(), $mc_list_id = null, $membership_only = FALSE) {
+  public static function getGroupsToSync($groupIDs = [], $mc_list_id = null, $membership_only = FALSE) {
 
-    $params = $groups = $temp = array();
+    $params = $groups = $temp = [];
     $groupIDs = array_filter(array_map('intval',$groupIDs));
 
     if (!empty($groupIDs)) {
@@ -411,7 +411,7 @@ class CRM_Mailchimp_Utils {
     if ($mc_list_id) {
       // just want results for a particular MC list.
       $whereClause .= " AND mc_list_id = %1 ";
-      $params[1] = array($mc_list_id, 'String');
+      $params[1] = [$mc_list_id, 'String'];
     }
 
     if ($membership_only) {
@@ -429,7 +429,7 @@ class CRM_Mailchimp_Utils {
       $interest_name = CRM_Mailchimp_Utils::getMCInterestName($dao->mc_list_id, $dao->mc_grouping_id, $dao->mc_group_id);
       $category_name = CRM_Mailchimp_Utils::getMCCategoryName($dao->mc_list_id, $dao->mc_grouping_id);
       $groups[$dao->entity_id] =
-        array(
+        [
           // Details about Mailchimp
           'list_id'               => $dao->mc_list_id,
           'list_name'             => $list_name,
@@ -447,7 +447,7 @@ class CRM_Mailchimp_Utils {
           'grouping_name'         => $category_name,
           'group_id'              => $dao->mc_group_id,
           'group_name'            => $interest_name,
-        );
+        ];
     }
 
     CRM_Mailchimp_Utils::checkDebug('End-CRM_Mailchimp_Utils getGroupsToSync $groups', $groups);
@@ -506,7 +506,7 @@ class CRM_Mailchimp_Utils {
 
     $mapper = &static::$mailchimp_interest_details;
     if (!array_key_exists($listID, $mapper)) {
-      $mapper[$listID] = array();
+      $mapper[$listID] = [];
 
       try {
         // Get list name.
@@ -649,7 +649,7 @@ class CRM_Mailchimp_Utils {
    * @param array  $variable - variable to print in log
    *
    */
-  public static function logErrors($description = 'No description', $variable = array()) {
+  public static function logErrors($description = 'No description', $variable = []) {
     CRM_Core_Error::debug_var("Error : " . $description, $variable, TRUE, TRUE, 'mailchimp');
   }
 

@@ -55,7 +55,7 @@ function civicrm_api3_mailchimp_getinterests($params) {
     $results = CRM_Mailchimp_Utils::getMCInterestGroupings($list_id);
   } 
   catch (Exception $e) {
-    return array();
+    return [];
   }
 
   $interests = [];
@@ -151,7 +151,7 @@ function civicrm_api3_mailchimp_getmembercount($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
   
   $results = $mcLists->getList();
-  $listmembercount = array();
+  $listmembercount = [];
   foreach($results['data'] as $list) {
     $listmembercount[$list['id']] = $list['stats']['member_count'];
   }
@@ -178,9 +178,9 @@ function civicrm_api3_mailchimp_getgroups($params) {
     $results = $mcLists->interestGroupings($params['id']);
   } 
   catch (Exception $e) {
-    return array();
+    return [];
   }
-  $groups = array();
+  $groups = [];
   
   foreach($results as $result) {
     $groups[$result['id']]['id'] = $result['id'];
@@ -208,17 +208,17 @@ function civicrm_api3_mailchimp_getgroupid($params) {
     $results = $mcLists->interestGroupings($params['id']);
   } 
   catch (Exception $e) {
-    return array();
+    return [];
   }
-  $groups = array();
+  $groups = [];
   foreach($results as $result) {
     foreach($result['groups'] as $group) {
-        $groups[] = array(
+        $groups[] = [
           'groupingid'  => $result['id'],
           'groupingname'  => $result['name'],
           'groupname' =>  $group['name'],
           'groupid' =>  $group['id'],
-        );
+        ];
     }
   }
   return civicrm_api3_create_success($groups);
@@ -236,13 +236,13 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
   $mcLists = new Mailchimp_Lists(CRM_Mailchimp_Utils::mailchimp());
 
   $results = $mcLists->getList();
-  $lists = array();
+  $lists = [];
 
   foreach($results['data'] as $list) {
     $lists[$list['id']]['name'] = $list['name'];
     $lists[$list['id']]['id'] = $list['id'];
 
-    $params = array('id' => $list['id']);
+    $params = ['id' => $list['id']];
     $group_results = civicrm_api3_mailchimp_getgroups($params);
     if (!empty($group_results)) {
       $lists[$list['id']]['grouping'] = $group_results['values'];
@@ -262,7 +262,7 @@ function civicrm_api3_mailchimp_getlistsandgroups($params) {
  * @throws CRM_Core_Exception
  */ 
 function civicrm_api3_mailchimp_getcivicrmgroupmailchimpsettings($params) {
-  $groupIds = empty($params['ids']) ? array() : explode(',', $params['ids']);
+  $groupIds = empty($params['ids']) ? [] : explode(',', $params['ids']);
   $groups  = CRM_Mailchimp_Utils::getGroupsToSync($groupIds);
   return civicrm_api3_create_success($groups);
 }

@@ -66,9 +66,9 @@ class CRM_Mailchimp_IntegrationTest extends \CivixPhar\PHPUnit\Framework\TestCas
   /** Number of intersts amd civicrm groups to create */
   protected static $no_of_records = 12;
   /** array holds the Interests Ids for test multiple interests. */
-  protected static $test_multiple_interest_ids = array();
+  protected static $test_multiple_interest_ids = [];
   /** array holds CiviCRM Group Ids for multiple interest group ids. */
-  protected static $civicrm_multiple_group_id_interests  = array();
+  protected static $civicrm_multiple_group_id_interests  = [];
 
   /**
    * array Test contact 1
@@ -304,7 +304,7 @@ class CRM_Mailchimp_IntegrationTest extends \CivixPhar\PHPUnit\Framework\TestCas
     }
 
     // Need to know field Ids for mailchimp fields.
-    $result = civicrm_api3('CustomField', 'get', ['label' => array('LIKE' => "%mailchimp%")]);
+    $result = civicrm_api3('CustomField', 'get', ['label' => ['LIKE' => "%mailchimp%"]]);
     $custom_ids = [];
     foreach ($result['values'] as $custom_field) {
       $custom_ids[$custom_field['name']] = "custom_" . $custom_field['id'];
@@ -332,13 +332,13 @@ class CRM_Mailchimp_IntegrationTest extends \CivixPhar\PHPUnit\Framework\TestCas
     static::$civicrm_group_id_membership = (int) $result['values'][0]['id'];
 
     // Ensure this group is set to be the membership group.
-    $result = civicrm_api3('Group', 'create', array(
+    $result = civicrm_api3('Group', 'create', [
       'id' => static::$civicrm_group_id_membership,
       $custom_ids['Mailchimp_List'] => static::$test_list_id,
       $custom_ids['is_mc_update_grouping'] => 0,
       $custom_ids['Mailchimp_Grouping'] => NULL,
       $custom_ids['Mailchimp_Group'] => NULL,
-    ));
+    ]);
 
     // Create group for the interests
     static::$civicrm_group_id_interest_1 = (int) static::createMappedInterestGroup($custom_ids, static::C_TEST_INTEREST_GROUP_NAME_1, static::$test_interest_id_1);

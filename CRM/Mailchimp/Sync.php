@@ -58,10 +58,10 @@ class CRM_Mailchimp_Sync {
     unset($this->interest_group_details[$this->membership_group_id]);
 
     // for mailchimp API v3, we need a hierarchized interest group details (group by mailchimp id)
-    $group_details_by_category = array();
+    $group_details_by_category = [];
     foreach ($this->interest_group_details as $civi_group_id => $details) {
       if (!array_key_exists($details['category_id'], $group_details_by_category)) {
-        $group_details_by_category[$details['category_id']] = array();
+        $group_details_by_category[$details['category_id']] = [];
       }
       $group_details_by_category[$details['category_id']][$civi_group_id] = $details;
     }
@@ -467,7 +467,7 @@ class CRM_Mailchimp_Sync {
       }
       // run insert prepared statement
       try {
-        $db->execute($insert, array(
+        $db->execute($insert, [
           $contact['id'],
           trim($email),
           $contact['first_name'],
@@ -483,7 +483,7 @@ class CRM_Mailchimp_Sync {
           $contact['country'],
           $custom_data,
           $tags
-        ));
+        ]);
       }
       catch (PEAR_Exception $e) {
         if (get_class($e->getCause()) == 'DB_Error') {
@@ -842,29 +842,29 @@ class CRM_Mailchimp_Sync {
       Add or remove tags from a list member.
       If a tag that does not exist is passed in and set as 'active', a new tag will be created in Mailchimp
       */
-      $tagsParams = array();
+      $tagsParams = [];
 
       if ($syncTag == 1) {
-        $civiTags = $dao->c_tags ? explode(',', unserialize($dao->c_tags)) : array();
-        $mailchimpTags = $dao->m_tags ? explode(',', unserialize($dao->m_tags)) : array();
+        $civiTags = $dao->c_tags ? explode(',', unserialize($dao->c_tags)) : [];
+        $mailchimpTags = $dao->m_tags ? explode(',', unserialize($dao->m_tags)) : [];
 
         // pushing only the new tags from Civi to Mailchimp
         foreach ($civiTags as $ignore => $tagName) {
           if (!in_array($tagName, $mailchimpTags)) {
-            $tagsParams[] = array(
+            $tagsParams[] = [
               'name' => $tagName,
               'status' => 'active'
-            );
+            ];
           }
         }
 
         //Remove the tags in Mailchimp, if not in Civitags array (setting status inactive will remove the tag from the member)
         foreach ($mailchimpTags as $ignore => $tagName) {
           if (!in_array($tagName, $civiTags)) {
-            $tagsParams[] = array(
+            $tagsParams[] = [
               'name' => $tagName,
               'status' => 'inactive'
-            );
+            ];
           }
         }
       }
@@ -875,7 +875,7 @@ class CRM_Mailchimp_Sync {
           CRM_Mailchimp_Utils::checkDebug($_tag, $tagsParams);
         } else {
           // Add POST tag operation to the batch.
-          $operations[] = ['POST', $url_prefix . md5(strtolower($dao->c_email)) . '/tags', array('tags' => $tagsParams)];
+          $operations[] = ['POST', $url_prefix . md5(strtolower($dao->c_email)) . '/tags', ['tags' => $tagsParams]];
         }
       }
 
@@ -1371,14 +1371,14 @@ class CRM_Mailchimp_Sync {
     $state = !empty($contact['state_province_name']) ? $contact['state_province_name'] : 'n/a';
     $zip = !empty($contact['postal_code']) ? $contact['postal_code'] : 'n/a';
     $country = !empty($contact['country']) ? $contact['country'] : 'n/a';
-    $addressFields = array(
+    $addressFields = [
       'addr1'   => $addr1,
       'addr2'   => $addr2,
       'city'    => $city,
       'state'   => $state,
       'zip'     => $zip,
       'country' => $country,
-    );
+    ];
     $data['merge_fields']['ADDRESS'] = $addressFields;
     foreach ($customFields as $name => $field) {
       $tag = strtoupper($name);
@@ -1403,22 +1403,22 @@ class CRM_Mailchimp_Sync {
     }
     // check if syncTags is enabled in mailchimp setting
     $syncTag = Civi::settings()->get('mailchimp_sync_tags');
-    $tagsParams = array();
+    $tagsParams = [];
     if ($syncTag == 1) {
-      $civiTags = $contact['tags'] ? explode(',', $contact['tags']) : array();
+      $civiTags = $contact['tags'] ? explode(',', $contact['tags']) : [];
 
       // pushing all the tags from Civi to Mailchimp
       // FIX ME : We are not checking and removing tags from Mailchimp here
       foreach ($civiTags as $ignore => $tagName) {
-        $tagsParams[] = array(
+        $tagsParams[] = [
           'name' => $tagName,
           'status' => 'active'
-        );
+        ];
       }
 
       if (!empty($tagsParams)) {
         try {
-          $result = $api->post("/lists/$this->list_id/members/$subscriber_hash/tags", array('tags' => $tagsParams));
+          $result = $api->post("/lists/$this->list_id/members/$subscriber_hash/tags", ['tags' => $tagsParams]);
 	  CRM_Mailchimp_Utils::checkDebug('Push tags on single sync.', $tagsParams);
         } catch (CRM_Mailchimp_RequestErrorException $e) {
           CRM_Core_Session::setStatus(ts('There was a problem trying to sync tags of this contact at Mailchimp:') . $e->getMessage());
@@ -1869,7 +1869,7 @@ class CRM_Mailchimp_Sync {
     if (isset($merge_fields['ADDRESS'])) {
       $address_changed = FALSE;
       // Fix me: not having country in difference check, as the country value is in short format in Mailchimp
-      $addressFieldKeys = array('addr1', 'addr2', 'city', 'state', 'zip');
+      $addressFieldKeys = ['addr1', 'addr2', 'city', 'state', 'zip'];
       // update address in mailchimp only if there's any changes in any of the above fields
       foreach ($addressFieldKeys as $addressFieldKey) {
         if ( !empty($civi_details[$addressFieldKey]) && ($civi_details[$addressFieldKey] != $mailchimp_details[$addressFieldKey]) ) {
@@ -1927,7 +1927,7 @@ class CRM_Mailchimp_Sync {
   /**
    * There's probably a better way to do this.
    */
-  public static function runSqlReturnAffectedRows($sql, $params = array()) {
+  public static function runSqlReturnAffectedRows($sql, $params = []) {
     $dao = new CRM_Core_DAO();
     $q = CRM_Core_DAO::composeQuery($sql, $params);
     $result = $dao->query($q);
