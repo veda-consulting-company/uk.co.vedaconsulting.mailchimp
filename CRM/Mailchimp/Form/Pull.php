@@ -11,7 +11,7 @@ class CRM_Mailchimp_Form_Pull extends CRM_Core_Form {
   const END_PARAMS = 'state=done';
 
   function preProcess() {
-    $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
+    $state = CRM_Utils_Request::retrieve('state', 'String', NULL, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
       $stats = CRM_Mailchimp_Utils::cacheGet('mailchimp_pull_stats');
 

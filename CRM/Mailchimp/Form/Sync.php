@@ -17,7 +17,7 @@ class CRM_Mailchimp_Form_Sync extends CRM_Core_Form {
    * @access public
    */
   function preProcess() {
-    $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
+    $state = CRM_Utils_Request::retrieve('state', 'String', NULL, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
       $stats = CRM_Mailchimp_Utils::cacheGet('mailchimp_push_stats', []);
       $groups = CRM_Mailchimp_Utils::getGroupsToSync(array(), null, $membership_only=TRUE);

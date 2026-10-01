@@ -20,7 +20,7 @@ class CRM_Mailchimp_Form_Check extends CRM_Core_Form {
   public function buildQuickForm() {
     CRM_Core_Resources::singleton()->addStyleFile('uk.co.vedaconsulting.mailchimp', 'css/mailchimp.css');
     CRM_Utils_System::setTitle(ts('Mailchimp Group Statistics'));
-    $state = CRM_Utils_Request::retrieve('state', 'String', CRM_Core_DAO::$_nullObject, FALSE, 'tmp', 'GET');
+    $state = CRM_Utils_Request::retrieve('state', 'String', NULL, FALSE, 'tmp', 'GET');
     if ($state == 'done') {
       $data = CRM_Mailchimp_Utils::cacheGet(C::CACHE_KEY);
       // Add links to group settings.
